@@ -9,7 +9,7 @@ const Users = () => {
   const initialUserState = {
     username: "الاسم",
     email: "الايميل",
-    phoneNumber: "رقم الموبايل",
+    phone: "رقم الموبايل",
     password: "كلمة السر",
 		role : "الوظيفة"
   };

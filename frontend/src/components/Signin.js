@@ -7,6 +7,8 @@ import './Signin.css';
 
 function Signin() {
 	const [form, setForm] = useState({username: '', password: ''});
+	const [apiError, setApiError] = useState({username: '', password: ''});
+
 	const navigate = useNavigate();
 
 	const handleChange = (e) => {
