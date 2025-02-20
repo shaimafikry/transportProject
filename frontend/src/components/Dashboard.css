@@ -1,0 +1,277 @@
+.container-fluid {
+  padding: 0 ;
+  margin: 0 ;
+  width: 100vw; /* Forces the full viewport width */
+  height: 100vh;
+  display: flex;
+  direction: rtl;
+  overflow-x: hidden; /* Prevent horizontal scrollbars */
+	flex-direction: row; /* Make sure sidebar & content are side by side */
+
+}
+
+
+
+/* Middle Content Section */
+.content {
+  flex: 1; 
+  background-color: white;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-y: auto;
+  direction: rtl; /* Restores normal left-to-right content inside */
+}
+
+/* Sidebar default (collapsed) */
+.sidebar-right {
+  width: 60px; /* Small width for icons */
+  height: 100vh;
+  background-color: #002a4a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 0;
+  flex-shrink: 0;
+  transition: width 0.3s ease; /* Smooth expand animation */
+  overflow: hidden;
+}
+
+/* Sidebar expanded on hover */
+.sidebar-right.expanded {
+  width: 200px; /* Full width */
+}
+
+/* Sidebar buttons */
+.sidebar-right button {
+  width: 50px;
+  height: 50px;
+  margin: 10px 0;
+  background-color: transparent;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 24px; /* Icon size */
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Expand button text when hovered */
+.sidebar-right.expanded button {
+  width: 100%;
+  justify-content: flex-start;
+  padding-left: 20px;
+}
+
+.sidebar-right.expanded button::after {
+  content: attr(title);
+  white-space: nowrap;
+  padding-left: 10px;
+  font-size: 16px;
+}
+
+/* Button hover effect */
+.sidebar-right button:hover {
+  background-color: #135ab4;
+}
+
+
+button {
+  font-size: 16px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px; /* Curved Borders */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+
+
+
+/* Form Group */
+.dashboard-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 80%;
+  max-width: 500px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px; /* Adds space between each entry */
+}
+
+/* Input Fields */
+.content input,
+.content select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* Buttons */
+.content button {
+  background-color: #1a73e8;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.content button:hover {
+  background-color: #135ab4;
+  transform: scale(1.05);
+}
+
+/* Save Button */
+.save-btn {
+  background-color: #28a745 !important;
+}
+
+.save-btn:hover {
+  background-color: #218838 !important;
+}
+
+
+
+
+/* Trip Option Buttons */
+.trip-options  {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.trip-options  button {
+  background-color: #1a73e8;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.trip-options  button:hover {
+  background-color: #135ab4;
+}
+
+
+
+/* Trip Table */
+.trip-table  {
+  width: 100%;
+  border-collapse: collapse;
+	align-self: flex-start;
+
+}
+
+.trip-table th, .trip-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.trip-table th {
+  background-color: #004c8c;
+  color: white;
+}
+
+.trip-table button {
+  margin: 2px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.trip-table button:hover {
+  opacity: 0.8;
+}
+
+
+
+/* Search Section */
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+.search-container input {
+  width: 80%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+
+
+
+/* Trip Option Buttons */
+.trip-options  {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.trip-options  button {
+  background-color: #1a73e8;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.trip-options  button:hover {
+  background-color: #135ab4;
+}
+
+
+
+/* user Table */
+.user-table  {
+  width: 100%;
+  border-collapse: collapse;
+	align-self: flex-start;
+
+}
+
+.user-table th, .user-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.user-table th {
+  background-color: #004c8c;
+  color: white;
+}
+
+.user-table button {
+  margin: 2px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.user-table button:hover {
+  opacity: 0.8;
+}
