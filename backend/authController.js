@@ -1,5 +1,5 @@
 require('dotenv').config({path: '../.env'});
-const Users = require('./config');
+const {Users} = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
 const serviceMail = process.env.SERVICE_MAIL;
@@ -36,7 +36,7 @@ async function emailSender(email, link) {
 const addUser = async (req, res) => {
   const newUser = req.body;
 	// username an email found
-  const user = await Users.findOne({email: newUser.email});
+	const user = await Users.findOne({ where: { email: newUser.email } });
 
 	if (user && user.email === newUser.email) {
 		return res.status(400).json('Email already exists');
@@ -45,12 +45,11 @@ const addUser = async (req, res) => {
 	const password_hash = await bcrypt.hash(newUser.password, 10);
 
 	newUser.password = password_hash;
-	newUser.verification_token = verification_token;
 
 	try {
 		await Users.create(newUser);
 
-	 return res.status(201).json({message: 'User added'});
+	 return res.status(201).json({message: 'تم اضافة المستخدم بنجاح'});
 
 	}catch(error){
 		console.error('error in signup', error);
@@ -63,8 +62,9 @@ const addUser = async (req, res) => {
 
 //MARK: Sign in
 const signIn = async (req, res) => {
+	console.log(req.body);
   const { email, password } = req.body;
-  const user = await Users.findOne({email: email});
+	const user = await Users.findOne({ where: { email: email } });
 	//console.log
   console.log(user);
 	if (!user) {

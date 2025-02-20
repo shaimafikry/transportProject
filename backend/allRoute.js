@@ -5,7 +5,7 @@ const { dashboard } = require('./controllers');
 
 
 
-router.post('/signin', signIn);
+router.post('/', signIn);
 router.get('/dashboard', dashboard);
 router.post('/dashboard', dashboard);
 router.put('/dashboard', dashboard);
