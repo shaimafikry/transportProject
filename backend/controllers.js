@@ -102,6 +102,7 @@ const dashboard = async(req, res) => {
 
 	if (action === "user-add"){
 		try {
+			console.log(data)
 			const user = await Users.create(data);
 			return res.status(200).json({message: "تم اضافة مستخدم بنجاح"})
 		} catch (error) {

@@ -132,4 +132,4 @@ const forgetPassword = async (req, res) => {
  };
 
 
-module.exports = { signIn, addUser, forgetPassword, renewPassword, verifyRegister };
+module.exports = { signIn, addUser, forgetPassword, renewPassword };
