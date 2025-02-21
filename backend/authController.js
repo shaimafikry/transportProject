@@ -62,11 +62,10 @@ const addUser = async (req, res) => {
 
 //MARK: Sign in
 const signIn = async (req, res) => {
-	console.log(req.body);
+	console.log(req.body, "entry");
   const { email, password } = req.body;
 	const user = await Users.findOne({ where: { email: email } });
 	//console.log
-  console.log(user);
 	if (!user) {
 		return res.status(400).json({ message: 'Invalid input: User not found' });
 	}

@@ -17,8 +17,6 @@ const Content = ({ selected }) => {
 
   // const [trips, setTrips] = useState([initialTrip]);
   const [leads, setLeads] = useState([initialLead]);
-  const [drivers, setDrivers] = useState([initialDriver]);
-  const [cars, setCars] = useState([initialCar]);
   const [organizations, setOrganizations] = useState([initialOrganization]);
   const [leadOptions, setLeadOptions] = useState([]);
 
@@ -29,8 +27,6 @@ const Content = ({ selected }) => {
 
 	useEffect(() => {
     setLeads([initialLead]);
-    setDrivers([initialDriver]);
-    setCars([initialCar]);
     setOrganizations([initialOrganization]);
   }, [selected]);
 
@@ -67,45 +63,6 @@ const Content = ({ selected }) => {
         </>
       )}
 
-      {/* Add Driver Section */}
-      {selected === "add-driver" && (
-        <>
-          <h2>اضافة سائق</h2>
-          {drivers.map((driver, index) => (
-            <div key={index} className="dashboard-form-group">
-              <select value={driver.lead} onChange={(e) => handleInputChange(setDrivers, index, "lead", e.target.value)}>
-                <option value="">اسم المندوب</option>
-                {leadOptions.map((lead, i) => (
-                  <option key={i} value={lead}>
-                    {lead}
-                  </option>
-                ))}
-              </select>
-              <input type="text" placeholder="اسم السواق" value={driver.name} onChange={(e) => handleInputChange(setDrivers, index, "name", e.target.value)} />
-              <input type="text" placeholder="رقم الموبايل" value={driver.phone} onChange={(e) => handleInputChange(setDrivers, index, "phone", e.target.value)} />
-              <input type="text" placeholder="الرقم القومي" value={driver.nationalID} onChange={(e) => handleInputChange(setDrivers, index, "nationalID", e.target.value)} />
-            </div>
-          ))}
-          <button onClick={() => setDrivers([...drivers, initialDriver])}>Add More</button>
-          <button className="save-btn">Save</button>
-        </>
-      )}
-
-			 {/* Add Car Section */}
-			 {selected === "add-car" && (
-        <>
-          <h2>إضافة سيارة</h2>
-          {cars.map((car, index) => (
-            <div key={index} className="dashboard-form-group">
-              <input type="text" placeholder="نوع السيارة" />
-              <input type="text" placeholder="رقم السيارة" />
-              <input type="text" placeholder="حروف السيارة" />
-            </div>
-          ))}
-          <button onClick={() => setCars([...cars, initialCar])}>Add More</button>
-          <button className="save-btn">Save</button>
-        </>
-      )}
 
 			{/* Add Organization Section */}
       {selected === "add-org" && (

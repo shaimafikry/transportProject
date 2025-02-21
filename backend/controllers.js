@@ -34,10 +34,12 @@ const dashboard = async(req, res) => {
 			const trips = await ConstructTrips.update( updateData,
 				{
 					where: {
-						id: data.id,
+						id: id,
 					},
 				},);
-			return res.status(200).json({message: "تم تعديل الرحلة بنجاح"})
+			const updatedTrip = await ConstructTrips.findOne({ where: { id: id } });
+
+			return res.status(200).json(updatedTrip)
 		} catch (error) {
 			console.error('Error fetching users:', error);
 	}
@@ -45,7 +47,8 @@ const dashboard = async(req, res) => {
 
 	if (action === "comp1-del"){
 		try {
-			const trips = await ConstructTrips.destroy(	{where: { id: data,	},},);
+			const { id, ...updateData } = req.body;
+			const trips = await ConstructTrips.destroy(	{where: { id: id,	},},);
 			return res.status(200).json({message: "تم حذف الرحلة بنجاح"})
 		} catch (error) {
 			console.error('Error fetching users:', error);
@@ -64,7 +67,6 @@ const dashboard = async(req, res) => {
 	}
 
 	if (action === "comp2-add"){
-		const data = req.body;
 		try {
 			const trips = await TransportTrips.create(data);
 			return res.status(200).json({message: "تم اضافة الرحلة بنجاح"})
@@ -76,15 +78,16 @@ const dashboard = async(req, res) => {
 
 	if (action === "comp2-edit"){
 		const { id, ...updateData } = req.body;
-
 		try {
 			const trips = await TransportTrips.update( updateData,
 				{
 					where: {
-						id: data.id,
+						id: id,
 					},
 				},);
-			return res.status(200).json({message: "تم تعديل الرحلة بنجاح"})
+
+			const updatedTrip = await TransportTrips.findOne({ where: { id: id } });
+			return res.status(200).json(updatedTrip)
 		} catch (error) {
 			console.error('Error fetching users:', error);
 	}
@@ -93,7 +96,8 @@ const dashboard = async(req, res) => {
 
 	if (action === "comp2-del"){
 		try {
-			const trips = await TransportTrips.destroy(	{where: { id: data,	},},);
+			const { id, ...updateData } = req.body;
+			const trips = await TransportTrips.destroy(	{where: { id: id,	},},);
 			return res.status(200).json({message: "تم حذف الرحلة بنجاح"})
 		} catch (error) {
 			console.error('Error fetching users:', error);
@@ -109,6 +113,36 @@ const dashboard = async(req, res) => {
 		try {
 			const users = await Users.findAll();
 			return res.status(200).json({users: users})
+		} catch (error) {
+			console.error('Error fetching users:', error);
+	}
+
+	}
+
+	
+	if (action === "user-edit"){
+		const { id, ...updateData } = req.body;
+		try {
+			const users = await Users.update( updateData,
+				{
+					where: {
+						id: id,
+					},
+				},);
+
+			const updatedUser = await Users.findOne({ where: { id: id } });
+			return res.status(200).json(updatedUser)
+		} catch (error) {
+			console.error('Error fetching users:', error);
+	}
+		
+	}
+
+	if (action === "user-del"){
+		try {
+			const { id, ...updateData } = req.body;
+			const users = await Users.destroy(	{where: { id: id,	},},);
+			return res.status(200).json({message: "تم حذف المستخدم بنجاح"})
 		} catch (error) {
 			console.error('Error fetching users:', error);
 	}

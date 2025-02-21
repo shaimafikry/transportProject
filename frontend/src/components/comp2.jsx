@@ -7,35 +7,35 @@ const Comp2 = () => {
 
 	
   const initialTripState = {
-    representativeName: "اسم المندوب",
-    driverName: "اسم السائق",
-    phoneNumber: "رقم الموبايل",
-    nationalId: "الرقم القومي",
-    passportNumber: "رقم الجواز",
-    carLetters: "حروف السيارة",
-    carNumbers: "أرقام السيارة",
-    trailerLetters: "حروف المقطورة",
-    trailerNumbers: "أرقام المقطورة",
-    arrivalDate: "تاريخ الوصول",
-    driverLoadingDate: "تاريخ التحميل للسائق",
-    carType: "نوع السيارة",
-    foNumber: "رقم FO",
-    loadingPlace: "مكان التحميل",
-    companyLoadingDate: "تاريخ التحميل للشركة",
-    cargoType: "نوع الحمولة",
+    leader_name: "اسم المندوب",
+    driver_name: "اسم السائق",
+    phone_number: "رقم الموبايل",
+    national_id: "الرقم القومي",
+    passport_number: "رقم الجواز",
+    car_letters: "حروف السيارة",
+    car_numbers: "أرقام السيارة",
+    trailer_letters: "حروف المقطورة",
+    trailer_numbers: "أرقام المقطورة",
+    arrival_date: "تاريخ الوصول",
+    driver_loading_date: "تاريخ التحميل للسائق",
+    car_type: "نوع السيارة",
+    fo_number: "رقم FO",
+    loading_place: "مكان التحميل",
+    company_loading_date: "تاريخ التحميل للشركة",
+    cargo_type: "نوع الحمولة",
     destination: "الجهة",
     equipment: "المعدة",
-    clientName: "اسم العميل",
-    agingDate: "تاريخ التعتيق",
-    nightsCount: "عدد البياتات",
-    nightValue: "قيمة البياتة",
-    totalNightsValue: "إجمالي قيمة البياتات",
-    transportFee: "ناوُلون",
+    client_name: "اسم العميل",
+    aging_date: "تاريخ التعتيق",
+    nights_count: "عدد البياتات",
+    night_value: "قيمة البياتة",
+    total_nights_value: "إجمالي قيمة البياتات",
+    transport_fee: "ناوُلون",
     expenses: "مصاريف (كارتة + ميزان)",
-    totalTransport: "إجمالي النقلة",
+    total_transport: "إجمالي النقلة",
     deposit: "عهدة",
-    totalReceivedCash: "إجمالي النقدية المستلمة",
-    transportCompany: "الشركة الناقلة",
+    total_received_cash: "إجمالي النقدية المستلمة",
+    transport_company: "الشركة الناقلة",
     notes: "ملاحظات",
   };
 
@@ -47,7 +47,13 @@ const Comp2 = () => {
 	const fetchTrips = async () => {
 			try {
 				const data = await fetchData("dashboard?action=comp2Trips");
-				setTripsComp2(data);
+
+				const formattedTrips = data.trips.map(trip => ({
+					...trip,
+					arrival_date: trip.arrivalDate.split("T")[0] // Extract only the date part
+				}));
+
+				setTripsComp2(Array.isArray(formattedTrips) ? formattedTrips : []);
 			} catch (error) {
 				console.error("Error fetching trips:", error);
 			}
@@ -84,11 +90,9 @@ const Comp2 = () => {
   const handleSaveTrip = async (id) => {
     try {
       const tripToUpdate = tripsComp2.find((trip) => trip.id === id);
-      const data = await putData('dashboard?action=comp2-edit', {
-				id,
-				...tripToUpdate, // Send full trip data
-			});
-      setTripsComp2(tripsComp2.map((trip) => (trip.id === id ? data : trip)));
+      const updatedTrip = await putData('dashboard?action=comp2-edit', {tripToUpdate});
+
+      setTripsComp2(tripsComp2.map((trip) => (trip.id === id ? {...updatedTrip, isEditing: false} : trip)));
     } catch (error) {
       console.error("Error updating trip:", error);
     }
@@ -98,7 +102,8 @@ const Comp2 = () => {
 	// Delete trip
   const handleDeleteTrip = async (id) => {
     try {
-      await deleteData('dashboard?action=comp2-del', {id});
+			const tripToDel = tripsComp2.find((trip) => trip.id === id);
+      await deleteData('dashboard?action=comp2-del', tripToDel);
       setTripsComp2(tripsComp2.filter((trip) => trip.id !== id));
     } catch (error) {
       console.error("Error deleting trip:", error);
@@ -109,7 +114,7 @@ const Comp2 = () => {
     <>
       <div className="trip-options">
         <button onClick={() => setViewComp2("add")}>إضافة رحلة</button>
-        <button onClick={() => setViewComp2("edit")}>تعديل الرحلات</button>
+        <button onClick={() =>{ fetchTrips(); setViewComp2("edit"); }}>تعديل الرحلات</button>
       </div>
 
       {viewComp2 === "add" && (
@@ -119,7 +124,7 @@ const Comp2 = () => {
             {Object.entries(initialTripState).map(([key, label]) => (
               <input
                 key={key}
-                type={key.includes("Date") ? "date" : "text"}
+                type={key.includes("date") ? "date" : "text"}
                 placeholder={label}
                 value={newTripComp2[key]}
                 onChange={(e) => handleTripChange(key, e.target.value)}
@@ -149,7 +154,7 @@ const Comp2 = () => {
                     <>
                       {Object.keys(initialTripState).map((key) => (
                         <td key={key}>
-                          <input type={key.includes("Date") ? "date" : "text"} defaultValue={trip[key]} />
+                          <input type={key.includes("date") ? "date" : "text"} defaultValue={trip[key]} />
                         </td>
                       ))}
                       <td>

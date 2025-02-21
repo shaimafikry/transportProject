@@ -27,12 +27,6 @@ const SidebarRight = ({ role, onSelect }) => {
           <button onClick={() => onSelect("add-lead")} title="اضافة مندوب">
             <FaUserPlus />
           </button>
-          <button onClick={() => onSelect("add-driver")} title="اضافة سائق">
-            <FaTruck />
-          </button>
-          <button onClick={() => onSelect("add-car")} title="اضافة سيارة">
-            <FaCar />
-          </button>
           <button onClick={() => onSelect("add-org")} title="اضافة منظمة">
             <FaRegBuilding />
           </button>

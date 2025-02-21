@@ -24,7 +24,7 @@ const Users = () => {
 	const fetchUsers = async () => {
 			try {
 				const data = await fetchData("dashboard?action=users");
-				setUsers(data);
+				setUsers(Array.isArray(data.users) ? data.users : []);
 			} catch (error) {
 				console.error("Error fetching users:", error);
 			}
@@ -62,8 +62,10 @@ const Users = () => {
   const handleSaveUser = async (id) => {
     try {
       const userToUpdate = users.find((user) => user.id === id);
-      const data = await putData(`dashboard?action=user-edit/${id}`, userToUpdate);
-      setUsers(users.map((user) => (user.id === id ? data : user)));
+      const updatedUser = await putData('dashboard?action=user-edit', userToUpdate);
+
+			
+      setUsers(users.map((user) => (user.id === id ?  { ...updatedUser, isEditing: false } : user)));
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -73,7 +75,9 @@ const Users = () => {
 	// Delete user
   const handleDeleteUser = async (id) => {
     try {
-      await deleteData(`dashboard?action=user-del/${id}`);
+			const userToDel = users.find((user) => user.id === id);
+
+      await deleteData('dashboard?action=user-del',userToDel);
       setUsers(users.filter((user) => user.id !== id));
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -84,10 +88,10 @@ const Users = () => {
     <>
       <div className="user-options">
         <button onClick={() => setUsersView("add")}>إضافة مستخدم</button>
-        <button onClick={() => setUsersView("edit")}>تعديل المستخدمين</button>
+        <button onClick={() => { fetchUsers(); setUsersView("edit"); }}>تعديل المستخدمين</button>
       </div>
 
-      {viewUsers === "add" && (
+      {usersView === "add" && (
         <>
           <h2>إضافة مستخدم جديد</h2>
           <div className="dashboard-form-group">
@@ -96,7 +100,7 @@ const Users = () => {
           // Role Dropdown for "data entry" & "manager"
           <select
             key={key}
-            value={newUserComp2[key]}
+            value={newUser[key]}
             onChange={(e) => handleUserChange(key, e.target.value)}
           >
             <option value="data entry">Data Entry</option>
@@ -108,7 +112,7 @@ const Users = () => {
             key={key}
             type={key.includes("Date") ? "date" : "text"}
             placeholder={label}
-            value={newUserComp2[key]}
+            value={newUser[key]}
             onChange={(e) => handleUserChange(key, e.target.value)}
           />
         )
@@ -117,7 +121,7 @@ const Users = () => {
     <button onClick={handleAddUser}>حفظ المستخدم</button>
   </>
 )}
-      {viewUsers === "edit" && (
+      {usersView === "edit" && (
         <>
           <h2>تعديل المستخدمين</h2>
           <table className="user-table">
@@ -130,7 +134,7 @@ const Users = () => {
               </tr>
             </thead>
             <tbody>
-              {usersComp2.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id}>
                   {user.isEditing ? (
                     <>

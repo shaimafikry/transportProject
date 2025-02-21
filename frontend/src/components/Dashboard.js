@@ -10,17 +10,17 @@ function Dashboard() {
 const [selectedSection, setSelectedSection] = useState(null);
 const [role, setRole] = useState("");
 
-  // ✅ Correctly Fetch Role from sessionStorage
   useEffect(() => {
     const storedRole = sessionStorage.getItem("role");
     if (storedRole) {
       setRole(storedRole);
     }
   }, []);
+	console.log(role);
 
 return (
 	<div className="container-fluid">
-		<SidebarRight onSelect={role, setSelectedSection} />
+		<SidebarRight  role={role} onSelect={setSelectedSection} />
 		<Content selected={selectedSection} />
 	</div>
 );
