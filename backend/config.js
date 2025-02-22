@@ -16,27 +16,19 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
   },
 });
 
-const Leaders = sequelize.define("Leaders", {
-  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  leader_name: { type: DataTypes.STRING, allowNull: false },
-  phone_number: { type: DataTypes.STRING, unique: true, allowNull: false },
-  national_id: { type: DataTypes.STRING, unique: true, allowNull: false },
-  passport_number: { type: DataTypes.STRING, unique: true },
-});
-
-
-
 
 const Drivers = sequelize.define("Drivers", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  leader_name: { type: DataTypes.STRING, allowNull: false },
   driver_name: { type: DataTypes.STRING, allowNull: false },
   phone_number: { type: DataTypes.STRING, unique: true, allowNull: false },
   national_id: { type: DataTypes.STRING, unique: true, allowNull: false },
   passport_number: { type: DataTypes.STRING, unique: true },
-  leader_id: { type: DataTypes.INTEGER, references: { model: Leaders, key: "id" } },
+  trip_num: { type: DataTypes.INTEGER, allowNull: false, defaultValue : 0 },
+  price: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0.0 },
+
 });
 
-Drivers.belongsTo(Leaders, { foreignKey: "leader_id" });
 
 
 const Cars = sequelize.define("Cars", {
@@ -57,9 +49,11 @@ const Trailers = sequelize.define("Trailers", {
 
 
 
-const Orgs = sequelize.define("Orgs", {
+const Agents = sequelize.define("Agents", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  org_name: { type: DataTypes.STRING },
+  agent_name: { type: DataTypes.STRING, unique: true},
+  agent_type: { type: DataTypes.STRING },
+
 });
 
 
@@ -142,4 +136,4 @@ const syncDB = async () => {
 
 syncDB();
 
-module.exports = { sequelize, Leaders, Drivers, Cars, Trailers, Orgs, TransportTrips, ConstructTrips, Users };
+module.exports = { sequelize, Drivers, Cars, Trailers, Agents, TransportTrips, ConstructTrips, Users };
