@@ -1,5 +1,5 @@
 .home-container {
-	background-color: #45709c;
+	background-color: #585550;
   height: 100vh;
   background-size: cover;
   color: rgb(154, 145, 145);
@@ -17,4 +17,20 @@
   background-color: #f8f9fa; /* bg-light */
   padding: 16px; /* p-4 */
   border-radius: 8px; /* rounded */
+}
+
+.signin-section h2{
+	color: rgb(41, 37, 37);
+}
+
+.signin-section button{
+	background-color: #907e7e;
+	border-color: #907e7e;
+}
+
+.signin-section button:hover {
+  background-color: #71483c;
+	border-color: #71483c;
+
+  transform: scale(1.05);
 }

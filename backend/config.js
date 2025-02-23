@@ -22,8 +22,8 @@ const Drivers = sequelize.define("Drivers", {
   driver_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
   phone_number: { type: DataTypes.STRING, allowNull: false},
   national_id: { type: DataTypes.STRING, allowNull: false},
-  passport_number: { type: DataTypes.STRING,},
-
+  passport_number: { type: DataTypes.STRING},
+	company: { type: DataTypes.STRING},
   trip_num: { type: DataTypes.INTEGER, defaultValue: 0 },
   total_all_transport: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
   remaining_money_fees: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
@@ -106,6 +106,7 @@ const TransportTrips = sequelize.define("TransportTrips", {
   equipment: { type: DataTypes.STRING, defaultValue: "" },
   client_name: { type: DataTypes.STRING, defaultValue: "" },
   aging_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+	nights_max:{ type: DataTypes.INTEGER, defaultValue: 0 },
   nights_count: { type: DataTypes.INTEGER, defaultValue: 0 },
   night_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
   total_nights_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
@@ -114,7 +115,7 @@ const TransportTrips = sequelize.define("TransportTrips", {
   total_transport: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
   deposit: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
   total_received_cash: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  transport_company: { type: DataTypes.STRING, defaultValue: "" },
+	remain_cash:{ type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
   notes: { type: DataTypes.TEXT, defaultValue: "" },
 });
 

@@ -3,81 +3,70 @@ import { fetchData, postData, putData, deleteData } from "../api";
 
 const Users = () => {
   const [usersView, setUsersView] = useState("");
-	const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]);
 
-	
   const initialUserState = {
     username: "الاسم",
     email: "الايميل",
     phone: "رقم الموبايل",
-    password: "كلمة السر",
-		role : "الوظيفة"
+    role: "الوظيفة",
+    password: "كلمة السر"
   };
-
-	
 
   const [newUser, setNewUser] = useState(
     Object.fromEntries(Object.keys(initialUserState).map((key) => [key, ""]))
   );
 
-
-	const fetchUsers = async () => {
-			try {
-				const data = await fetchData("dashboard?action=users");
-				setUsers(Array.isArray(data.users) ? data.users : []);
-			} catch (error) {
-				console.error("Error fetching users:", error);
-			}
-		};
+  const fetchUsers = async () => {
+    try {
+      const data = await fetchData("dashboard?action=users");
+      setUsers(Array.isArray(data.users) ? data.users.map(user => ({ ...user, isEditing: false })) : []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
   useEffect(() => {
     setUsersView("");
-		fetchUsers();
-	}, []);
+    fetchUsers();
+  }, []);
 
-  // Handle user input changes
   const handleUserChange = (field, value) => {
     setNewUser({ ...newUser, [field]: value });
   };
 
+  const handleEditUserChange = (id, field, value) => {
+    setUsers(users.map(user => (user.id === id ? { ...user, [field]: value } : user)));
+  };
 
-
-	// Add a new user
   const handleAddUser = async () => {
     try {
-      const data = await postData("dashboard?action=user-add", newUser);
-      setUsers([...users, data]);
-      setNewUser({ ...initialUserState });
+      const data = await postData("dashboard?action=users-add", newUser);
+      setUsers([...users, { ...data, isEditing: false }]);
+      setNewUser(Object.fromEntries(Object.keys(initialUserState).map((key) => [key, ""])));
     } catch (error) {
       console.error("Error adding user:", error);
     }
   };
 
-  // Toggle edit mode for a user
   const handleEditUser = (id) => {
     setUsers(users.map((user) => (user.id === id ? { ...user, isEditing: !user.isEditing } : user)));
   };
 
-	// Update user
   const handleSaveUser = async (id) => {
     try {
       const userToUpdate = users.find((user) => user.id === id);
-      const updatedUser = await putData('dashboard?action=user-edit', userToUpdate);
+      const updatedUser = await putData("dashboard?action=users-edit", userToUpdate);
 
-			
-      setUsers(users.map((user) => (user.id === id ?  { ...updatedUser, isEditing: false } : user)));
+      setUsers(users.map((user) => (user.id === id ? { ...updatedUser, isEditing: false } : user)));
     } catch (error) {
       console.error("Error updating user:", error);
     }
   };
 
-
-	// Delete user
   const handleDeleteUser = async (id) => {
     try {
-			const userToDel = users.find((user) => user.id === id);
-
-      await deleteData('dashboard?action=user-del',userToDel);
+      await deleteData("dashboard?action=users-del", { id });
       setUsers(users.filter((user) => user.id !== id));
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -95,40 +84,44 @@ const Users = () => {
         <>
           <h2>إضافة مستخدم جديد</h2>
           <div className="dashboard-form-group">
-					{Object.entries(initialUserState).map(([key, label]) =>
-        key === "role" ? (
-          // Role Dropdown for "data entry" & "manager"
-          <select
-            key={key}
-            value={newUser[key]}
-            onChange={(e) => handleUserChange(key, e.target.value)}
-          >
-            <option value="data entry">Data Entry</option>
-            <option value="manager">Manager</option>
-          </select>
-        ) : (
-          // Regular Input Fields
-          <input
-            key={key}
-            type={key.includes("Date") ? "date" : "text"}
-            placeholder={label}
-            value={newUser[key]}
-            onChange={(e) => handleUserChange(key, e.target.value)}
-          />
-        )
+            {Object.entries(initialUserState).map(([key, label]) =>
+              key === "role" ? (
+                <select key={key} value={newUser[key]} onChange={(e) => handleUserChange(key, e.target.value)}>
+                  <option value="">اختر الوظيفة</option>
+                  <option value="data entry">Data Entry</option>
+                  <option value="manager">Manager</option>
+                </select>
+              ) : key === "password" ? (
+                <input
+                  key={key}
+                  type="password"
+                  placeholder={label}
+                  value={newUser[key]}
+                  onChange={(e) => handleUserChange(key, e.target.value)}
+                />
+              ) : (
+                <input
+                  key={key}
+                  type="text"
+                  placeholder={label}
+                  value={newUser[key]}
+                  onChange={(e) => handleUserChange(key, e.target.value)}
+                />
+              )
+            )}
+          </div>
+          <button onClick={handleAddUser}>حفظ المستخدم</button>
+        </>
       )}
-    </div>
-    <button onClick={handleAddUser}>حفظ المستخدم</button>
-  </>
-)}
+
       {usersView === "edit" && (
         <>
           <h2>تعديل المستخدمين</h2>
           <table className="user-table">
             <thead>
               <tr>
-                {Object.values(initialUserState).map((label, index) => (
-                  <th key={index}>{label}</th>
+                {Object.entries(initialUserState).map(([key, label]) => (
+                  <th key={key}>{label}</th>
                 ))}
                 <th>الإجراءات</th>
               </tr>
@@ -140,7 +133,24 @@ const Users = () => {
                     <>
                       {Object.keys(initialUserState).map((key) => (
                         <td key={key}>
-                          <input type={key.includes("Date") ? "date" : "text"} defaultValue={user[key]} />
+                          {key === "role" ? (
+                            <select value={user[key]} onChange={(e) => handleEditUserChange(user.id, key, e.target.value)}>
+                              <option value="data entry">Data Entry</option>
+                              <option value="manager">Manager</option>
+                            </select>
+                          ) : key === "password" ? (
+                            <input
+                              type="text"
+                              value={user[key]}
+                              onChange={(e) => handleEditUserChange(user.id, key, e.target.value)}
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={user[key]}
+                              onChange={(e) => handleEditUserChange(user.id, key, e.target.value)}
+                            />
+                          )}
                         </td>
                       ))}
                       <td>
@@ -152,7 +162,9 @@ const Users = () => {
                   ) : (
                     <>
                       {Object.keys(initialUserState).map((key) => (
-                        <td key={key}>{user[key]}</td>
+                        <td key={key}>
+                          {key === "password" ? "******" : user[key]}
+                        </td>
                       ))}
                       <td>
                         <button onClick={() => handleEditUser(user.id)}>تعديل</button>

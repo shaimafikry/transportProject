@@ -1,5 +1,6 @@
 /* Ensure the entire page fills the screen */
 html, body {
+	background-image: image('../public/background.jpg');
   width: 100%;
   height: 100%;
   margin: 0;

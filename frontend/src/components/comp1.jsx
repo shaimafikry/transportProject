@@ -21,7 +21,7 @@ const Comp1 = () => {
   const fetchTrips = async () => {
     try {
       const data = await fetchData("dashboard?action=comp1Trips");
-			const formattedTrips = data.trips.map(trip => ({
+			const formattedTrips = data.comp1Trips.map(trip => ({
 				...trip,
 				trip_date: trip.trip_date.split("T")[0] // Extract only the date part
 			}));
@@ -69,7 +69,7 @@ const Comp1 = () => {
   // Add a new trip
   const handleAddTrip = async () => {
     try {
-      const data = await postData("dashboard?action=comp1-add", newTripComp1);
+      const data = await postData("dashboard?action=comp1Trips-add", newTripComp1);
       setTripsComp1([...tripsComp1, data]);
       setNewTripComp1({
         bon_number: "", driver_name: "", car_number: "", quantity: "", trip_date: "", price: ""
@@ -83,7 +83,7 @@ const Comp1 = () => {
   const handleSaveTrip = async (id) => {
     try {
       const tripToUpdate = tripsComp1.find((trip) => trip.id === id);
-      const updatedTrip  = await putData('dashboard?action=comp1-edit', tripToUpdate);
+      const updatedTrip  = await putData('dashboard?action=comp1Trips-edit', tripToUpdate);
 
       setTripsComp1((prevTrips) =>
         prevTrips.map((trip) => (trip.id === id ? { ...updatedTrip, trip_date: trip.trip_date.split("T")[0], isEditing: false }  : trip))
@@ -99,7 +99,7 @@ const Comp1 = () => {
   const handleDeleteTrip = async (id) => {
     try {
 			const tripToDel = tripsComp1.find((trip) => trip.id === id);
-      await deleteData('dashboard?action=comp1-del', tripToDel);
+      await deleteData('dashboard?action=comp1Trips-del', tripToDel);
       setTripsComp1((prevTrips) => prevTrips.filter((trip) => trip.id !== id));
     } catch (error) {
       console.error("Error deleting trip:", error);
@@ -115,16 +115,20 @@ const Comp1 = () => {
 
       {viewComp1 === "add" && (
         <>
-          <h2>رحلات شركة المحاجر</h2>
+          <h2>اضافة رحلات  شركة المحاجر</h2>
           <div className="dashboard-form-group">
 					{tripFields.map(({ name, type, placeholder }) => (
+					<div key={name} className="form-field">
+						<label htmlFor={name}>{placeholder}</label>
               <input
-                key={name}
+                id={name}
                 type={type}
                 placeholder={placeholder}
                 value={newTripComp1[name]}
                 onChange={(e) => handleTripChange(name, e.target.value)}
               />
+						 </div>
+
             ))}
           </div>
           <button onClick={handleAddTrip}>حفظ الرحلة</button>
@@ -133,7 +137,7 @@ const Comp1 = () => {
 
       {viewComp1 === "edit" && (
         <>
-          <h2>تعديل الرحلات</h2>
+          <h2>تعديل رحلات شركة المحاجر</h2>
           <table className="trip-table">
             <thead>
               <tr>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { signIn, addUser, forgetPassword, renewPassword, verifyRegister, logout, addTripAndDriver } = require('./authController');
+const { signIn, addUser, forgetPassword, renewPassword, logout, addTripAndDriver } = require('./authController');
 const { dashboard } = require('./controllers');
 
 

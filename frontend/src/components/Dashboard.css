@@ -1,100 +1,97 @@
+/* Dashboard Container */
+h2 {
+	color: white;
+}
 .container-fluid {
-  padding: 0 ;
-  margin: 0 ;
-  width: 100vw; /* Forces the full viewport width */
+  padding: 0;
+  margin: 0;
+  width: 100vw; /* Full viewport width */
   height: 100vh;
   display: flex;
+  flex-direction: column; /* Stack sidebar and content vertically */
   direction: rtl;
   overflow-x: hidden; /* Prevent horizontal scrollbars */
-	flex-direction: row; /* Make sure sidebar & content are side by side */
+}
 
+/* Pseudo-element for the background image with opacity */
+.container-fluid::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../public/background.jpg'); /* Correct path to your image */
+  background-size: cover; /* Cover the entire page */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent repeating */
+  z-index: -1; /* Place the pseudo-element behind the content */
+}
+/* Dark shadow overlay */
+.container-fluid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(109, 107, 107, 0.5), /* Dark shadow with 50% opacity */
+    rgba(0, 0, 0, 0.5)
+  );
+  z-index: -1; /* Place the overlay behind the content */
 }
 
 
-
-/* Middle Content Section */
-.content {
-  flex: 1; 
-  background-color: white;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  overflow-y: auto;
-  direction: rtl; /* Restores normal left-to-right content inside */
-}
-
-/* Sidebar default (collapsed) */
+/* Sidebar (Top Section) */
 .sidebar-right {
-  width: 60px; /* Small width for icons */
-  height: 100vh;
-  background-color: #002a4a;
+  width: 100%; /* Full width */
+  height: auto; /* Adjust height as needed */
+  background-color: #302f2f;
   color: white;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Align buttons horizontally */
   align-items: center;
-  justify-content: flex-start;
-  padding: 10px 0;
+  justify-content: center;
+  padding: 10px;
   flex-shrink: 0;
-  transition: width 0.3s ease; /* Smooth expand animation */
-  overflow: hidden;
-}
-
-/* Sidebar expanded on hover */
-.sidebar-right.expanded {
-  width: 200px; /* Full width */
 }
 
 /* Sidebar buttons */
 .sidebar-right button {
-  width: 50px;
+  width: auto; /* Adjust width to fit content */
   height: 50px;
-  margin: 10px 0;
+  margin: 0 10px; /* Adjust margin for horizontal spacing */
   background-color: transparent;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 24px; /* Icon size */
-  transition: background-color 0.3s ease;
+  font-size: 16px; /* Adjust font size */
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-}
+  padding: 0 10px; /* Add padding for better spacing */
+	gap: 8px; /* Add space between icon and text */
 
-/* Expand button text when hovered */
-.sidebar-right.expanded button {
-  width: 100%;
-  justify-content: flex-start;
-  padding-left: 20px;
-}
-
-.sidebar-right.expanded button::after {
-  content: attr(title);
-  white-space: nowrap;
-  padding-left: 10px;
-  font-size: 16px;
 }
 
 /* Button hover effect */
 .sidebar-right button:hover {
-  background-color: #135ab4;
+  background-color: #71483c;
 }
 
-
-button {
-  font-size: 16px;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px; /* Curved Borders */
-  transition: background-color 0.3s ease, transform 0.2s ease;
+/* Content Section (Below Sidebar) */
+.content {
+  flex: 1; /* Take up remaining space */
+	padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-y: auto; /* Allow vertical scrolling */
+  direction: rtl; /* Restores normal left-to-right content inside */
 }
-
-
-
 
 /* Form Group */
 .dashboard-form-group {
@@ -122,7 +119,7 @@ button {
 
 /* Buttons */
 .content button {
-  background-color: #1a73e8;
+  background-color: #907e7e;
   color: white;
   padding: 10px;
   border: none;
@@ -133,31 +130,28 @@ button {
 }
 
 .content button:hover {
-  background-color: #135ab4;
+  background-color: #71483c;
   transform: scale(1.05);
 }
 
 /* Save Button */
 .save-btn {
-  background-color: #28a745 !important;
+  background-color: #302f2f !important;
 }
 
 .save-btn:hover {
-  background-color: #218838 !important;
+  background-color: #71483c !important;
 }
 
-
-
-
 /* Trip Option Buttons */
-.trip-options  {
+.trip-options {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
 }
 
-.trip-options  button {
-  background-color: #1a73e8;
+.trip-options button {
+  background-color: #302f2f;
   color: white;
   padding: 10px;
   border: none;
@@ -165,32 +159,32 @@ button {
   cursor: pointer;
 }
 
-.trip-options  button:hover {
-  background-color: #135ab4;
+.trip-options button:hover {
+  background-color: #71483c;
 }
-
-
 
 /* Trip Table */
-.trip-table  {
+.trip-table {
   width: 100%;
   border-collapse: collapse;
-	align-self: flex-start;
-
+  align-self: flex-start;
+	background-color: #ffffff;
 }
 
-.trip-table th, .trip-table td {
+.trip-table th,
+.trip-table td {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
 }
 
 .trip-table th {
-  background-color: #004c8c;
+  background-color: #71483c;
   color: white;
 }
 
 .trip-table button {
+  background-color: #71483c;
   margin: 2px;
   padding: 5px 10px;
   border: none;
@@ -200,9 +194,8 @@ button {
 
 .trip-table button:hover {
   opacity: 0.8;
+
 }
-
-
 
 /* Search Section */
 .search-container {
@@ -220,18 +213,8 @@ button {
   border: 1px solid #ccc;
 }
 
-
-
-
-/* Trip Option Buttons */
-.trip-options  {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.trip-options  button {
-  background-color: #1a73e8;
+.search-container button {
+  background-color: #71483c;
   color: white;
   padding: 10px;
   border: none;
@@ -239,28 +222,28 @@ button {
   cursor: pointer;
 }
 
-.trip-options  button:hover {
-  background-color: #135ab4;
+.search-container button:hover {
+  background-color: #71483c;
 }
 
-
-
-/* user Table */
-.user-table  {
+/* User Table */
+.user-table {
   width: 100%;
   border-collapse: collapse;
-	align-self: flex-start;
+  align-self: flex-start;
+	background-color: #ffffff;
 
 }
 
-.user-table th, .user-table td {
+.user-table th,
+.user-table td {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
 }
 
 .user-table th {
-  background-color: #004c8c;
+  background-color: #71483c;
   color: white;
 }
 
@@ -274,4 +257,93 @@ button {
 
 .user-table button:hover {
   opacity: 0.8;
+}
+
+/* User Option Buttons */
+.user-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.user-options button {
+  background-color: #71483c;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.user-options button:hover {
+  background-color: #71483c;
+}
+
+/* Driver Table */
+.driver-table {
+  width: 100%;
+  border-collapse: collapse;
+  align-self: flex-start;
+	background-color: #ffffff;
+
+}
+
+.driver-table th,
+.driver-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.driver-table th {
+  background-color: #71483c;
+  color: white;
+}
+
+.driver-table button {
+  margin: 2px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.driver-table button:hover {
+  opacity: 0.8;
+}
+
+/* Driver Option Buttons */
+.driver-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.driver-options button {
+  background-color: #71483c;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.driver-options button:hover {
+  background-color: #71483c;
+}
+
+.dashboard-form-group .form-field {
+  margin-bottom: 15px;
+}
+
+.dashboard-form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.dashboard-form-group input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
 }

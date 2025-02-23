@@ -57,55 +57,89 @@ const addUser = async (req, res) => {
 
 	}
 };
+
+
+const editUser= async(req, res)=> {
+		const { id, ...updateData } = req.body;
+
+		const password_hash = await bcrypt.hash(updateData.password, 10);
+
+		updateData.password = password_hash;
+
+		try {
+
+		await Users.update(updateData, { where: { id } });
+		return Users.findOne({ where: { id } }); 
+		
+	}catch(error){
+		console.error('error in edit user', error);
+		return res.status(500).json(`server error ${error}`);
+
+	}
+
+};
+
+
+
+const allUsers = async (req, res) => {
+  try {
+    const users = await Users.findAll();
+
+    const sanitizedUsers = users.map(user => {
+      return { ...user, password: "" };
+    });
+
+    return res.status(200).json({ users: sanitizedUsers });
+
+  } catch (error) {
+    console.error('Error in fetching users:', error);
+    return res.status(500).json({ error: `Server error: ${error.message}` });
+  }
+};
+
+
+
+
+
+
+
+
 // MARK: ADD Trip
 const addTripAndDriver = async (req, res) => {
 	try {
-		// دالة لتحويل القيم النصية إلى أرقام صحيحة، وإرجاع null فقط إذا لم يكن رقمًا
-		// دالة لتنظيف البيانات حسب النوع
 		const sanitizeInput = (key, value) => {
 			if (value === "" || value === null || value === undefined) {
-				// الحقول الرقمية تتحول إلى 0
 				if (["nights_count", "night_value", "total_nights_value", "transport_fee", 
 					 "expenses", "total_transport", "deposit", "total_received_cash"]
 					.includes(key)) {
 					return 0;
 				}
-				// باقي الحقول تبقى نص فارغ
 				return "";
 			}
 
-			// لو الحقل هو `national_id` نحوله إلى نص
 			if (key === "national_id" || key === "phone_number") {
 				return value.toString();
 			}
 
-			// لو الحقل رقمي نحوله إلى `float`
 			if (!isNaN(value) && typeof value !== "boolean") {
 				return parseFloat(value);
 			}
-
-			// الباقي يظل كما هو
 			return value;
 		};
 		
-		// تنظيف جميع القيم في الطلب
 		const sanitizedData = {};
 		Object.keys(req.body).forEach((key) => {
 			sanitizedData[key] = sanitizeInput(key, req.body[key]);
 		});
 
-		// استخراج القيم المطلوبة
 		let { national_id, total_transport, total_received_cash } = sanitizedData;
 		
 
-		// تأكد من أن القيم الرقمية لا تكون null
 		total_transport = total_transport ?? 0;
 		total_received_cash = total_received_cash ?? 0;
 
-		// البحث عن السائق بناءً على الرقم القومي
 		let driver = await Drivers.findOne({ where: { national_id } });
 
-		// إدخال الرحلة الجديدة
 		await TransportTrips.create(sanitizedData);
 		console.log("تمت إضافة بيانات الرحلة بنجاح");
 
@@ -210,4 +244,4 @@ const forgetPassword = async (req, res) => {
   };
   
 
-module.exports = { signIn, addUser, forgetPassword, renewPassword, logout, addTripAndDriver };
+module.exports = { signIn, addUser,editUser, allUsers, forgetPassword, renewPassword, logout, addTripAndDriver };
