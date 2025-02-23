@@ -206,7 +206,7 @@
 // module.exports = { dashboard};
 
 const { sequelize, Leaders, Drivers, Agents, TransportTrips, ConstructTrips, Users } = require('./config');
-const { addUser } = require('./authController');
+const { addUser, addTripAndDriver } = require('./authController');
 
 const models = {
   comp1Trips: ConstructTrips,
@@ -250,6 +250,9 @@ const dashboard = async (req, res) => {
 
   // Handle user addition separately
   if (action === "users-add") return addUser(req, res);
+  if (action === "comp2-add") return addTripAndDriver(req, res);
+
+
 
   // Handle all other actions dynamically
   const model = models[action.replace(/-(add|edit|del)$/, "")];
