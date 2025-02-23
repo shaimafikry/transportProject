@@ -1,5 +1,5 @@
 require('dotenv').config({path: '../.env'});
-const {Users} = require('./config');
+const { Users, Drivers, TransportTrips } = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
 const serviceMail = process.env.SERVICE_MAIL;
@@ -57,7 +57,81 @@ const addUser = async (req, res) => {
 
 	}
 };
+// MARK: ADD Trip
+const addTripAndDriver = async (req, res) => {
+	try {
+		// دالة لتحويل القيم النصية إلى أرقام صحيحة، وإرجاع null فقط إذا لم يكن رقمًا
+		// دالة لتنظيف البيانات حسب النوع
+		const sanitizeInput = (key, value) => {
+			if (value === "" || value === null || value === undefined) {
+				// الحقول الرقمية تتحول إلى 0
+				if (["nights_count", "night_value", "total_nights_value", "transport_fee", 
+					 "expenses", "total_transport", "deposit", "total_received_cash"]
+					.includes(key)) {
+					return 0;
+				}
+				// باقي الحقول تبقى نص فارغ
+				return "";
+			}
 
+			// لو الحقل هو `national_id` نحوله إلى نص
+			if (key === "national_id" || key === "phone_number") {
+				return value.toString();
+			}
+
+			// لو الحقل رقمي نحوله إلى `float`
+			if (!isNaN(value) && typeof value !== "boolean") {
+				return parseFloat(value);
+			}
+
+			// الباقي يظل كما هو
+			return value;
+		};
+		
+		// تنظيف جميع القيم في الطلب
+		const sanitizedData = {};
+		Object.keys(req.body).forEach((key) => {
+			sanitizedData[key] = sanitizeInput(key, req.body[key]);
+		});
+
+		// استخراج القيم المطلوبة
+		let { national_id, total_transport, total_received_cash } = sanitizedData;
+		
+
+		// تأكد من أن القيم الرقمية لا تكون null
+		total_transport = total_transport ?? 0;
+		total_received_cash = total_received_cash ?? 0;
+
+		// البحث عن السائق بناءً على الرقم القومي
+		let driver = await Drivers.findOne({ where: { national_id } });
+
+		// إدخال الرحلة الجديدة
+		await TransportTrips.create(sanitizedData);
+		console.log("تمت إضافة بيانات الرحلة بنجاح");
+
+		if (driver) {
+			driver.trip_num += 1;
+			driver.total_all_transport += total_transport;
+			driver.remaining_money_fees += total_transport - total_received_cash;
+			await driver.save();
+			console.log("تم تعديل بيانات السائق بنجاح");
+		} else {
+			driver = await Drivers.create({
+				...sanitizedData,
+				trip_num: 1,
+				total_all_transport: total_transport,
+				remaining_money_fees: total_transport - total_received_cash
+			});
+			console.log("تمت إضافة بيانات السائق بنجاح");
+		}
+		
+		return res.status(201).json({ message: "تمت الإضافة بنجاح" });
+
+	} catch (error) {
+		console.error("Error adding trip and driver:", error);
+		return res.status(500).json({ error: `حدث خطأ أثناء معالجة الطلب, ${error.message}` });
+	}
+};
 
 
 //MARK: Sign in
@@ -130,5 +204,10 @@ const forgetPassword = async (req, res) => {
   }
  };
 
+ const logout = (req, res) => {
+	res.clearCookie("token"); // حذف الكوكيز التي تحتوي على التوكن
+	return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+  };
+  
 
-module.exports = { signIn, addUser, forgetPassword, renewPassword };
+module.exports = { signIn, addUser, forgetPassword, renewPassword, logout, addTripAndDriver };
