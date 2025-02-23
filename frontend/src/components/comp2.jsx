@@ -73,6 +73,8 @@ const Comp2 = () => {
 	// Add a new trip
   const handleAddTrip = async () => {
     try {
+      console.log("Data sent to API:", newTripComp2); // ✅ تأكد أن البيانات ليست فارغة
+
       const data = await postData("dashboard?action=comp2-add", newTripComp2);
       setTripsComp2([...tripsComp2, data]);
       setNewTripComp2({ ...initialTripState });
