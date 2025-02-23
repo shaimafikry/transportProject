@@ -16,18 +16,19 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
   },
 });
 
-
 const Drivers = sequelize.define("Drivers", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  leader_name: { type: DataTypes.STRING, allowNull: false },
-  driver_name: { type: DataTypes.STRING, allowNull: false },
-  phone_number: { type: DataTypes.STRING, unique: true, allowNull: false },
-  national_id: { type: DataTypes.STRING, unique: true, allowNull: false },
-  passport_number: { type: DataTypes.STRING, unique: true },
-  trip_num: { type: DataTypes.INTEGER, allowNull: false, defaultValue : 0 },
-  price: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0.0 },
+  leader_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  driver_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  phone_number: { type: DataTypes.STRING, allowNull: false},
+  national_id: { type: DataTypes.STRING, allowNull: false},
+  passport_number: { type: DataTypes.STRING,},
 
+  trip_num: { type: DataTypes.INTEGER, defaultValue: 0 },
+  total_all_transport: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  remaining_money_fees: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
 });
+
 
 
 
@@ -83,39 +84,38 @@ const Users = sequelize.define("Users", {
 });
 
 
-
 const TransportTrips = sequelize.define("TransportTrips", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  leader_name: { type: DataTypes.STRING, allowNull: false },
-  driver_name: { type: DataTypes.STRING, allowNull: false },
-  phone_number: { type: DataTypes.STRING, unique: true, allowNull: false },
-  national_id: { type: DataTypes.STRING, unique: true, allowNull: false },
-  passport_number: { type: DataTypes.STRING, unique: true },
-  car_letters: { type: DataTypes.STRING },
-  car_numbers: { type: DataTypes.STRING },
-  trailer_letters: { type: DataTypes.STRING },
-  trailer_numbers: { type: DataTypes.STRING },
-  arrival_date: { type: DataTypes.DATE },
-  driver_loading_date: { type: DataTypes.DATE },
-  car_type: { type: DataTypes.STRING },
-  fo_number: { type: DataTypes.STRING },
-  loading_place: { type: DataTypes.STRING },
-  company_loading_date: { type: DataTypes.DATE },
-  cargo_type: { type: DataTypes.STRING },
-  destination: { type: DataTypes.STRING },
-  equipment: { type: DataTypes.STRING },
-  client_name: { type: DataTypes.STRING },
-  aging_date: { type: DataTypes.DATE },
-  nights_count: { type: DataTypes.INTEGER },
-  night_value: { type: DataTypes.DECIMAL(10, 2) },
-  total_nights_value: { type: DataTypes.DECIMAL(10, 2) },
-  transport_fee: { type: DataTypes.DECIMAL(10, 2) },
-  expenses: { type: DataTypes.DECIMAL(10, 2) },
-  total_transport: { type: DataTypes.DECIMAL(10, 2) },
-  deposit: { type: DataTypes.DECIMAL(10, 2) },
-  total_received_cash: { type: DataTypes.DECIMAL(10, 2) },
-  transport_company: { type: DataTypes.STRING },
-  notes: { type: DataTypes.TEXT },
+  leader_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  driver_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  phone_number: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  national_id: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  passport_number: { type: DataTypes.STRING, defaultValue: "" },
+  car_letters: { type: DataTypes.STRING, defaultValue: "" },
+  car_numbers: { type: DataTypes.STRING, defaultValue: "" },
+  trailer_letters: { type: DataTypes.STRING, defaultValue: "" },
+  trailer_numbers: { type: DataTypes.STRING, defaultValue: "" },
+  arrival_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  driver_loading_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  car_type: { type: DataTypes.STRING, defaultValue: "" },
+  fo_number: { type: DataTypes.STRING, defaultValue: "" },
+  loading_place: { type: DataTypes.STRING, defaultValue: "" },
+  company_loading_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  cargo_type: { type: DataTypes.STRING, defaultValue: "" },
+  destination: { type: DataTypes.STRING, defaultValue: "" },
+  equipment: { type: DataTypes.STRING, defaultValue: "" },
+  client_name: { type: DataTypes.STRING, defaultValue: "" },
+  aging_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  nights_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+  night_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  total_nights_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  transport_fee: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  expenses: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  total_transport: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  deposit: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  total_received_cash: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  transport_company: { type: DataTypes.STRING, defaultValue: "" },
+  notes: { type: DataTypes.TEXT, defaultValue: "" },
 });
 
 
@@ -133,6 +133,13 @@ const syncDB = async () => {
     console.error("Error syncing database:", error);
   }
 };
+
+
+sequelize.sync({ alter: true })
+  .then(() => {
+    console.log("Database schema updated successfully!");
+  })
+  .catch(error => console.error("Error updating schema:", error));
 
 syncDB();
 
