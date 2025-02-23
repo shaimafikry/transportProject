@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaSearch, FaIndustry, FaBuilding, FaUserPlus, FaTruck, FaCar, FaRegBuilding, FaUser, FaSignOutAlt } from "react-icons/fa"; 
 import SearchForm from "./SearchForm";
+import LogoutButton from "./LogoutButton";
+
 
 const SidebarRight = ({ role, onSelect }) => {
   const [showSearch, setShowSearch] = useState(false);
@@ -39,7 +41,9 @@ const SidebarRight = ({ role, onSelect }) => {
           <button title="الملف الشخصي">
             <FaUser />
           </button>
+          
           <button title="تسجيل خروج">
+            <LogoutButton />
             <FaSignOutAlt />
           </button>
         </>
