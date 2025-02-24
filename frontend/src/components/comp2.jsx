@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
+import TripFilterSort from "./TripFilterSort";
+
 
 const Comp2 = () => {
   const [viewComp2, setViewComp2] = useState("");
@@ -219,13 +221,17 @@ const Comp2 = () => {
 
   return (
     <>
+
+  
       <div className="trip-options">
         <button onClick={() => { fetchAgents(); setViewComp2("add"); }}>إضافة رحلة</button>
         <button onClick={() => { fetchTrips(); setViewComp2("edit"); }}>تعديل رحلة</button>
         <button onClick={() => { fetchTrips(); setViewComp2("all"); }}>الرحلات</button>
-
       </div>
-
+      
+      {/*//MARK: call FilterSort*/}
+      <TripFilterSort trips={tripsComp2} />
+  
       {viewComp2 === "add" && (
         <>
           <h2>إضافة رحلات لشركة النقل</h2>
