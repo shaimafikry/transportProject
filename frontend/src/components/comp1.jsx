@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
+import TripFilterSortComp1 from "./Comp1Filter";
+
 
 const Comp1 = () => {
   const [viewComp1, setViewComp1] = useState(""); 
@@ -112,6 +114,9 @@ const Comp1 = () => {
         <button onClick={() => setViewComp1("add")}>إضافة رحلة</button>
         <button onClick={() => { fetchTrips(); setViewComp1("edit"); }}>تعديل رحلة</button>
       </div>
+        
+        {/* MARK: FilterComp1 */}
+        <TripFilterSortComp1 trips={tripsComp1}/>
 
       {viewComp1 === "add" && (
         <>
