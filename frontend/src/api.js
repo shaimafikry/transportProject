@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:5000';
+//const API_URL = 'http://localhost:5000';
+
+const API_URL = 'https://transport-project-backend.vercel.app';
 
 // Function to get the token
 const getToken = () => sessionStorage.getItem('token');
