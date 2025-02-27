@@ -1,12 +1,40 @@
 /* Ensure the entire page fills the screen */
 html, body {
-	background-image: image('../public/background.jpg');
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* 
-	Prevents unwanted horizontal scrolling */
-	font-family: Arial, sans-serif;
-	
+  overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+  font-family: Arial, sans-serif;
+  position: relative; /* Required for pseudo-elements */
+}
+
+/* Pseudo-element for the background image */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../public/background.jpg'); /* Correct path to your image */
+  background-size: cover; /* Cover the entire page */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent repeating */
+  z-index: -1; /* Place the pseudo-element behind the content */
+}
+
+/* Dark shadow overlay */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(0, 0, 0, 0.5), /* Dark shadow with 50% opacity */
+    rgba(0, 0, 0, 0.5)
+  );
+  z-index: -1; /* Place the overlay behind the content */
 }

@@ -140,10 +140,10 @@ const TripFilterSort = ({ trips }) => {
         <button className="export-btn" onClick={exportToExcel}>Export to Excel</button>
       </div>
 
-      <table>
+      <table  className="trip-table">
         <thead>
           <tr>
-            {trips.length > 0 && Object.keys(trips[0]).filter(key => key !== "id").map((key) => (
+            {trips.length > 0 && Object.keys(initialTripState).map((key) => (
               <th key={key}>{key.replace(/_/g, " ").toUpperCase()}</th>
             ))}
           </tr>
@@ -151,7 +151,7 @@ const TripFilterSort = ({ trips }) => {
         <tbody>
           {filteredTrips.map((trip) => (
             <tr key={trip.id}>
-              {Object.keys(trip).filter(key => key !== "id").map((key) => (
+              {Object.keys(initialTripState).map((key) => (
                 <td key={key}>{trip[key]}</td>
               ))}
             </tr>

@@ -13,34 +13,6 @@ h2 {
   overflow-x: hidden; /* Prevent horizontal scrollbars */
 }
 
-/* Pseudo-element for the background image with opacity */
-.container-fluid::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('../../public/background.jpg'); /* Correct path to your image */
-  background-size: cover; /* Cover the entire page */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent repeating */
-  z-index: -1; /* Place the pseudo-element behind the content */
-}
-/* Dark shadow overlay */
-.container-fluid::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    rgba(109, 107, 107, 0.5), /* Dark shadow with 50% opacity */
-    rgba(0, 0, 0, 0.5)
-  );
-  z-index: -1; /* Place the overlay behind the content */
-}
 
 
 /* Sidebar (Top Section) */

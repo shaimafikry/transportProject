@@ -8,6 +8,7 @@ function Dashboard() {
 
 	
 const [selectedSection, setSelectedSection] = useState(null);
+const [showFilter, setShowFilter] = useState(false);
 const [role, setRole] = useState("");
 
   useEffect(() => {
@@ -18,10 +19,14 @@ const [role, setRole] = useState("");
   }, []);
 	console.log(role);
 
+  const toggleFilter = () => {
+    setShowFilter((prev) => !prev);
+  };
+
 return (
 	<div className="container-fluid">
-		<SidebarRight  role={role} onSelect={setSelectedSection} />
-		<Content selected={selectedSection} />
+		<SidebarRight  role={role} onSelect={setSelectedSection} onSearch={toggleFilter} />
+		<Content selected={selectedSection} showFilter={showFilter} />
 	</div>
 );
 };

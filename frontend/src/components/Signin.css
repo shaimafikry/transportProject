@@ -1,8 +1,8 @@
 .home-container {
-	background-color: #585550;
+
   height: 100vh;
   background-size: cover;
-  color: rgb(154, 145, 145);
+  color: rgb(255, 255, 255);
   display: flex; /* Correct way to apply Bootstrap styles */
   flex-direction: column;
   justify-content: center;
@@ -14,14 +14,18 @@
 .signin-section {
   max-width: 400px;
   width: 100%;
-  background-color: #f8f9fa; /* bg-light */
   padding: 16px; /* p-4 */
   border-radius: 8px; /* rounded */
+	
 }
 
-.signin-section h2{
-	color: rgb(41, 37, 37);
+.form-control {
+  text-align: right;
+
+
 }
+
+
 
 .signin-section button{
 	background-color: #907e7e;

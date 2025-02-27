@@ -3,11 +3,14 @@ import { fetchData, postData, putData, deleteData } from "../api";
 import TripFilterSort from "./TripFilterSort";
 
 
-const Comp2 = () => {
+const Comp2 = ({ showFilter, onSearchClick }) => {
   const [viewComp2, setViewComp2] = useState("");
   const [tripsComp2, setTripsComp2] = useState([]);
   const [agents, setAgents] = useState([]);
   const [selectedAgentType, setSelectedAgentType] = useState("");
+	const [isSearching, setIsSearching] = useState(false);
+	const [originalTrips, setOriginalTrips] = useState([]); // To store the original data
+	
 
   const initialTripState = {
     leader_name: "اسم المندوب",
@@ -73,10 +76,11 @@ const Comp2 = () => {
     try {
       const data = await fetchData("dashboard?action=comp2Trips");
       const formattedTrips = data.comp2Trips.map((trip) => ({
-        ...trip,
-        // arrival_date: trip.arrivalDate.split("T")[0], // Extract only the date part
-      }));
+        ...trip, }));
       setTripsComp2(Array.isArray(formattedTrips) ? formattedTrips : []);
+			setTripsComp2(formattedTrips);
+      setOriginalTrips(formattedTrips); 
+      setIsSearching(false); // Reset search state
     } catch (error) {
       console.error("Error fetching trips:", error);
     }
@@ -95,6 +99,8 @@ const Comp2 = () => {
   useEffect(() => {
     setViewComp2("");
     fetchAgents();
+    fetchTrips();
+
   }, []);
 
   // Calculate nights count
@@ -134,7 +140,7 @@ const Comp2 = () => {
     }));
   };
 
-  // Automatically trigger calculations when relevant fields change
+
   useEffect(() => {
     calculateNightsCount();
     calculateTotalTransport();
@@ -146,6 +152,18 @@ const Comp2 = () => {
     newTripComp2.expenses,
     newTripComp2.total_received_cash,
   ]);
+
+	// Handle search results from TripFilterSortComp1
+  const handleSearch = (searchResults) => {
+    setTripsComp2(searchResults); // Update the table with filtered data
+    setIsSearching(true); // Set searching to active
+  };
+
+  // Reset to show all trips
+  const resetSearch = () => {
+    setTripsComp2(originalTrips); // Reset to original data
+    setIsSearching(false); // Set searching to inactive
+  };
 
   // Handle trip input changes
   const handleTripChange = (field, value) => {
@@ -219,6 +237,14 @@ const Comp2 = () => {
     }
   };
 
+		useEffect(() => {
+			if (!showFilter) {
+				resetSearch(); // Restore full data when search is toggled off
+			} else {
+				setViewComp2(""); // Show edit page when search is toggled on
+			}
+		}, [showFilter]);
+
   return (
     <>
 
@@ -230,7 +256,9 @@ const Comp2 = () => {
       </div>
       
       {/*//MARK: call FilterSort*/}
-      <TripFilterSort trips={tripsComp2} />
+			{showFilter &&  viewComp2 !== "add" && viewComp2 !== "edit" && (
+        <TripFilterSort trips={originalTrips} onSearch={handleSearch} />
+      )}
   
       {viewComp2 === "add" && (
         <>
@@ -401,7 +429,7 @@ const Comp2 = () => {
         </>
       )}
 			
-      {viewComp2 === "all" && (
+      {!showFilter && viewComp2 === "all" && (
         <>
           <h2>سجل رحلات شركة النقل </h2>
           <table className="trip-table">

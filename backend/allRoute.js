@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { signIn, addUser, forgetPassword, renewPassword, logout, addTripAndDriver } = require('./authController');
+const { signIn, forgetPassword, logout, forgetPasswordCheck } = require('./authController');
 const { dashboard } = require('./controllers');
 
 
@@ -12,6 +12,9 @@ router.get('/dashboard', dashboard);
 router.post('/dashboard', dashboard);
 router.put('/dashboard', dashboard);
 router.delete('/dashboard', dashboard);
+router.get('/forget-password', forgetPasswordCheck);
+router.put('/forget-password', forgetPassword);
+
 
 
 

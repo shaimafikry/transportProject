@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { FaSearch, FaIndustry, FaBuilding, FaUserPlus, FaTruck, FaCar, FaRegBuilding, FaUser, FaSignOutAlt } from "react-icons/fa"; 
-import SearchForm from "./SearchForm";
 
 
-const SidebarRight = ({ role, onSelect }) => {
-  const [showSearch, setShowSearch] = useState(false);
+
+const SidebarRight = ({ role, onSelect, onSearch  }) => {
 	const handleLogout = async () => {
     try {
       const response = await fetch("http://localhost:5000/logout", {
@@ -27,9 +26,8 @@ const SidebarRight = ({ role, onSelect }) => {
   return (
     <div 
       className={"sidebar-right"} >
-      {!showSearch ? (
         <>
-          <button onClick={() => setShowSearch(true)} title="البحث">
+          <button onClick={onSearch} title="البحث">
             <FaSearch /> البحث
           </button>
           <button onClick={() => onSelect("add-comp1")} title="المحاجر">
@@ -50,7 +48,7 @@ const SidebarRight = ({ role, onSelect }) => {
             </button>
           )}
 
-          <button title="الملف الشخصي">
+          <button onClick={() => onSelect("profile")} title="الملف الشخصي">
             <FaUser /> الملف الشخصي
           </button>
           
@@ -58,9 +56,6 @@ const SidebarRight = ({ role, onSelect }) => {
             <FaSignOutAlt /> تسجيل خروج
           </button>
         </>
-      ) : (
-        <SearchForm onClose={() => setShowSearch(false)} />
-      )}
     </div>
   );
 };

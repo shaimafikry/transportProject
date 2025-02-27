@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
+import DriverFilter from "./driverFilter";
 
-const Drivers = () => {
+
+
+const Drivers = ({ showFilter, onSearchClick }) => {
   const [viewDrivers, setViewDrivers] = useState(""); 
   const [drivers, setDrivers] = useState([]);
   const [newDriver, setNewDriver] = useState({
     leader_name: "", driver_name: "", phone_number: "", national_id: "", passport_number: ""
   });
+
+	const [originalDrivers, setOriginalDrivers] = useState([]); 
+	const [isSearching, setIsSearching] = useState(false);
+
+
+
 
 	const driverFields = [
 		{ name: "leader_name", type: "text", placeholder: "اسم المندوب" },
@@ -30,6 +39,11 @@ const Drivers = () => {
     try {
       const data = await fetchData("dashboard?action=drivers");
 			setDrivers(Array.isArray(data.drivers) ? data.drivers.map(driver => ({ ...driver, isEditing: false })) : []);
+			
+			setOriginalDrivers(data.drivers); // Save the original data
+      setIsSearching(false); // Reset search state
+
+
 		} catch (error) {
 			console.error("Error fetching drivers:", error);
 			setDrivers([]);
@@ -41,6 +55,25 @@ const Drivers = () => {
     fetchDrivers();
   }, []);
 
+
+	
+  // Handle search results from filterDriver
+  const handleSearch = (searchResults) => {
+    setDrivers(searchResults); 
+    setIsSearching(true); 
+  };
+
+  // Reset to show all drivers
+  const resetSearch = () => {
+    setDrivers(originalDrivers); // Reset to original data
+    setIsSearching(false); // Set searching to inactive
+  };
+
+
+
+
+
+
   const handleDriverChange = (field, value) => {
     setNewDriver((prev) => ({ ...prev, [field]: value }));
   };
@@ -51,6 +84,14 @@ const Drivers = () => {
         driver.id === driverId ? { ...driver, [field]: value } : driver
       )
     );
+
+
+		// Update originalDrivers
+		setOriginalDrivers((prevOriginalDrivers) =>
+			prevOriginalDrivers.map((driver) =>
+				driver.id === driverId ? { ...driver, [field]: value } : driver
+			)
+		);
   };
 
 	const handleEditDriver = (id) => {
@@ -61,6 +102,16 @@ const Drivers = () => {
 						? { ...driver.originalData, isEditing: false } // Reset to original data if cancelling
 						: { ...driver, originalData: { ...driver }, isEditing: true } // Store original before editing
 					: driver
+			)
+		);
+
+		
+		// Update originalDrivers
+		setOriginalDrivers((prevOriginalDrivers) =>
+			prevOriginalDrivers.map((trip) =>
+				trip.id === id
+					? { ...trip, isEditing: !trip.isEditing, originalData: trip.isEditing ? trip.originalData : { ...trip } }
+					: trip
 			)
 		);
 	};
@@ -86,6 +137,21 @@ const Drivers = () => {
         prevDrivers.map((driver) => (driver.id === id ? {...driver, ...updatedDriver,isEditing: false }  : driver))
       );
 
+			
+			 // Update originalDrivers
+			 setOriginalDrivers((prevOriginalDrivers) =>
+				prevOriginalDrivers.map((trip) =>
+					trip.id === id
+						? { ...updatedTrip, trip_date: trip.trip_date.split("T")[0], isEditing: false }
+						: trip
+				)
+			);
+
+
+
+
+
+
     } catch (error) {
       console.error("Error updating driver:", error);
     }
@@ -96,10 +162,28 @@ const Drivers = () => {
 			const driverToDel = drivers.find((driver) => driver.id === id);
       await deleteData('dashboard?action=drivers-del', driverToDel);
       setDrivers((prevDrivers) => prevDrivers.filter((driver) => driver.id !== id));
+
+			// Update originalDrivers
+			setOriginalDrivers((prevOriginalDrivers) =>
+				prevOriginalDrivers.filter((trip) => trip.id !== id)
+			);
+
+
+
+
     } catch (error) {
       console.error("Error deleting driver:", error);
     }
   };
+
+
+	useEffect(() => {
+			if (!showFilter) {
+				resetSearch(); 
+			} else {
+				setViewDrivers("edit");
+			}
+		}, [showFilter]);
 
   return (
     <>
@@ -107,6 +191,10 @@ const Drivers = () => {
         <button onClick={() => setViewDrivers("add")}>إضافة سائق</button>
         <button onClick={() => { fetchDrivers(); setViewDrivers("edit"); }}>تعديل سائق</button>
       </div>
+
+			{showFilter &&  viewDrivers !== "add" && (
+        <DriverFilter drivers={originalDrivers} onSearch={handleSearch} />
+      )}
 
       {viewDrivers === "add" && (
         <>

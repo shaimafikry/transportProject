@@ -6,31 +6,12 @@ const serviceMail = process.env.SERVICE_MAIL;
 const servicePassword = process.env.SERVICE_PASSWORD;
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
-const nodemailer = require('nodemailer');
 
-// MARK: mail set
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: serviceMail,
-    pass: servicePassword,
-  },
-});
 
-// async..await is not allowed in global scope, must use a wrapper
-async function emailSender(email, link) {
-  // send mail with defined transport object
-  const info = await transporter.sendMail({
-    from: '"To-Do HR 👻" <shaimafikry@gmail.com>', // sender address
-    to: email, // list of receivers
-    subject: "Confirm Registeration ✔", // Subject line
-    text: "click on the link below to confirm your registeration", // plain text body
-    html: link, // html body
-  });
 
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
-}
+async function validatePass(password, hashedPassword) {
+	return await bcrypt.compare(password, hashedPassword);
+};
 
 //MARK: adduser
 const addUser = async (req, res) => {
@@ -175,12 +156,12 @@ const signIn = async (req, res) => {
 	const user = await Users.findOne({ where: { email: email } });
 	//console.log
 	if (!user) {
-		return res.status(400).json({ message: 'Invalid input: User not found' });
+		return res.status(400).json({ message: 'هذا المستخدم غير موجود' });
 	}
 
 	const isPasswordValid = await bcrypt.compare(password, user.password)
 	if (!isPasswordValid) {
-		return res.status(400).json({ message: 'Invalid input: Incorrect password' });
+		return res.status(400).json({ message: 'كلمة السر غير صحيحة' });
 	}
 	// generate JWT token and send it back to the client
 	const payload = {
@@ -190,53 +171,81 @@ const signIn = async (req, res) => {
 	}
 	const token = jwt.sign(payload, secret_key, { algorithm: 'HS256' });
 
-  return res.status(200).json({ token: token , role: user.role, message: 'Login successful', redirectUrl: '/dashboard' });
+  return res.status(200).json({ token: token , role: user.role, id: user.id, message: 'Login successful', redirectUrl: '/dashboard' });
 
 };
 
 
 //MARK: FORGET PSSWORD
-const forgetPassword = async (req, res) => {	
-	const {email} = req.body;
+const forgetPasswordCheck = async (req, res) => {	
+	const {phone} = req.query.phone;
 
-	const user = await Users.findOne({email: email});
+
+	const user = await Users.findOne({phone: phone});
   console.log(user);
 
 	if (!user) {
-		return res.status(200).json({message: 'email doesnt exist'});
+		return res.status(200).json({message: 'المستخدم غير موجود ف قاعدة البيانات'});
 	}
 
-	const verification_token = crypto.randomBytes(32).toString('hex');
-	const link = `http://localhost:5000/auth/renewpassword?token=${verification_token}`;
+	return res.status(200).json(user.id)
 
-	await Users.updateOne({email: email}, {$set :{ verification_token: verification_token}});
-	await emailSender(email, link).catch(console.error)
-	// return res.status(201).json(link);
+};
 
-	return res.status(200).json({message : 'renew password link has been sent to your mail'})
+const forgetPassword = async (req, res) => {	
+	const {id, password} = req.body;
+
+	const user = await Users.findOne({id: id});
+  console.log(user);
+// Hash the new password
+const newHash = await bcrypt.hash(newPass, 10);
+
+// Update password in database
+await Users.update({ password: newHash }, { where: { id } });
+
+return res.status(200).json({ message: 'تم تجديد كلمة السر بنجاح' });
 
 };
 
 
 // MARK: RENEWPASSWORD
- const renewPassword = async (req, res)=> {
-	const { token } = req.query;
-	const {password} = req.body;
+const updatePassword = async (req, res) => {
+  const { id, oldPassword, newPassword } = req.body;
+	console.log(id, oldPassword, newPassword, req.body)
+
   try {
-		const user = await Users.findOne({verification_token: token});
-		if (!user) {
-      return res.status(403).json('faild to verify mail');
+    // Find user by ID
+    const user = await Users.findOne({ where: { id } });
+    if (!user) {
+      return res.status(403).json({ message: 'هذا المستخدم غير موجود' });
     }
 
-		const password_hash = await bcrypt.hash(password, 10);
+    // Check if both old and new passwords are provided
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'كلمة السر مطلوبة' });
+    }
 
-      await Users.updateOne({email: user.email}, { verification_token: null, password : password_hash});
-      return res.status(200).json('password updated successfully, you cn now login');
+    // Validate old password
+    const isValid = await validatePass(oldPassword, user.password);
+    if (!isValid) {
+      return res.status(401).json({ message: 'كلمة السر القديمة غير صحيحة' });
+    }
+
+    // Hash the new password
+    const newHash = await bcrypt.hash(newPassword, 10);
+
+    // Update password in database
+    await Users.update({ password: newHash }, { where: { id } });
+
+    return res.status(200).json({ message: 'تم تجديد كلمة السر بنجاح' });
+
   } catch (error) {
-    console.error('error in updating password', error);
-    return res.status(500).json(`server error ${error}`);
+    console.error('Error updating password:', error);
+    return res.status(500).json({ message: 'حدثت مشكلة أثناء تجديد كلمة السر' });
   }
- };
+};
+
+
 
  const logout = (req, res) => {
 	res.clearCookie("token"); // حذف الكوكيز التي تحتوي على التوكن
@@ -244,4 +253,4 @@ const forgetPassword = async (req, res) => {
   };
   
 
-module.exports = { signIn, addUser,editUser, allUsers, forgetPassword, renewPassword, logout, addTripAndDriver };
+module.exports = { signIn, addUser,editUser, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver };
