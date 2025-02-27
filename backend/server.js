@@ -1,26 +1,30 @@
-
-require('dotenv').config({path: '../.env'})
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const allRoutes = require('./allRoute');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
-
-// app.use(morgan('dev'));
+// Middleware
 app.use(express.json());
-// app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
-//app.use(cors());
-
-app.use(cors({ origin:https://transport-project-azure.vercel.app/}));
 
 
+const allowedOrigins = [
+  "https://transport-project-azure.vercel.app", 
+  "http://localhost:3000"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+// تحميل جميع الـ Routes
 app.use('/', allRoutes);
 
-
-
-
+// تشغيل السيرفر
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Backend available at: http://localhost:${PORT}`);
 });
