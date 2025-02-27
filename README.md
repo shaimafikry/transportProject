@@ -67,6 +67,8 @@ npm start
 
 - **Shaimaa Fikry**
 - **Mahmoud Ragab**
+- **Kareem Badr**
+
 
 ## 📜 License
 
