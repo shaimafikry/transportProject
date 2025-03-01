@@ -36,10 +36,11 @@ const initialTripState = {
     notes: "ملاحظات",
 };
 
-const TripFilterSort = ({ trips }) => {
+const TripFilterSortComp2 = ({ trips }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({ client_name: "", destination: "", leader_name: "", startDate: "", endDate: "" });
+  const [filters, setFilters] = useState({ client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
+
   const [uniqueClients, setUniqueClients] = useState([]);
   const [uniqueDestinations, setUniqueDestinations] = useState([]);
   const [uniqueLeaders, setUniqueLeaders] = useState([]);
@@ -119,47 +120,28 @@ const TripFilterSort = ({ trips }) => {
 
   return (
     <div>
-      <div className="search-filter-bar">
-        <input type="text" placeholder="🔍 Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+      <div className="search-container">
+        <input type="text" placeholder="🔍 البحث..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 
         <select name="client_name" value={filters.client_name} onChange={(e) => setFilters({ ...filters, client_name: e.target.value })}>
-          <option value="">Filter by Client Name</option>
+          <option value="">تصنيف حسب العميل</option>
           {uniqueClients.map(client => <option key={client} value={client}>{client}</option>)}
         </select>
         <select name="destination" value={filters.destination} onChange={(e) => setFilters({ ...filters, destination: e.target.value })}>
-          <option value="">Filter by Destination</option>
+          <option value="">تصنيف حسب الواجهة</option>
           {uniqueDestinations.map(destination => <option key={destination} value={destination}>{destination}</option>)}
         </select>
         <select name="leader_name" value={filters.leader_name} onChange={(e) => setFilters({ ...filters, leader_name: e.target.value })}>
-          <option value="">Filter by Leader Name</option>
+          <option value="">تصنيف حسب المندوب</option>
           {uniqueLeaders.map(leader => <option key={leader} value={leader}>{leader}</option>)}
         </select>
         <input type="date" name="startDate" value={filters.startDate} onChange={(e) => setFilters({ ...filters, startDate: e.target.value })} />
         <input type="date" name="endDate" value={filters.endDate} onChange={(e) => setFilters({ ...filters, endDate: e.target.value })} />
-        <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>Sort by Date ({sortOrder})</button>
-        <button className="export-btn" onClick={exportToExcel}>Export to Excel</button>
+        <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>ترتيب حسب التاريخ ({sortOrder})</button>
+        <button className="export-btn" onClick={exportToExcel}>حفظ الي ملف اكسيل</button>
       </div>
-
-      <table  className="trip-table">
-        <thead>
-          <tr>
-            {trips.length > 0 && Object.keys(initialTripState).map((key) => (
-              <th key={key}>{key.replace(/_/g, " ").toUpperCase()}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTrips.map((trip) => (
-            <tr key={trip.id}>
-              {Object.keys(initialTripState).map((key) => (
-                <td key={key}>{trip[key]}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 };
 
-export default TripFilterSort;
+export default TripFilterSortComp2;

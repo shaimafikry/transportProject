@@ -43,8 +43,8 @@ const Agent = () => {
   return (
     <>
       <div className="driver-options">
-        <button onClick={() => setViewAgents("add")}>إضافة منظمة</button>
-        <button onClick={() => setViewAgents("show")}>عرض المنظمات</button>
+        <button onClick={() => setViewAgents("add")}>إضافة عميل</button>
+        <button onClick={() => setViewAgents("show")}>عرض العملاء</button>
       </div>
 
       {viewAgents === "add" && (

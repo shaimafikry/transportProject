@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import * as XLSX from "xlsx";
+import './search.css'
 
 const initialTripState = {
   bon_number: "رقم البون",
@@ -92,7 +93,7 @@ const TripFilterSortComp1 = ({ trips, onSearch }) => {
 
   return (
     <div>
-      <div className="search-filter-bar">
+      <div className="search-container">
         <input
           type="text"
           placeholder="🔍 البحث..."

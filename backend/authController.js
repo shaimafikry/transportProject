@@ -2,9 +2,6 @@ require('dotenv').config({path: '../.env'});
 const { Users, Drivers, TransportTrips } = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
-const serviceMail = process.env.SERVICE_MAIL;
-const servicePassword = process.env.SERVICE_PASSWORD;
-const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 
 
@@ -67,8 +64,16 @@ const allUsers = async (req, res) => {
     const users = await Users.findAll();
 
     const sanitizedUsers = users.map(user => {
-      return { ...user, password: "" };
+      return {
+        id: user.id,
+        username: user.username,
+        phone: user.phone,
+        password: "", // Explicitly set password to an empty string
+        email: user.email,
+        role: user.role,
+      };
     });
+		console.log(sanitizedUsers)
 
     return res.status(200).json({ users: sanitizedUsers });
 
@@ -153,8 +158,11 @@ const addTripAndDriver = async (req, res) => {
 const signIn = async (req, res) => {
 	console.log(req.body, "entry");
   const { email, password } = req.body;
+
+	try{
 	const user = await Users.findOne({ where: { email: email } });
 	//console.log
+
 	if (!user) {
 		return res.status(400).json({ message: 'هذا المستخدم غير موجود' });
 	}
@@ -172,39 +180,49 @@ const signIn = async (req, res) => {
 	const token = jwt.sign(payload, secret_key, { algorithm: 'HS256' });
 
   return res.status(200).json({ token: token , role: user.role, id: user.id, message: 'Login successful', redirectUrl: '/dashboard' });
+}catch(error){
+	console.error('Error updating password:', error);
+	return res.status(500).json({ message: 'خطأ في الاتصال' });
+}
+
 
 };
 
 
 //MARK: FORGET PSSWORD
-const forgetPasswordCheck = async (req, res) => {	
-	const {phone} = req.query.phone;
+const forgetPasswordCheck = async (req, res) => {
+  const phone = req.query.phone;
+  console.log("phone", phone);
 
-
-	const user = await Users.findOne({phone: phone});
+  const user = await Users.findOne({ where: { phone } });
   console.log(user);
 
-	if (!user) {
-		return res.status(200).json({message: 'المستخدم غير موجود ف قاعدة البيانات'});
-	}
+  if (!user) {
+    return res.status(404).json({ message: "المستخدم غير موجود في قاعدة البيانات" });
+  }
 
-	return res.status(200).json(user.id)
-
+  return res.status(200).json(user.id);
 };
 
-const forgetPassword = async (req, res) => {	
-	const {id, password} = req.body;
 
-	const user = await Users.findOne({id: id});
-  console.log(user);
-// Hash the new password
-const newHash = await bcrypt.hash(newPass, 10);
 
-// Update password in database
-await Users.update({ password: newHash }, { where: { id } });
+const forgetPassword = async (req, res) => {
+  const { id, newPassword } = req.body;
 
-return res.status(200).json({ message: 'تم تجديد كلمة السر بنجاح' });
+  const user = await Users.findOne({ where: { id } });
+  // console.log(user);
 
+  if (!user) {
+    return res.status(404).json({ message: "المستخدم غير موجود" });
+  }
+
+  // Hash the new password
+  const newHash = await bcrypt.hash(newPassword, 10);
+
+  // Update password in the database
+  await Users.update({ password: newHash }, { where: { id } });
+
+  return res.status(200).json({ message: "تم تجديد كلمة السر بنجاح" });
 };
 
 

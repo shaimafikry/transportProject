@@ -11,16 +11,16 @@ const ForgetPass = () => {
 
   const handleCheck = async () => {
     try {
-      const checkUser = await fetchData(`/forget-password?phone=${phone}`);
+      const checkUser = await fetchData(`forget-password?phone=${phone}`);
       if (checkUser) {
-				setUserId(checkUser);
+        setUserId(checkUser);
         setChecked(true);
       } else {
         setStatus("رقم الموبايل غير مسجل");
       }
     } catch (error) {
       console.error("Error checking phone number:", error);
-      setStatus("حدث خطأ أثناء التحقق من الرقم");
+      setStatus(error.message);
     }
   };
 
@@ -34,7 +34,7 @@ const ForgetPass = () => {
 
     try {
       const formData = { id, newPassword };
-      await putData("/forget-password", formData);
+      await putData("forget-password", formData);
       setStatus("تم تغيير كلمة السر بنجاح");
       setPhone("");
       setNewPassword("");
@@ -46,44 +46,123 @@ const ForgetPass = () => {
   };
 
   return (
-    <div>
-      {!checked ? (
-        <div>
-          <h2>يرجى إدخال رقم الموبايل</h2>
-          <input
-            type="text"
-            placeholder="رقم الموبايل"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="mb-4"
-          />
-          <button type="button" onClick={handleCheck}>
-            تحقق من رقم الموبايل
-          </button>
-          {status && <p className="text-red-600 mt-2">{status}</p>}
-        </div>
-      ) : (
-        <div className="home-container">
-          <h2 className="text-xl font-semibold">تغيير كلمة السر</h2>
-          <form onSubmit={handleSubmit} className="signin-section">
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh", // Full viewport height
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "400px", // Limit width for better readability
+          padding: "20px",
+          borderRadius: "10px", // Rounded corners for the container
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Subtle shadow
+          textAlign: "right", // Align text to the right
+        }}
+      >
+        {!checked ? (
+          <div>
+            <h2 style={{ marginBottom: "20px" }}>يرجى إدخال رقم الموبايل</h2>
             <input
-              type="password"
-              placeholder="كلمة السر الجديدة"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="mb-4"
+              type="text"
+              placeholder="رقم الموبايل"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                fontSize: "16px",
+                borderRadius: "5px", // Rounded corners for input
+                border: "1px solid #ccc", // Light border
+                textAlign: "right", // Align text to the right
+                direction: "rtl", // Right-to-left for placeholder
+                marginBottom: "20px",
+              }}
             />
-            <div className="flex flex-col gap-2 mt-3">
-              <button type="submit">حفظ</button>
+            <div>
+              <button
+                type="button" // Changed to type="button"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "5px", // Rounded corners for button
+                  backgroundColor: "#907e7e", // Button color
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s", // Smooth transition for hover
+                }}
+                onClick={handleCheck}
+                onMouseOver={(e) => (e.target.style.backgroundColor = "#71483c")} // Hover effect
+                onMouseOut={(e) => (e.target.style.backgroundColor = "#907e7e")} // Reset on mouse out
+              >
+                تحقق من رقم الموبايل
+              </button>
             </div>
             {status && (
-              <p className={status === "تم تغيير كلمة السر بنجاح" ? "text-green-600" : "text-red-600"}>
-                {status}
-              </p>
+              <p style={{ color: "#e53e3e", marginTop: "10px" }}>{status}</p>
             )}
-          </form>
-        </div>
-      )}
+          </div>
+        ) : (
+          <div>
+            <h2 style={{ marginBottom: "20px" }}>تغيير كلمة السر</h2>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="password"
+                placeholder="كلمة السر الجديدة"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "5px", // Rounded corners for input
+                  border: "1px solid #ccc", // Light border
+                  textAlign: "right", // Align text to the right
+                  direction: "rtl", // Right-to-left for placeholder
+                  marginBottom: "20px",
+                }}
+              />
+              <div>
+                <button
+                  type="submit"
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    fontSize: "16px",
+                    borderRadius: "5px", // Rounded corners for button
+                    backgroundColor: "#907e7e", // Button color
+                    color: "white",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "background-color 0.3s", // Smooth transition for hover
+                  }}
+                  onMouseOver={(e) => (e.target.style.backgroundColor = "#71483c")} // Hover effect
+                  onMouseOut={(e) => (e.target.style.backgroundColor = "#907e7e")} // Reset on mouse out
+                >
+                  حفظ
+                </button>
+              </div>
+              {status && (
+                <p
+                  style={{
+                    color:
+                      status === "تم تغيير كلمة السر بنجاح" ? "#38a169" : "#e53e3e", // Green for success, red for error
+                    marginTop: "10px",
+                  }}
+                >
+                  {status}
+                </p>
+              )}
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

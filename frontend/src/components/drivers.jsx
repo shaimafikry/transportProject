@@ -217,7 +217,8 @@ const Drivers = ({ showFilter, onSearchClick }) => {
       {viewDrivers === "edit" && (
         <>
           <h2>تعديل السائقين</h2>
-          <table className="driver-table">
+          <div className="table-container">
+						<table>
             <thead>
               <tr>
           			{editFields.map(({ placeholder }) => (
@@ -261,6 +262,7 @@ const Drivers = ({ showFilter, onSearchClick }) => {
               ))}
             </tbody>
           </table>
+					</div>
         </>
       )}
     </>

@@ -108,7 +108,7 @@ const DriverFilter = ({ drivers, onSearch }) => {
 
   return (
     <div>
-      <div className="search-filter-bar">
+      <div className="search-container">
         <input
           type="text"
           placeholder="🔍 البحث..."

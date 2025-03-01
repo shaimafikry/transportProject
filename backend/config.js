@@ -32,23 +32,6 @@ const Drivers = sequelize.define("Drivers", {
 
 
 
-const Cars = sequelize.define("Cars", {
-  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  car_type: { type: DataTypes.STRING },
-  car_number: { type: DataTypes.STRING, unique: true, allowNull: false },
-  car_letters: { type: DataTypes.STRING, unique: true, allowNull: false },
-});
-
-
-
-const Trailers = sequelize.define("Trailers", {
-  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  car_type: { type: DataTypes.STRING },
-  car_number: { type: DataTypes.STRING, unique: true, allowNull: false },
-  car_letters: { type: DataTypes.STRING, unique: true, allowNull: false },
-});
-
-
 
 const Agents = sequelize.define("Agents", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -144,4 +127,4 @@ sequelize.sync({ alter: true })
 
 syncDB();
 
-module.exports = { sequelize, Drivers, Cars, Trailers, Agents, TransportTrips, ConstructTrips, Users };
+module.exports = { sequelize, Drivers, Agents, TransportTrips, ConstructTrips, Users };

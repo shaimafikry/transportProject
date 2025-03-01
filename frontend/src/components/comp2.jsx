@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
-import TripFilterSort from "./TripFilterSort";
-
+import TripFilterSortComp2 from "./Comp2Filter";
+import ImportTrips from "./import"
 
 const Comp2 = ({ showFilter, onSearchClick }) => {
+	const [showImportModal, setShowImportModal] = useState(false);
   const [viewComp2, setViewComp2] = useState("");
   const [tripsComp2, setTripsComp2] = useState([]);
   const [agents, setAgents] = useState([]);
@@ -78,7 +79,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       const formattedTrips = data.comp2Trips.map((trip) => ({
         ...trip, }));
       setTripsComp2(Array.isArray(formattedTrips) ? formattedTrips : []);
-			setTripsComp2(formattedTrips);
+			// setTripsComp2(formattedTrips);
       setOriginalTrips(formattedTrips); 
       setIsSearching(false); // Reset search state
     } catch (error) {
@@ -102,6 +103,15 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
     fetchTrips();
 
   }, []);
+
+	
+  // Handle saving imported data
+  const handleSaveImportedData = (data) => {
+    console.log("Data to save:", data);
+    // Call your backend API here to save the data
+    // Example: axios.post("/api/trips/add", data);
+    setShowImportModal(false); // Close the modal after saving
+  };
 
   // Calculate nights count
   const calculateNightsCount = () => {
@@ -153,7 +163,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
     newTripComp2.total_received_cash,
   ]);
 
-	// Handle search results from TripFilterSortComp1
+	// Handle search results from TripFilterSortComp2Comp1
   const handleSearch = (searchResults) => {
     setTripsComp2(searchResults); // Update the table with filtered data
     setIsSearching(true); // Set searching to active
@@ -186,6 +196,16 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 					trip.id === tripId ? { ...trip, [field]: value } : trip
 				)
 			);
+
+			
+		// Update originalTrips
+  setOriginalTrips((prevOriginalTrips) =>
+    prevOriginalTrips.map((trip) =>
+      trip.id === tripId ? { ...trip, [field]: value } : trip
+    )
+  );
+
+
 		};
 
   // Add a new trip
@@ -211,6 +231,16 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 					: trip
 			)
 		);
+
+
+			// Update originalTrips
+			setOriginalTrips((prevOriginalTrips) =>
+				prevOriginalTrips.map((trip) =>
+					trip.id === id
+						? { ...trip, isEditing: !trip.isEditing, originalData: trip.isEditing ? trip.originalData : { ...trip } }
+						: trip
+				)
+			);
 	};
 
 
@@ -221,6 +251,17 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       const updatedTrip = await putData('dashboard?action=comp2Trips-edit', tripToUpdate );
 			setTripsComp2((prevTrips) =>
         prevTrips.map((trip) => (trip.id === id ? { ...updatedTrip, isEditing: false }  : trip)))
+
+
+			
+			 // Update originalTrips
+			 setOriginalTrips((prevOriginalTrips) =>
+				prevOriginalTrips.map((trip) =>
+					trip.id === id
+						? { ...updatedTrip, isEditing: false }
+						: trip
+				)
+			);
 		}catch (error) {
       console.error("Error updating trip:", error);
     }
@@ -232,6 +273,13 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       const tripToDel = tripsComp2.find((trip) => trip.id === id);
       await deleteData('dashboard?action=comp2Trips-del', tripToDel);
       setTripsComp2(tripsComp2.filter((trip) => trip.id !== id));
+
+			 // Update originalTrips
+			 setOriginalTrips((prevOriginalTrips) =>
+				prevOriginalTrips.filter((trip) => trip.id !== id)
+			);
+
+
     } catch (error) {
       console.error("Error deleting trip:", error);
     }
@@ -241,7 +289,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 			if (!showFilter) {
 				resetSearch(); // Restore full data when search is toggled off
 			} else {
-				setViewComp2(""); // Show edit page when search is toggled on
+				setViewComp2("edit"); 
 			}
 		}, [showFilter]);
 
@@ -251,21 +299,22 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
   
       <div className="trip-options">
         <button onClick={() => { fetchAgents(); setViewComp2("add"); }}>إضافة رحلة</button>
+        <button onClick={() => setShowImportModal(true)}>اضافة من ملف اكسيل</button>
         <button onClick={() => { fetchTrips(); setViewComp2("edit"); }}>تعديل رحلة</button>
         <button onClick={() => { fetchTrips(); setViewComp2("all"); }}>الرحلات</button>
       </div>
       
       {/*//MARK: call FilterSort*/}
-			{showFilter &&  viewComp2 !== "add" && viewComp2 !== "edit" && (
-        <TripFilterSort trips={originalTrips} onSearch={handleSearch} />
+			{showFilter &&  viewComp2 !== "add" && (
+        <TripFilterSortComp2 trips={originalTrips} onSearch={handleSearch} />
       )}
   
       {viewComp2 === "add" && (
         <>
           <h2>إضافة رحلات لشركة النقل</h2>
-          <div className="dashboard-form-group">
+          <div className="comp2-dashboard-form-group">
             {Object.entries(initialTripState).map(([key, label]) => (
-              <div key={key} className="form-field">
+              <div key={key} className="comp2-form-field">
                 <label htmlFor={key}>{label}</label>
                 {key === "car_type" ? (
                   <select
@@ -318,7 +367,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       {viewComp2 === "edit" && (
         <>
           <h2>تعديل رحلات شركة النقل </h2>
-          <table className="trip-table">
+					<div className="table-container">
+          <table >
             <thead>
               <tr>
                 <th>اسم السائق</th>
@@ -426,13 +476,14 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
               ))}
             </tbody>
           </table>
+					</div>
         </>
       )}
 			
       {!showFilter && viewComp2 === "all" && (
         <>
           <h2>سجل رحلات شركة النقل </h2>
-          <table className="trip-table">
+          <table className="table-large">
             <thead>
               <tr>
 							{Object.entries(initialTripState).map(([key, label]) => (
@@ -451,6 +502,14 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
             </tbody>
           </table>
         </>
+      )}
+
+			{/* Import Excel Modal */}
+      {showImportModal && (
+        <ImportTrips
+          onClose={() => setShowImportModal(false)}
+          onSave={handleSaveImportedData}
+        />
       )}
     </>
   );

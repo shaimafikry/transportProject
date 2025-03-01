@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { signIn, forgetPassword, logout, forgetPasswordCheck } = require('./authController');
 const { dashboard } = require('./controllers');
+const authToken = require('./authToken');
 
-
+// router.use(authToken)
 
 router.post('/', signIn);
 router.post('/logout', logout);

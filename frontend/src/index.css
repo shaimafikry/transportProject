@@ -1,40 +1,54 @@
-/* Ensure the entire page fills the screen */
 html, body {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
+  font-size: 16px;
   overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+  overflow-y: auto; /* Prevents white space from causing extra scroll */
   font-family: Arial, sans-serif;
   position: relative; /* Required for pseudo-elements */
 }
 
-/* Pseudo-element for the background image */
+/* Background Image */
 body::before {
   content: "";
-  position: absolute;
+  position: fixed; /* Ensures it covers the entire screen */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('../public/background.jpg'); /* Correct path to your image */
-  background-size: cover; /* Cover the entire page */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent repeating */
-  z-index: -1; /* Place the pseudo-element behind the content */
+  background-image: url('../public/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
 }
 
 /* Dark shadow overlay */
 body::after {
   content: "";
-  position: absolute;
+  position: fixed; /* Stays full screen */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    rgba(0, 0, 0, 0.5), /* Dark shadow with 50% opacity */
+    rgba(0, 0, 0, 0.5), 
     rgba(0, 0, 0, 0.5)
   );
-  z-index: -1; /* Place the overlay behind the content */
+  z-index: -1;
+}
+
+/* Responsive Font Sizes */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
 }

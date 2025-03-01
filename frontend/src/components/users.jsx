@@ -117,7 +117,8 @@ const Users = () => {
       {usersView === "edit" && (
         <>
           <h2>تعديل المستخدمين</h2>
-          <table className="user-table">
+          <div className="table-container">
+						<table>
             <thead>
               <tr>
                 {Object.entries(initialUserState).map(([key, label]) => (
@@ -175,6 +176,7 @@ const Users = () => {
               ))}
             </tbody>
           </table>
+					</div>
         </>
       )}
     </>

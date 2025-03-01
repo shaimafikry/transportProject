@@ -5,8 +5,8 @@ import TripFilterSortComp1 from "./Comp1Filter";
 const Comp1 = ({ showFilter, onSearchClick }) => {
   const [viewComp1, setViewComp1] = useState("");
   const [tripsComp1, setTripsComp1] = useState([]);
-  const [originalTrips, setOriginalTrips] = useState([]); // To store the original data
-  const [isSearching, setIsSearching] = useState(false); // To track if searching is active
+  const [originalTrips, setOriginalTrips] = useState([]); 
+  const [isSearching, setIsSearching] = useState(false); 
 
   const [newTripComp1, setNewTripComp1] = useState({
     bon_number: "",
@@ -38,7 +38,8 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
       }));
 
       setTripsComp1(formattedTrips);
-      setOriginalTrips(formattedTrips); // Save the original data
+      setOriginalTrips(formattedTrips); 
+
       setIsSearching(false); // Reset search state
     } catch (error) {
       console.error("Error fetching trips:", error);
@@ -49,7 +50,7 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
   useEffect(() => {
     setViewComp1("");
     fetchTrips();
-  }, []);
+  }, [onSearchClick]);
 
   // Handle search results from TripFilterSortComp1
   const handleSearch = (searchResults) => {
@@ -215,7 +216,8 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
       {viewComp1 === "edit" && (
         <>
           <h2>رحلات شركة المحاجر</h2>
-          <table className="trip-table">
+					<div  className="table-container">
+          <table>
             <thead>
               <tr>
                 {tripFields.map(({ placeholder }) => (
@@ -258,6 +260,7 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
               ))}
             </tbody>
           </table>
+					</div>
         </>
       )}
     </>

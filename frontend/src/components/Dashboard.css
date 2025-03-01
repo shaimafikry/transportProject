@@ -1,99 +1,213 @@
 /* Dashboard Container */
 h2 {
-	color: white;
+  color: white;
 }
+
 .container-fluid {
   padding: 0;
   margin: 0;
-  width: 100vw; /* Full viewport width */
-  height: 100vh;
+  width: 100%; /* Full viewport width */
+  min-height: 100vh;
   display: flex;
   flex-direction: column; /* Stack sidebar and content vertically */
+  align-items: center; /* Ensures content stays centered */
+  justify-content: flex-start;
   direction: rtl;
   overflow-x: hidden; /* Prevent horizontal scrollbars */
 }
 
+/* Profile Section */
+.profile-section {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 8px;
+}
 
-
-/* Sidebar (Top Section) */
+/* Sidebar */
 .sidebar-right {
   width: 100%; /* Full width */
-  height: auto; /* Adjust height as needed */
+  flex-wrap: wrap; /* Allows buttons to wrap if needed */
+  height: auto;
   background-color: #302f2f;
   color: white;
   display: flex;
-  flex-direction: row; /* Align buttons horizontally */
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   padding: 10px;
   flex-shrink: 0;
 }
 
-/* Sidebar buttons */
+/* Sidebar Logo */
+.sidebar-right img {
+  width: 100px; /* Adjust the width as needed */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 8px; /* Optional: Add rounded corners */
+}
+
+/* Sidebar Buttons */
 .sidebar-right button {
-  width: auto; /* Adjust width to fit content */
+  width: auto;
+  flex: 1;
+  min-width: 100px;
   height: 50px;
-  margin: 0 10px; /* Adjust margin for horizontal spacing */
+  margin: 0 10px;
   background-color: transparent;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px; /* Adjust font size */
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px; /* Add padding for better spacing */
-	gap: 8px; /* Add space between icon and text */
-
+  padding: 0 10px;
+  gap: 8px;
 }
 
-/* Button hover effect */
 .sidebar-right button:hover {
   background-color: #71483c;
 }
 
-
-
-/* Content Section (Below Sidebar) */
+/* Content Section */
 .content {
-  flex: 1; /* Take up remaining space */
-	padding: 20px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   overflow-y: auto; /* Allow vertical scrolling */
-  direction: rtl; /* Restores normal left-to-right content inside */
+  width: 100%;
+  max-width: 1200px;
+  padding: 10px;
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .content {
+    padding: 5px;
+    flex-direction: column;
+  }
 }
 
 /* Form Group */
-.dashboard-form-group {
+.dashboard-form-group{
+  width: 90%;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 80%;
-  max-width: 500px;
   padding: 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
+	background: rgba(249, 249, 249, 0.8); /* 80% opacity */
+	border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px; /* Adds space between each entry */
+  margin-bottom: 20px;
 }
 
-/* Input Fields */
-.content input,
-.content select {
+.comp2-dashboard-form-group {
+  width: 90%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  padding: 20px;
+	background: rgba(249, 249, 249, 0.8); /* 80% opacity */
+	border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.comp2-form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.comp2-form-field label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.comp2-form-field input,
+.comp2-form-field select {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 14px;
 }
 
+@media (max-width: 1024px) {
+  .comp2-dashboard-form-group {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .comp2-dashboard-form-group {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+
+/* .comp2-dashboard-form-group { */
+  /* flex-direction: row; */
+/* } */
+
+.dashboard-form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.dashboard-form-group input {
+  width: 100%;
+  min-width: 200px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* Input Fields */
+/* .content input, */
+/* .content select { */
+  /* width: 100%; */
+  /* padding: 10px; */
+  /* min-width: 200px; */
+  /* border: 1px solid #ccc; */
+  /* border-radius: 5px; */
+  /* font-size: 14px; */
+/* } */
+
+/* Make input fields fully responsive */
+.content input,
+.content select {
+  width: 100%;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .content input,
+  .content select {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
 /* Buttons */
 .content button {
-  background-color: #907e7e;
+  background-color: #302f2f;
   color: white;
   padding: 10px;
   border: none;
@@ -108,23 +222,118 @@ h2 {
   transform: scale(1.05);
 }
 
-/* Save Button */
-.save-btn {
-  background-color: #302f2f !important;
+
+
+/* Ensure tables are fully scrollable on small screens */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+	display: block;
+  justify-self: center;
+	background-color: transparent;
+	white-space: nowrap; /* Prevent wrapping of table content */
+
 }
 
-.save-btn:hover {
-  background-color: #71483c !important;
+.table-large {
+  width: 100%;
+  overflow-x: auto;
+	display: block;
+  justify-self: center;
+	background-color: transparent;
+	white-space: nowrap; /* Prevent wrapping of table content */
+
 }
 
-/* Trip Option Buttons */
-.trip-options {
+table {
+  width: 100%;
+  min-width: 600px; 
+  border-collapse: collapse;
+  background-color: #ffffff;
+	overflow-x: auto;
+	
+
+}
+
+/* Prevent table from being cut off on small screens */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  table {
+    min-width: 100%; /* Ensure it fits inside the container */
+  }
+}
+
+
+
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+	white-space: nowrap; /* Prevent wrapping of table content */
+
+}
+
+th {
+  background-color: #71483c;
+  color: white;
+}
+
+tr {
+  background-color: #fcfcfc;
+}
+
+/* Scrollable Tables Only When Needed */
+@media (max-width: 1024px) {
+  .table-container {
+    overflow-x: auto;
+  }
+}
+
+
+
+
+
+table button {
+  background-color: #71483c;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  table button {
+    font-size: 12px;
+    padding: 4px 8px;
+
+  }
+}
+
+
+table button:hover {
+  opacity: 0.8;
+}
+
+/* Trip, User & Driver Option Buttons */
+.trip-options,
+.user-options,
+.driver-options {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
 }
 
-.trip-options button {
+.trip-options button,
+.user-options button,
+.driver-options button {
   background-color: #302f2f;
   color: white;
   padding: 10px;
@@ -133,236 +342,8 @@ h2 {
   cursor: pointer;
 }
 
-.trip-options button:hover {
-  background-color: #71483c;
-}
-
-/* Trip Table */
-.trip-table {
-  width: 100%;
-  border-collapse: collapse;
-  align-self: flex-start;
-	background-color: #ffffff;
-}
-
-.trip-table th,
-.trip-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
-}
-
-.trip-table th {
-  background-color: #71483c;
-  color: white;
-}
-
-.trip-table button {
-  background-color: #71483c;
-  margin: 2px;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.trip-table button:hover {
-  opacity: 0.8;
-
-}
-
-/* Search Section */
-.search-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  align-items: center;
-}
-
-.search-container input {
-  width: 80%;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.search-container button {
-  background-color: #71483c;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.search-container button:hover {
-  background-color: #71483c;
-}
-
-/* User Table */
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  align-self: flex-start;
-	background-color: #ffffff;
-
-}
-
-.user-table th,
-.user-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
-}
-
-.user-table th {
-  background-color: #71483c;
-  color: white;
-}
-
-.user-table button {
-  margin: 2px;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.user-table button:hover {
-  opacity: 0.8;
-}
-
-/* User Option Buttons */
-.user-options {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.user-options button {
-  background-color: #71483c;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.user-options button:hover {
-  background-color: #71483c;
-}
-
-/* Driver Table */
-.driver-table {
-  width: 100%;
-  border-collapse: collapse;
-  align-self: flex-start;
-	background-color: #ffffff;
-
-}
-
-.driver-table th,
-.driver-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
-}
-
-.driver-table th {
-  background-color: #71483c;
-  color: white;
-}
-
-.driver-table button {
-  margin: 2px;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.driver-table button:hover {
-  opacity: 0.8;
-}
-
-/* Driver Option Buttons */
-.driver-options {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.driver-options button {
-  background-color: #71483c;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
+.trip-options button:hover,
+.user-options button:hover,
 .driver-options button:hover {
   background-color: #71483c;
-}
-
-.dashboard-form-group .form-field {
-  margin-bottom: 15px;
-}
-
-.dashboard-form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.dashboard-form-group input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-
-/* **************************** */
-/* Search & Filter Bar (New Section Below Sidebar) */
-.search-filter-bar {
-  width: 100%;
-  background-color: #3a3939;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-/* Search Input */
-.search-filter-bar input {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  width: 200px;
-}
-
-/* Filter & Sort Dropdown */
-.search-filter-bar select {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-
-/* Export Button */
-.export-btn {
-  background-color: #28a745;
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.export-btn:hover {
-  background-color: #218838;
 }

@@ -7,14 +7,14 @@ import Agent from "./agent.jsx"
 import Profile from "./profile.jsx"
 
 
-const Content = ({ selected, showFilter }) => {
+const Content = ({ selected, showFilter, onSearchClick }) => {
 
 
   return (
     <div className="content">
 
       {/* Add Trip Section - Main Buttons */}
-			{selected === "add-comp1" && <Comp1 showFilter={showFilter} />}
+			{selected === "add-comp1" && <Comp1 showFilter={showFilter} onSearchClick={onSearchClick} />}
 
       {selected === "add-comp2" && <Comp2 showFilter={showFilter} />}
 

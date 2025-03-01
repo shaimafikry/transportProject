@@ -27,6 +27,8 @@ const SidebarRight = ({ role, onSelect, onSearch  }) => {
     <div 
       className={"sidebar-right"} >
         <>
+				<img src="/logo.jpg" alt="Logo"/>
+
           <button onClick={onSearch} title="البحث">
             <FaSearch /> البحث
           </button>

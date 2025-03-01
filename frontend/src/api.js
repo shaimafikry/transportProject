@@ -21,6 +21,7 @@ const apiRequest = async (endpoint, method = 'GET', data = null) => {
     if (!response.ok) {
       const errorData = await response.json();
 			console.log(errorData);
+			console.log(errorData.message);
       throw new Error(errorData.message || 'An unexpected error occurred.');
     }
     return await response.json();

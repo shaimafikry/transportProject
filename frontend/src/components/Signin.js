@@ -30,7 +30,7 @@ function Signin() {
 			sessionStorage.setItem('userId', data.id);
 
 
-			setSuccessMessage('Login successful!');
+			setSuccessMessage('تم تسجيل الدخول بنجاح');
 			console.log("Login successful:", data);
 			navigate(data.redirectUrl);
 
