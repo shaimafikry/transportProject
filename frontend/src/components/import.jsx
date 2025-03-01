@@ -80,7 +80,7 @@ const ImportTrips = () => {
       }
       alert("تم حفظ البيانات");
       setShowModal(false); // Close the modal
-      setImportedData([]); /git / Clear the imported data
+      setImportedData([]); 
     } catch (error) {
       console.error("Error saving data:", error);
       alert("Failed to save data. Please try again.");
