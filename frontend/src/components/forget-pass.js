@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { putData, fetchData } from "../api.js";
+import { Link, useNavigate } from 'react-router-dom';
 
 const ForgetPass = () => {
   const [phone, setPhone] = useState("");
@@ -162,6 +163,11 @@ const ForgetPass = () => {
             </form>
           </div>
         )}
+			  <p className="mt-3" style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    color: "white",
+                  }}>العودة الي صفحة تسجيل الدخول <Link to="/">اضغط هنا</Link></p>
       </div>
     </div>
   );

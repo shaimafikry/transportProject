@@ -84,6 +84,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       setIsSearching(false); // Reset search state
     } catch (error) {
       console.error("Error fetching trips:", error);
+      setTripsComp2([]);
+
     }
   };
 
@@ -102,7 +104,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
     fetchAgents();
     fetchTrips();
 
-  }, []);
+  }, [onSearchClick]);
 
 	
   // Handle saving imported data
@@ -115,7 +117,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
   // Calculate nights count
   const calculateNightsCount = () => {
-    const arrivalDate = new Date(newTripComp2.arrival_date);
+		// subtract company loading date from aging date
+    const arrivalDate = new Date(newTripComp2.aging_date);
     const loadingDate = new Date(newTripComp2.company_loading_date);
 		const maxNights = parseFloat(newTripComp2.nights_max) || 0;
 
@@ -226,11 +229,12 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 			prevTrips.map((trip) =>
 				trip.id === id
 					? trip.isEditing
-						? { ...trip.originalData, isEditing: false } // Reset to original data if cancelling
-						: { ...trip, originalData: { ...trip }, isEditing: true } // Store original before editing
+						? { ...trip.originalData, isEditing: false } 
+						: { ...trip, originalData: { ...trip }, isEditing: true } 
 					: trip
 			)
 		);
+		//check here
 
 
 			// Update originalTrips
@@ -287,7 +291,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
 		useEffect(() => {
 			if (!showFilter) {
-				resetSearch(); // Restore full data when search is toggled off
+				resetSearch();
 			} else {
 				setViewComp2("edit"); 
 			}
@@ -378,6 +382,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                 <th>مكان التحميل</th>
                 <th>تاريخ التحميل للشركة</th>
                 <th>الجهة</th>
+                <th>تاريخ التعتيق</th>
                 <th>اسم العميل</th>
                 <th>عدد البياتات</th>
                 <th>إجمالي النقلة</th>
@@ -421,6 +426,10 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                         <input type="text" defaultValue={trip.destination} 
 												onChange={(e) => handleEditTripChange(trip.id, "destination", e.target.value)}/>
                       </td>
+											<td>
+                        <input type="date" defaultValue={trip.aging_date} 
+												onChange={(e) => handleEditTripChange(trip.id, "aging_date", e.target.value)}/>
+                      </td>
                       <td>
                         <input type="text" defaultValue={trip.client_name}
 												onChange={(e) => handleEditTripChange(trip.id, "client_name", e.target.value)} />
@@ -460,6 +469,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                       <td>{trip.loading_place}</td>
                       <td>{trip.company_loading_date}</td>
                       <td>{trip.destination}</td>
+                      <td>{trip.aging_date}</td>
                       <td>{trip.client_name}</td>
                       <td>{trip.nights_count}</td>
                       <td>{trip.total_transport}</td>

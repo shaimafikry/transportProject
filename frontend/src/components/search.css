@@ -1,36 +1,127 @@
-/* Search Section */
+/* Search Container */
 .search-container {
   display: flex;
-  flex-direction: row;
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
   gap: 10px;
   width: 100%;
   align-items: center;
-	color: white;
-
+	background: rgba(249, 249, 249, 0.8); /* 80% opacity */
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.search-container input {
-  width: 80%;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+/* Search Input */
+.search-container input[type="text"] {
+  flex: 1 1 100%; /* Full width on small screens */
+  padding: 10px;
+  border: 2px solid #ddd; /* Light border */
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
 }
 
+.search-container input[type="text"]:focus {
+  border-color: #71483c; /* Highlight on focus */
+  outline: none; /* Remove default outline */
+}
+
+/* Dropdown Filters */
+.search-container select {
+  flex: 1 1 45%; /* Adjust width for responsiveness */
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.search-container select:focus {
+  border-color: #71483c;
+  outline: none;
+}
+
+/* Date Inputs */
+.search-container input[type="date"] {
+  flex: 1 1 45%; /* Adjust width for responsiveness */
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: white;
+  transition: border-color 0.3s ease;
+}
+
+.search-container input[type="date"]:focus {
+  border-color: #71483c;
+  outline: none;
+}
+
+/* Buttons */
 .search-container button {
+  flex: 1 1 100%; /* Full width on small screens */
+  padding: 10px;
   background-color: #71483c;
   color: white;
-  padding: 8px;
-	justify-content: flex-start;
   border: none;
   border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
-	white-space: nowrap; /* Prevent text from wrapping */
-  display: flex;
-  align-items: center; /* Center text vertically */
-  justify-content: center; /* Center text horizontally */
-  width: auto; /* Allow the button to expand based on content */
+  transition: background-color 0.3s ease;
+  max-width: 200px; /* Limit button width on larger screens */
 }
 
 .search-container button:hover {
-  background-color: #71483c;
+  background-color: #5a382e; /* Darker shade on hover */
+}
+
+/* Labels */
+.search-container label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
+  text-align: right; /* Align text to the right */
+  width: 100%; /* Ensure label takes full width */
+}
+
+/* Date Filter Container */
+.search-container .date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.search-container .date-filter label {
+  text-align: right; /* Align labels to the right */
+}
+
+/* Responsive Adjustments */
+@media (min-width: 768px) {
+  .search-container input[type="text"] {
+    flex: 1 1 50%; /* Adjust width for larger screens */
+  }
+
+  .search-container select,
+  .search-container input[type="date"] {
+    flex: 1 1 30%; /* Adjust width for larger screens */
+  }
+
+  .search-container button {
+    flex: 1 1 auto; /* Auto width for buttons */
+    max-width: 150px; /* Limit button width on larger screens */
+  }
+
+  .search-container .date-filter {
+    flex-direction: row; /* Align date inputs horizontally on larger screens */
+    align-items: flex-end; /* Align labels to the bottom */
+  }
+
+  .search-container .date-filter label {
+    width: auto; /* Allow labels to take only necessary space */
+    margin-right: 10px; /* Add spacing between label and input */
+  }
 }

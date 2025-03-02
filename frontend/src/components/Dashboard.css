@@ -232,6 +232,10 @@ h2 {
   justify-self: center;
 	background-color: transparent;
 	white-space: nowrap; /* Prevent wrapping of table content */
+	border-radius: 10px;
+
+
+
 
 }
 
@@ -242,6 +246,10 @@ h2 {
   justify-self: center;
 	background-color: transparent;
 	white-space: nowrap; /* Prevent wrapping of table content */
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+	border-radius: 10px;
+
+
 
 }
 
@@ -249,8 +257,10 @@ table {
   width: 100%;
   min-width: 600px; 
   border-collapse: collapse;
-  background-color: #ffffff;
-	overflow-x: auto;
+	overflow-x: hidden;
+
+
+
 	
 
 }

@@ -13,10 +13,10 @@ async function validatePass(password, hashedPassword) {
 //MARK: adduser
 const addUser = async (req, res) => {
   const newUser = req.body;
-	// username an email found
-	const user = await Users.findOne({ where: { email: newUser.email } });
+	// username an username found
+	const user = await Users.findOne({ where: { username: newUser.username } });
 
-	if (user && user.email === newUser.email) {
+	if (user && user.username === newUser.username) {
 		return res.status(400).json('Email already exists');
 	}
 
@@ -39,10 +39,16 @@ const addUser = async (req, res) => {
 
 const editUser= async(req, res)=> {
 		const { id, ...updateData } = req.body;
+		console.log(req.body)
 
-		const password_hash = await bcrypt.hash(updateData.password, 10);
-
-		updateData.password = password_hash;
+	  // Check if the password is being updated
+    if (updateData.password && updateData.password.trim() !== "") {
+      const password_hash = await bcrypt.hash(updateData.password, 10);
+      updateData.password = password_hash;
+    } else {
+      // Remove the password field if it's empty or undefined
+      delete updateData.password;
+    }
 
 		try {
 
@@ -66,10 +72,10 @@ const allUsers = async (req, res) => {
     const sanitizedUsers = users.map(user => {
       return {
         id: user.id,
-        username: user.username,
+        name: user.name,
         phone: user.phone,
         password: "", // Explicitly set password to an empty string
-        email: user.email,
+        username: user.username,
         role: user.role,
       };
     });
@@ -157,10 +163,10 @@ const addTripAndDriver = async (req, res) => {
 //MARK: Sign in
 const signIn = async (req, res) => {
 	console.log(req.body, "entry");
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
 	try{
-	const user = await Users.findOne({ where: { email: email } });
+	const user = await Users.findOne({ where: { username: username } });
 	//console.log
 
 	if (!user) {
@@ -173,13 +179,13 @@ const signIn = async (req, res) => {
 	}
 	// generate JWT token and send it back to the client
 	const payload = {
-		username: user.username,
+		name: user.name,
     id: user.id,
     iat: Math.floor(Date.now() / 1000) - 60 * 60 * 24 , // token will expire in 24 day
 	}
 	const token = jwt.sign(payload, secret_key, { algorithm: 'HS256' });
 
-  return res.status(200).json({ token: token , role: user.role, id: user.id, message: 'Login successful', redirectUrl: '/dashboard' });
+  return res.status(200).json({ token: token , role: user.role, id: user.id, username:  user.username, message: 'Login successful', redirectUrl: '/dashboard' });
 }catch(error){
 	console.error('Error updating password:', error);
 	return res.status(500).json({ message: 'خطأ في الاتصال' });

@@ -18,10 +18,10 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
 const Drivers = sequelize.define("Drivers", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  leader_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
-  driver_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
-  phone_number: { type: DataTypes.STRING, allowNull: false},
-  national_id: { type: DataTypes.STRING, allowNull: false},
+  leader_name: { type: DataTypes.STRING,  defaultValue: "" },
+  driver_name: { type: DataTypes.STRING,  defaultValue: "" },
+  phone_number: { type: DataTypes.STRING},
+  national_id: { type: DataTypes.STRING},
   passport_number: { type: DataTypes.STRING},
 	company: { type: DataTypes.STRING},
   trip_num: { type: DataTypes.INTEGER, defaultValue: 0 },
@@ -35,7 +35,7 @@ const Drivers = sequelize.define("Drivers", {
 
 const Agents = sequelize.define("Agents", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  agent_name: { type: DataTypes.STRING, unique: true},
+  agent_name: { type: DataTypes.STRING},
   agent_type: { type: DataTypes.STRING },
 
 });
@@ -43,12 +43,12 @@ const Agents = sequelize.define("Agents", {
 
 const ConstructTrips = sequelize.define("ConstructTrips", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  bon_number: { type: DataTypes.STRING, allowNull: false },
-  driver_name: { type: DataTypes.STRING, allowNull: false },
-  car_number: { type: DataTypes.STRING, allowNull: false },
-  quantity: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
-  trip_date: { type: DataTypes.DATE, allowNull: false },
-  price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+  bon_number: { type: DataTypes.STRING },
+  driver_name: { type: DataTypes.STRING },
+  car_number: { type: DataTypes.STRING },
+  quantity: { type: DataTypes.DECIMAL(10, 2) },
+  trip_date: { type: DataTypes.DATE },
+  price: { type: DataTypes.DECIMAL(10, 2) },
 });
 
 
@@ -56,12 +56,12 @@ const ConstructTrips = sequelize.define("ConstructTrips", {
 const Users = sequelize.define("Users", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   username: { type: DataTypes.STRING, allowNull: false },
+  name: { type: DataTypes.STRING, allowNull: false },
   phone: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, allowNull: false },
 	role: {
     type: DataTypes.STRING,
-    allowNull: false,
+    
     defaultValue: "data entry", // ✅ Default role set to "data entry"
   },
 });
@@ -69,26 +69,26 @@ const Users = sequelize.define("Users", {
 
 const TransportTrips = sequelize.define("TransportTrips", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  leader_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
-  driver_name: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
-  phone_number: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
-  national_id: { type: DataTypes.STRING, allowNull: false, defaultValue: "" },
+  leader_name: { type: DataTypes.STRING,  defaultValue: "" },
+  driver_name: { type: DataTypes.STRING,  defaultValue: "" },
+  phone_number: { type: DataTypes.STRING,  defaultValue: "" },
+  national_id: { type: DataTypes.STRING,  defaultValue: "" },
   passport_number: { type: DataTypes.STRING, defaultValue: "" },
   car_letters: { type: DataTypes.STRING, defaultValue: "" },
   car_numbers: { type: DataTypes.STRING, defaultValue: "" },
   trailer_letters: { type: DataTypes.STRING, defaultValue: "" },
   trailer_numbers: { type: DataTypes.STRING, defaultValue: "" },
-  arrival_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
-  driver_loading_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  arrival_date: { type: DataTypes.DATEONLY, defaultValue: null },
+  driver_loading_date: { type: DataTypes.DATEONLY, defaultValue:null},
   car_type: { type: DataTypes.STRING, defaultValue: "" },
   fo_number: { type: DataTypes.STRING, defaultValue: "" },
   loading_place: { type: DataTypes.STRING, defaultValue: "" },
-  company_loading_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  company_loading_date: { type: DataTypes.DATEONLY, defaultValue: null },
   cargo_type: { type: DataTypes.STRING, defaultValue: "" },
   destination: { type: DataTypes.STRING, defaultValue: "" },
   equipment: { type: DataTypes.STRING, defaultValue: "" },
   client_name: { type: DataTypes.STRING, defaultValue: "" },
-  aging_date: { type: DataTypes.DATEONLY, defaultValue: Sequelize.NOW },
+  aging_date: { type: DataTypes.DATEONLY, defaultValue: null },
 	nights_max:{ type: DataTypes.INTEGER, defaultValue: 0 },
   nights_count: { type: DataTypes.INTEGER, defaultValue: 0 },
   night_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },

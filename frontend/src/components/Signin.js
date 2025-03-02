@@ -6,7 +6,7 @@ import './Signin.css';
 
 
 function Signin() {
-	const [form, setForm] = useState({email: '', password: ''});
+	const [form, setForm] = useState({username: '', password: ''});
 	const [apiError, setApiError] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
 
@@ -28,7 +28,7 @@ function Signin() {
 			sessionStorage.setItem('token', data.token);
 			sessionStorage.setItem('role', data.role);
 			sessionStorage.setItem('userId', data.id);
-
+			sessionStorage.setItem('username', data.username);
 
 			setSuccessMessage('تم تسجيل الدخول بنجاح');
 			console.log("Login successful:", data);
@@ -44,11 +44,12 @@ function Signin() {
 
   return (
     <div className="home-container">
+			<img className="logo" src="/logo.jpg" />
       <div className="signin-section">
         <h2>تسجيل الدخول</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <input type="text" className="form-control" placeholder="اسم المستخدم" name="email" value={form.email} onChange={handleChange} required />
+            <input type="text" className="form-control" placeholder="اسم المستخدم" name="username" value={form.username} onChange={handleChange} required />
           </div>
           <div className="form-group mt-3">
             <input type="password" className="form-control"  placeholder="كلمة السر" name="password" value={form.password} onChange={handleChange} required />

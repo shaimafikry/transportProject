@@ -25,7 +25,7 @@ const Content = ({ selected, showFilter, onSearchClick }) => {
 
       {selected === "drivers" && <Drivers showFilter={showFilter} />}
 
-      {selected === "users" && <Users />}
+      {selected === "users" && <Users showFilter={showFilter} />}
 
       {!selected && ( <div className="fixed inset-0 flex items-center justify-center">
     <h2 className="text-6xl font-extrabold text-purple-600 tracking-wide" style={{ fontFamily: 'Lobster, cursive' }}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
+import './search.css'
 
 
 const initialTripState = {
@@ -36,7 +37,7 @@ const initialTripState = {
     notes: "ملاحظات",
 };
 
-const TripFilterSortComp2 = ({ trips }) => {
+const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [filters, setFilters] = useState({ client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
@@ -81,17 +82,40 @@ const TripFilterSortComp2 = ({ trips }) => {
     if (filters.leader_name) {
       result = result.filter((trip) => trip.leader_name.toLowerCase().includes(filters.leader_name.toLowerCase()));
     }
+		//filter acordong to cmpny loading date
     if (filters.startDate && filters.endDate) {
       result = result.filter((trip) => {
-        const tripDate = new Date(trip.start_date);
+        const tripDate = new Date(trip.company_loading_date);
         return tripDate >= new Date(filters.startDate) && tripDate <= new Date(filters.endDate);
       });
     }
 
-    result.sort((a, b) => sortOrder === "asc" ? new Date(a.inserted_date) - new Date(b.inserted_date) : new Date(b.inserted_date) - new Date(a.inserted_date));
+        // Apply sorting
+				result.sort((a, b) => {
+					const dateA = new Date(a.company_loading_date); // Use the correct field for sorting
+					const dateB = new Date(b.company_loading_date);
+		
+					if (sortOrder === "asc") {
+						return dateA - dateB; // Ascending order
+					} else {
+						return dateB - dateA; // Descending order
+					}
+				});
     
-    return result;
+    // return result;
+
+		return result.map((trip) => ({
+			...trip,
+			isEditing: trips.find((t) => t.id === trip.id)?.isEditing || false,
+		}));
+
+
   }, [trips, searchQuery, filters, sortOrder]);
+
+	// Trigger search automatically when filteredTrips changes
+		useEffect(() => {
+			onSearch(filteredTrips);
+		}, [filteredTrips, onSearch]);
 
   const exportToExcel = () => {
     const exportData = trips.map(trip => {
@@ -121,25 +145,76 @@ const TripFilterSortComp2 = ({ trips }) => {
   return (
     <div>
       <div className="search-container">
-        <input type="text" placeholder="🔍 البحث..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+  <input
+    type="text"
+    placeholder="🔍 البحث..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
 
-        <select name="client_name" value={filters.client_name} onChange={(e) => setFilters({ ...filters, client_name: e.target.value })}>
-          <option value="">تصنيف حسب العميل</option>
-          {uniqueClients.map(client => <option key={client} value={client}>{client}</option>)}
-        </select>
-        <select name="destination" value={filters.destination} onChange={(e) => setFilters({ ...filters, destination: e.target.value })}>
-          <option value="">تصنيف حسب الواجهة</option>
-          {uniqueDestinations.map(destination => <option key={destination} value={destination}>{destination}</option>)}
-        </select>
-        <select name="leader_name" value={filters.leader_name} onChange={(e) => setFilters({ ...filters, leader_name: e.target.value })}>
-          <option value="">تصنيف حسب المندوب</option>
-          {uniqueLeaders.map(leader => <option key={leader} value={leader}>{leader}</option>)}
-        </select>
-        <input type="date" name="startDate" value={filters.startDate} onChange={(e) => setFilters({ ...filters, startDate: e.target.value })} />
-        <input type="date" name="endDate" value={filters.endDate} onChange={(e) => setFilters({ ...filters, endDate: e.target.value })} />
-        <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>ترتيب حسب التاريخ ({sortOrder})</button>
-        <button className="export-btn" onClick={exportToExcel}>حفظ الي ملف اكسيل</button>
-      </div>
+  <select
+    name="client_name"
+    value={filters.client_name}
+    onChange={(e) => setFilters({ ...filters, client_name: e.target.value })}
+  >
+    <option value="">تصنيف حسب العميل</option>
+    {uniqueClients.map((client) => (
+      <option key={client} value={client}>
+        {client}
+      </option>
+    ))}
+  </select>
+
+  <select
+    name="destination"
+    value={filters.destination}
+    onChange={(e) => setFilters({ ...filters, destination: e.target.value })}
+  >
+    <option value="">تصنيف حسب الواجهة</option>
+    {uniqueDestinations.map((destination) => (
+      <option key={destination} value={destination}>
+        {destination}
+      </option>
+    ))}
+  </select>
+
+  <select
+    name="leader_name"
+    value={filters.leader_name}
+    onChange={(e) => setFilters({ ...filters, leader_name: e.target.value })}
+  >
+    <option value="">تصنيف حسب المندوب</option>
+    {uniqueLeaders.map((leader) => (
+      <option key={leader} value={leader}>
+        {leader}
+      </option>
+    ))}
+  </select>
+
+	<div className="date-filter">
+  <label htmlFor="startDate">البدء:</label>
+  <input
+    type="date"
+    name="startDate"
+    value={filters.startDate}
+    onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+  />
+  <label htmlFor="endDate">النهاية:</label>
+  <input
+    type="date"
+    name="endDate"
+    value={filters.endDate}
+    onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+  />
+</div>
+  <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
+    ترتيب حسب التعتيق ({sortOrder === "asc" ? "تصاعدي" : "تنازلي"})
+  </button>
+
+  <button className="export-btn" onClick={exportToExcel}>
+    حفظ إلى ملف إكسيل
+  </button>
+</div>
     </div>
   );
 };
