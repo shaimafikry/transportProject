@@ -2,41 +2,16 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import { postData } from "../api";
 
-const initialTripState = {
-  leader_name: "اسم المندوب",
+const tripFields = {
+  bon_number: "رقم البون",
   driver_name: "اسم السائق",
-  phone_number: "رقم الموبايل",
-  national_id: "الرقم القومي",
-  passport_number: "رقم الجواز",
-  car_letters: "حروف السيارة",
-  car_numbers: "أرقام السيارة",
-  trailer_letters: "حروف المقطورة",
-  trailer_numbers: "أرقام المقطورة",
-  arrival_date: "تاريخ الوصول",
-  driver_loading_date: "تاريخ التحميل للسائق",
-  car_type: "نوع السيارة",
-  fo_number: "رقم FO",
-  loading_place: "مكان التحميل",
-  company_loading_date: "تاريخ التحميل للشركة",
-  cargo_type: "نوع الحمولة",
-  destination: "الجهة",
-  equipment: "المعدة",
-  client_name: "اسم العميل",
-  aging_date: "تاريخ التعتيق",
-  nights_count: "عدد البياتات",
-  nights_max: "اقصى عدد بياتات",
-  night_value: "قيمة البياتة",
-  total_nights_value: "إجمالي قيمة البياتات",
-  transport_fee: "ناوُلون",
-  expenses: "مصاريف (كارتة + ميزان)",
-  total_transport: "إجمالي النقلة",
-  deposit: "عهدة",
-  total_received_cash: "إجمالي النقدية المستلمة",
-  remain_cash: "المتبقى",
-  notes: "ملاحظات",
+  car_number: "رقم السيارة",
+  quantity: "الكمية",
+  trip_date: "تاريخ التحميل",
+  price: "السعر",
 };
 
-const ImportTrips = () => {
+const ImportTripsFile = () => {
   const [importedData, setImportedData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
@@ -59,8 +34,8 @@ const ImportTrips = () => {
         const headers = jsonData[0]; // الصف الأول كعناوين أعمدة
         const columnMapping = {};
 
-        Object.keys(initialTripState).forEach((key) => {
-          const columnIndex = headers.findIndex((col) => col.trim() === initialTripState[key].trim());
+        Object.keys(tripFields).forEach((key) => {
+          const columnIndex = headers.findIndex((col) => col.trim() === tripFields[key].trim());
           if (columnIndex !== -1) {
             columnMapping[key] = columnIndex;
           }
@@ -88,7 +63,7 @@ const ImportTrips = () => {
   const handleSave = async () => {
     try {
       for (const trip of importedData) {
-        await postData("dashboard?action=comp2Trips-add", trip);
+        await postData("dashboard?action=comp1Trips-add", trip);
       }
       alert("تم حفظ البيانات");
       setShowModal(false);
@@ -109,15 +84,15 @@ const ImportTrips = () => {
             <table style={styles.table}>
               <thead>
                 <tr>
-                  {Object.keys(initialTripState).map((field) => (
-                    <th key={field}>{initialTripState[field]}</th>
+                  {Object.keys(tripFields).map((field) => (
+                    <th key={field}>{tripFields[field]}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {importedData.map((row, index) => (
                   <tr key={index}>
-                    {Object.keys(initialTripState).map((field) => (
+                    {Object.keys(tripFields).map((field) => (
                       <td key={field}>{row[field] || ""}</td>
                     ))}
                   </tr>
@@ -158,19 +133,6 @@ const styles = {
     borderCollapse: "collapse",
     marginBottom: "20px",
   },
-  buttonContainer: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px", // Space between buttons
-  },
-  button: {
-    padding: "10px 20px",
-    borderRadius: "5px",
-    border: "none",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    cursor: "pointer",
-  },
 };
 
-export default ImportTrips;
+export default ImportTripsFile;

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
 import TripFilterSortComp1 from "./Comp1Filter";
+import ImportTripsFile from "./import_stones";
 
 const Comp1 = ({ showFilter, onSearchClick }) => {
   const [viewComp1, setViewComp1] = useState("");
+  const [showImportModal, setShowImportModal] = useState(false);
   const [tripsComp1, setTripsComp1] = useState([]);
   const [originalTrips, setOriginalTrips] = useState([]); 
   const [isSearching, setIsSearching] = useState(false); 
@@ -51,6 +53,17 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
     setViewComp1("");
     fetchTrips();
   }, [onSearchClick]);
+
+
+   // Handle saving imported data
+   const handleSaveImportedData = (data) => {
+    console.log("Data to save:", data);
+    // Call your backend API here to save the data
+    // Example: axios.post("/api/trips/add", data);
+    setShowImportModal(false); // Close the modal after saving
+  };
+
+
 
   // Handle search results from TripFilterSortComp1
   const handleSearch = (searchResults) => {
@@ -184,6 +197,7 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
     <>
         <div className="trip-options">
           <button onClick={() => setViewComp1("add")}>إضافة رحلة</button>
+          <button onClick={() => setShowImportModal(true)}>اضافة من ملف اكسيل</button>
           <button onClick={() => { fetchTrips(); setViewComp1("edit"); }}>تعديل رحلة</button>
         </div>
 
@@ -241,11 +255,9 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
                         </td>
                       ))}
                       <td>
-											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
                         <button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
                         <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
-												</div>
                       </td>
                     </>
                   ) : (
@@ -264,6 +276,12 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
           </table>
 					</div>
         </>
+      )}
+      {showImportModal && (
+        <ImportTripsFile
+          onClose={() => setShowImportModal(false)}
+          onSave={handleSaveImportedData}
+        />
       )}
     </>
   );
