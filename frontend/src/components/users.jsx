@@ -283,6 +283,7 @@ const Users = ({ showFilter, onSearchClick }) => {
                           </td>
                         ))}
                         <td>
+												<div className="action-buttons">
                           <button onClick={() => handleSaveUser(user.id)}>
                             حفظ
                           </button>
@@ -292,6 +293,7 @@ const Users = ({ showFilter, onSearchClick }) => {
                           <button onClick={() => handleEditUser(user.id)}>
                             إلغاء
                           </button>
+													</div>
                         </td>
                       </>
                     ) : (

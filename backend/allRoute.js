@@ -4,7 +4,7 @@ const { signIn, forgetPassword, logout, forgetPasswordCheck } = require('./authC
 const { dashboard } = require('./controllers');
 const authToken = require('./authToken');
 
-router.post('/signin', signIn); 
+router.post('/', signIn); 
 router.post('/logout', logout); 
 router.get('/forget-password', forgetPasswordCheck); 
 router.put('/forget-password', forgetPassword); 

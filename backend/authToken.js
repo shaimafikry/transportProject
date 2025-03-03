@@ -3,14 +3,13 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const authToken = (req, res, next) => {
-  // get the token frm the request
-  const token = req.cookies.token;
+  const token = req.headers['authorization']?.split(' ')[1]; // Extract the token from "Bearer <token>"
   if (!token) {
-    return res.status(401).send('Access Denied');
+    return res.status(401).json('الوصول مرفوض لعدم تسجيل الدخول');
 	}
 
 	jwt.verify(token, process.env.SECRET_KEY , (err, user) => {
-	  if (err) return res.status(403).send('Invalid token');
+	  if (err) return res.status(403).json('التوكن فير صحيح');
     req.user = user;
     next();
 	});

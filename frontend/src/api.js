@@ -22,12 +22,13 @@ const apiRequest = async (endpoint, method = 'GET', data = null) => {
       const errorData = await response.json();
 			console.log(errorData);
 			console.log(errorData.message);
-      throw new Error(errorData.message || 'An unexpected error occurred.');
+			throw new Error(errorData.error || errorData.message || "حدث خطأ أثناء معالجة الطلب");
+
     }
     return await response.json();
   } catch (error) {
     console.error(`Error in ${method} request:`, error);
-    throw new Error(error.message);
+    throw new Error(error.message || "حدث خطأ أثناء معالجة الطلب");
   }
 };
 

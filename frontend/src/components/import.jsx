@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
-import { postData} from "../api";
+import { postData } from "../api";
 
 const ImportTrips = () => {
   const [importedData, setImportedData] = useState([]);
@@ -50,23 +50,38 @@ const ImportTrips = () => {
     reader.onload = (event) => {
       const data = new Uint8Array(event.target.result);
       const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Get raw data with headers
 
-      // Extract data rows (ignore headers)
-      const rows = jsonData.slice(1); // Skip the header row
+      // Array to store data from all sheets
+      const allSheetData = [];
 
-      // Map columns to expected fields by order
-      const mappedData = rows.map((row) => {
-        const mappedRow = {};
-        expectedFields.forEach((field, index) => {
-          mappedRow[field] = row[index] || null; // Assign column value to field (or null if missing)
+      // Iterate over all sheet names
+      workbook.SheetNames.forEach((sheetName) => {
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Get raw data with headers
+
+        // Extract data rows (ignore headers)
+        const rows = jsonData.slice(1); // Skip the header row
+
+        // Map columns to expected fields by order
+        const mappedData = rows.map((row) => {
+          const mappedRow = {};
+          expectedFields.forEach((field, index) => {
+            mappedRow[field] = row[index] || null; // Assign column value to field (or null if missing)
+          });
+          return mappedRow;
         });
-        return mappedRow;
+
+        // Filter out empty rows
+        const nonEmptyRows = mappedData.filter((row) =>
+          Object.values(row).some((value) => value !== null && value !== "")
+        );
+
+        // Add data from this sheet to the allSheetData array
+        allSheetData.push(...nonEmptyRows);
       });
 
-      setImportedData(mappedData);
+      // Set the imported data state
+      setImportedData(allSheetData);
       setShowModal(true); // Show the modal with the imported data
     };
     reader.readAsArrayBuffer(file);
@@ -75,15 +90,25 @@ const ImportTrips = () => {
   // Handle saving data to the backend
   const handleSave = async () => {
     try {
-      for (const trip of importedData) {
-        await postData("dashboard?action=comp2Trips-add", trip); // Call the backend API
+      console.log("Data to save:", importedData);
+      for (const tripData of importedData) {
+        // Sanitize the data (replace empty strings with null)
+        const sanitizedData = { ...tripData };
+        Object.keys(sanitizedData).forEach((key) => {
+          if (sanitizedData[key] === "" ||sanitizedData[key] === null) {
+            sanitizedData[key] = null;
+          }
+        });
+
+        // Save the trip
+        await postData("dashboard?action=comp2Trips-add", sanitizedData);
       }
       alert("تم حفظ البيانات");
       setShowModal(false); // Close the modal
-      setImportedData([]); 
+      setImportedData([]);
     } catch (error) {
-      console.error("Error saving data:", error);
-      alert("Failed to save data. Please try again.");
+      console.error("Error saving imported data:", error);
+      alert(`حدث خطأ أثناء حفظ البيانات: ${error.message}`);
     }
   };
 
@@ -100,6 +125,7 @@ const ImportTrips = () => {
             <table style={styles.table}>
               <thead>
                 <tr>
+                  <th>#</th> {/* Counter column */}
                   {expectedFields.map((field) => (
                     <th key={field}>{field}</th>
                   ))}
@@ -108,6 +134,7 @@ const ImportTrips = () => {
               <tbody>
                 {importedData.map((row, index) => (
                   <tr key={index}>
+                    <td>{index + 1}</td> {/* Counter value */}
                     {expectedFields.map((field) => (
                       <td key={field}>{row[field] || ""}</td>
                     ))}
@@ -115,8 +142,17 @@ const ImportTrips = () => {
                 ))}
               </tbody>
             </table>
-            <button onClick={handleSave}>Save</button>
-            <button onClick={() => setShowModal(false)}>Cancel</button>
+            <div style={styles.buttonContainer}>
+              <button style={styles.button} onClick={handleSave}>
+                حفظ
+              </button>
+              <button
+                style={styles.button}
+                onClick={() => setShowModal(false)}
+              >
+                الغاء
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -124,7 +160,7 @@ const ImportTrips = () => {
   );
 };
 
-// Styles for the modal and table
+// Styles for the modal, table, and buttons
 const styles = {
   modal: {
     position: "fixed",
@@ -149,6 +185,19 @@ const styles = {
     width: "100%",
     borderCollapse: "collapse",
     marginBottom: "20px",
+  },
+  buttonContainer: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px", // Space between buttons
+  },
+  button: {
+    padding: "10px 20px",
+    borderRadius: "5px",
+    border: "none",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    cursor: "pointer",
   },
 };
 

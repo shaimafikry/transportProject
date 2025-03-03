@@ -46,6 +46,8 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [uniqueDestinations, setUniqueDestinations] = useState([]);
   const [uniqueLeaders, setUniqueLeaders] = useState([]);
 
+	console.log(trips)
+
   useEffect(() => {
     if (trips.length > 0) {
       const clients = [...new Set(trips.map(trip => trip.client_name))];

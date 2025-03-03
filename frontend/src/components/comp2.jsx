@@ -11,6 +11,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
   const [selectedAgentType, setSelectedAgentType] = useState("");
 	const [isSearching, setIsSearching] = useState(false);
 	const [originalTrips, setOriginalTrips] = useState([]); // To store the original data
+	const [message, setMessage]= useState("");
 	
 
   const initialTripState = {
@@ -106,14 +107,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
   }, [onSearchClick]);
 
-	
-  // Handle saving imported data
-  const handleSaveImportedData = (data) => {
-    console.log("Data to save:", data);
-    // Call your backend API here to save the data
-    // Example: axios.post("/api/trips/add", data);
-    setShowImportModal(false); // Close the modal after saving
-  };
+				
 
   // Calculate nights count
   const calculateNightsCount = () => {
@@ -214,11 +208,23 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
   // Add a new trip
   const handleAddTrip = async () => {
     try {
-      const data = await postData("dashboard?action=comp2Trips-add", newTripComp2);
+
+		const tripData = { ...newTripComp2 };
+    Object.keys(tripData).forEach((key) => {
+      if (tripData[key] === "") {
+        tripData[key] = null;
+      }
+    });
+
+      const data = await postData("dashboard?action=comp2Trips-add", tripData);
       setTripsComp2([...tripsComp2, data]);
-      setNewTripComp2({ ...initialTripState });
+      setNewTripComp2(Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""])));
+
+
+			setMessage("تم اضافة الرحلة بنجاح")
     } catch (error) {
       console.error("Error adding trip:", error);
+			setMessage(error.message);
     }
   };
 
@@ -252,7 +258,16 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
   const handleSaveTrip = async (id) => {
     try {
       const tripToUpdate = tripsComp2.find((trip) => trip.id === id);
-      const updatedTrip = await putData('dashboard?action=comp2Trips-edit', tripToUpdate );
+				const tripData = { ...tripToUpdate };
+				Object.keys(tripData).forEach((key) => {
+					if (tripData[key] === "") {
+						tripData[key] = null;
+					}
+				});
+
+      const updatedTrip = await putData('dashboard?action=comp2Trips-edit', tripData );
+
+
 			setTripsComp2((prevTrips) =>
         prevTrips.map((trip) => (trip.id === id ? { ...updatedTrip, isEditing: false }  : trip)))
 
@@ -268,6 +283,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 			);
 		}catch (error) {
       console.error("Error updating trip:", error);
+			setMessage(`${error.message}`)
     }
   };
 
@@ -297,13 +313,15 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 			}
 		}, [showFilter]);
 
+
+
   return (
     <>
 
   
       <div className="trip-options">
         <button onClick={() => { fetchAgents(); setViewComp2("add"); }}>إضافة رحلة</button>
-        <button onClick={() => setShowImportModal(true)}>اضافة من ملف اكسيل</button>
+        <button onClick={() => setViewComp2("import")}>اضافة من ملف اكسيل</button>
         <button onClick={() => { fetchTrips(); setViewComp2("edit"); }}>تعديل رحلة</button>
         <button onClick={() => { fetchTrips(); setViewComp2("all"); }}>الرحلات</button>
       </div>
@@ -326,6 +344,9 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                     value={newTripComp2[key]}
                     onChange={(e) => handleTripChange(key, e.target.value)}
                   >
+										<option value="" disabled>
+											اختر نوع السيارة 
+										</option>
                     {carTypes.map((type, index) => (
                       <option key={index} value={type}>{type}</option>
                     ))}
@@ -336,6 +357,9 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                     value={newTripComp2[key]}
                     onChange={(e) => handleTripChange(key, e.target.value)}
                   >
+										<option value="" disabled>
+											اختر اسم العميل
+										</option>
                     {agents.map((agent, index) => (
                       <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
                     ))}
@@ -365,6 +389,9 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
             ))}
           </div>
           <button onClick={handleAddTrip}>حفظ الرحلة</button>
+					{message && (
+          <p style={{ color: "white", backgroundColor: "red", padding: "8px", borderRadius: "4px" }} className="mt-2">{message}</p>
+        )}
         </>
       )}
 
@@ -455,9 +482,11 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 												onChange={(e) => handleEditTripChange(trip.id, "notes", e.target.value)} />
                       </td>
                       <td>
+											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
                         <button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
                         <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
+												</div>
                       </td>
                     </>
                   ) : (
@@ -515,11 +544,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       )}
 
 			{/* Import Excel Modal */}
-      {showImportModal && (
-        <ImportTrips
-          onClose={() => setShowImportModal(false)}
-          onSave={handleSaveImportedData}
-        />
+      {viewComp2 === "import" && (
+        <ImportTrips        />
       )}
     </>
   );

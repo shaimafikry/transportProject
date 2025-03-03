@@ -97,66 +97,170 @@ const allUsers = async (req, res) => {
 
 
 // MARK: ADD Trip
+// const addTripAndDriver = async (req, res) => {
+// 	try {
+// 		const sanitizeInput = (key, value) => {
+// 			if (value === "" || value === null || value === undefined) {
+// 				if (["nights_count", "night_value", "total_nights_value", "transport_fee", 
+// 					 "expenses", "total_transport", "deposit", "total_received_cash"]
+// 					.includes(key)) {
+// 					return 0;
+// 				}
+// 				return "";
+// 			}
+
+// 			if (key === "national_id" || key === "phone_number") {
+// 				return value.toString();
+// 			}
+
+// 			if (!isNaN(value) && typeof value !== "boolean") {
+// 				return parseFloat(value);
+// 			}
+// 			return value;
+// 		};
+		
+// 		const sanitizedData = {};
+// 		Object.keys(req.body).forEach((key) => {
+// 			sanitizedData[key] = sanitizeInput(key, req.body[key]);
+// 		});
+
+// 		let { national_id, total_transport, total_received_cash } = sanitizedData;
+		
+
+// 		total_transport = total_transport ?? 0;
+// 		total_received_cash = total_received_cash ?? 0;
+
+// 		let driver = await Drivers.findOne({ where: { national_id } });
+
+// 		await TransportTrips.create(sanitizedData);
+// 		console.log("تمت إضافة بيانات الرحلة بنجاح");
+
+// 		if (driver) {
+// 			driver.trip_num += 1;
+// 			driver.total_all_transport += total_transport;
+// 			driver.remaining_money_fees += total_transport - total_received_cash;
+// 			await driver.save();
+// 			console.log("تم تعديل بيانات السائق بنجاح");
+// 		} else {
+// 			driver = await Drivers.create({
+// 				...sanitizedData,
+// 				trip_num: 1,
+// 				total_all_transport: total_transport,
+// 				remaining_money_fees: total_transport - total_received_cash
+// 			});
+// 			console.log("تمت إضافة بيانات السائق بنجاح");
+// 		}
+		
+// 		return res.status(201).json({ message: "تمت الإضافة بنجاح" });
+
+// 	} catch (error) {
+// 		console.error("Error adding trip and driver:", error);
+// 		return res.status(500).json({ error: `حدث خطأ أثناء معالجة الطلب, ${error.message}` });
+// 	}
+// };
+
+// MARK: ADD Trip
 const addTripAndDriver = async (req, res) => {
-	try {
-		const sanitizeInput = (key, value) => {
-			if (value === "" || value === null || value === undefined) {
-				if (["nights_count", "night_value", "total_nights_value", "transport_fee", 
-					 "expenses", "total_transport", "deposit", "total_received_cash"]
-					.includes(key)) {
-					return 0;
-				}
-				return "";
-			}
+  try {
+    // Sanitize input data
+    const sanitizeInput = (key, value) => {
+      if (value === "" || value === null || value === undefined) {
+        // For numeric fields, default to 0 if null or empty
+        if (
+          [
+            "nights_count",
+            "night_value",
+            "total_nights_value",
+            "transport_fee",
+            "expenses",
+            "total_transport",
+            "deposit",
+            "total_received_cash",
+          ].includes(key)
+        ) {
+          return 0;
+        }
+        // For other fields, return null
+        return null;
+      }
 
-			if (key === "national_id" || key === "phone_number") {
-				return value.toString();
-			}
+      // Convert national_id and phone_number to strings
+      if (key === "national_id" || key === "phone_number") {
+        return value.toString();
+      }
 
-			if (!isNaN(value) && typeof value !== "boolean") {
-				return parseFloat(value);
-			}
-			return value;
-		};
+      // Convert numeric fields to numbers
+      if (!isNaN(value) && typeof value !== "boolean") {
+        return parseFloat(value);
+      }
+
+      // Return the value as-is
+      return value;
+    };
+
+    // Sanitize all fields in the request body
+    const sanitizedData = {};
+    Object.keys(req.body).forEach((key) => {
+      sanitizedData[key] = sanitizeInput(key, req.body[key]);
+    });
+
+    // Extract required fields for calculations
+    const { national_id, total_transport, total_received_cash } = sanitizedData;
+
+    // Ensure numeric fields have valid values
+    sanitizedData.total_transport = total_transport ?? 0;
+    sanitizedData.total_received_cash = total_received_cash ?? 0;
+
+    // Validate required fields
+    if (!sanitizedData.driver_name){
+      return res.status(400).json({ error: "يجب إدخال اسم السائق " });
+    }
+		if (!sanitizedData.client_name) {
+      return res.status(400).json({ error: "يجب إدخال اسم العميل" });
+    }
+		if (!sanitizedData.fo_number) {
+      return res.status(400).json({ error: "يجب إدخال رقم FO" });
+    }
+
+		if (!sanitizedData.national_id) {
+      return res.status(400).json({ error: "يجب إدخال الرقم القومي  للسائق  " });
+    }
 		
-		const sanitizedData = {};
-		Object.keys(req.body).forEach((key) => {
-			sanitizedData[key] = sanitizeInput(key, req.body[key]);
-		});
 
-		let { national_id, total_transport, total_received_cash } = sanitizedData;
-		
+    // Check if the driver already exists
+    let driver = await Drivers.findOne({ where: { national_id } });
 
-		total_transport = total_transport ?? 0;
-		total_received_cash = total_received_cash ?? 0;
+    // Create the trip
+    await TransportTrips.create(sanitizedData);
+    console.log("تمت إضافة بيانات الرحلة بنجاح");
 
-		let driver = await Drivers.findOne({ where: { national_id } });
+    // Update or create the driver
+    if (driver) {
+      driver.trip_num += 1;
+      driver.total_all_transport += sanitizedData.total_transport;
+      driver.remaining_money_fees +=
+        sanitizedData.total_transport - sanitizedData.total_received_cash;
+      await driver.save();
+      console.log("تم تعديل بيانات السائق بنجاح");
+    } else {
+      driver = await Drivers.create({
+        ...sanitizedData,
+        trip_num: 1,
+        total_all_transport: sanitizedData.total_transport,
+        remaining_money_fees:
+          sanitizedData.total_transport - sanitizedData.total_received_cash,
+      });
+      console.log("تمت إضافة بيانات السائق بنجاح");
+    }
 
-		await TransportTrips.create(sanitizedData);
-		console.log("تمت إضافة بيانات الرحلة بنجاح");
-
-		if (driver) {
-			driver.trip_num += 1;
-			driver.total_all_transport += total_transport;
-			driver.remaining_money_fees += total_transport - total_received_cash;
-			await driver.save();
-			console.log("تم تعديل بيانات السائق بنجاح");
-		} else {
-			driver = await Drivers.create({
-				...sanitizedData,
-				trip_num: 1,
-				total_all_transport: total_transport,
-				remaining_money_fees: total_transport - total_received_cash
-			});
-			console.log("تمت إضافة بيانات السائق بنجاح");
-		}
-		
-		return res.status(201).json({ message: "تمت الإضافة بنجاح" });
-
-	} catch (error) {
-		console.error("Error adding trip and driver:", error);
-		return res.status(500).json({ error: `حدث خطأ أثناء معالجة الطلب, ${error.message}` });
-	}
+    // Return success response
+    return res.status(201).json({ message: "تمت الإضافة بنجاح" });
+  } catch (error) {
+    console.error("Error adding trip and driver:", error);
+    return res
+      .status(500)
+      .json({ error: `حدث خطأ أثناء معالجة الطلب, ${error.message}` });
+  }
 };
 
 

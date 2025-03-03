@@ -241,9 +241,11 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
                         </td>
                       ))}
                       <td>
+											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
                         <button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
                         <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
+												</div>
                       </td>
                     </>
                   ) : (

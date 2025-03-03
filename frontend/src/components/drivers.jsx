@@ -221,9 +221,11 @@ const Drivers = ({ showFilter, onSearchClick }) => {
                           </td>
                         ))}
                         <td>
+												<div className="action-buttons">
                           <button onClick={() => handleSaveDriver(driver.id)}>حفظ</button>
                           <button onClick={() => handleDeleteDriver(driver.id)}>حذف</button>
                           <button onClick={() => handleEditDriver(driver.id)}>إلغاء</button>
+													</div>
                         </td>
                       </>
                     ) : (

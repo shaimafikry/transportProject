@@ -34,21 +34,21 @@ h2 {
 .sidebar-right {
   width: 100%; /* Full width */
   flex-wrap: wrap; /* Allows buttons to wrap if needed */
-  height: auto;
+  height: fit-content;
   background-color: #302f2f;
   color: white;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 5px;
   flex-shrink: 0;
 }
 
 /* Sidebar Logo */
 .sidebar-right img {
-  width: 100px; /* Adjust the width as needed */
-  height: auto; /* Maintain aspect ratio */
+  width: 80px; /* Adjust the width as needed */
+  height:fit-content; /* Maintain aspect ratio */
   border-radius: 8px; /* Optional: Add rounded corners */
 }
 
@@ -58,7 +58,7 @@ h2 {
   flex: 1;
   min-width: 100px;
   height: 50px;
-  margin: 0 10px;
+  margin: 0 5px;
   background-color: transparent;
   color: white;
   border: none;
@@ -68,8 +68,8 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
-  gap: 8px;
+  padding: 0 5px;
+  gap: 5px;
 }
 
 .sidebar-right button:hover {
@@ -299,6 +299,11 @@ tr {
   background-color: #fcfcfc;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 8px; /* Adjust the gap size as needed */
+}
+
 /* Scrollable Tables Only When Needed */
 @media (max-width: 1024px) {
   .table-container {
@@ -317,6 +322,7 @@ table button {
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+
 }
 
 @media (max-width: 768px) {
