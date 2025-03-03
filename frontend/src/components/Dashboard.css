@@ -187,7 +187,8 @@ h2 {
 
 /* Make input fields fully responsive */
 .content input,
-.content select {
+.content select,
+.content textarea {
   width: 100%;
   max-width: 100%;
   padding: 8px;
@@ -196,6 +197,12 @@ h2 {
   font-size: 14px;
   box-sizing: border-box;
 }
+
+.content textarea {
+		resize: horizontal; /* Allow only horizontal resizing initially */
+		overflow: auto; /* Hide the vertical scrollbar */
+	}
+
 
 @media (max-width: 768px) {
   .content input,

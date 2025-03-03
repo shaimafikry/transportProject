@@ -69,9 +69,9 @@ const Users = sequelize.define("Users", {
 
 const TransportTrips = sequelize.define("TransportTrips", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  leader_name: { type: DataTypes.STRING,  allowNull: true },
+  leader_name: { type: DataTypes.STRING,  defaultValue: "" },
   driver_name: { type: DataTypes.STRING,  allowNull: false },
-  phone_number: { type: DataTypes.STRING,  allowNull: true },
+  phone_number: { type: DataTypes.STRING,  defaultValue: "" },
   national_id: { type: DataTypes.STRING,  allowNull: false },
   passport_number: { type: DataTypes.STRING, allowNull: true },
   car_letters: { type: DataTypes.STRING, allowNull: true },

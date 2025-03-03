@@ -212,7 +212,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 		const tripData = { ...newTripComp2 };
     Object.keys(tripData).forEach((key) => {
       if (tripData[key] === "") {
-        tripData[key] = null;
+        tripData[key] = "";
       }
     });
 
@@ -261,7 +261,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 				const tripData = { ...tripToUpdate };
 				Object.keys(tripData).forEach((key) => {
 					if (tripData[key] === "") {
-						tripData[key] = null;
+						tripData[key] = "";
 					}
 				});
 
@@ -308,12 +308,11 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 		useEffect(() => {
 			if (!showFilter) {
 				resetSearch();
-			} else {
-				setViewComp2("edit"); 
+			}
+			else{
+						setViewComp2("edit");
 			}
 		}, [showFilter]);
-
-
 
   return (
     <>
@@ -327,7 +326,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       </div>
       
       {/*//MARK: call FilterSort*/}
-			{showFilter &&  viewComp2 !== "add" && (
+			{showFilter && viewComp2 == "edit" && (
         <TripFilterSortComp2 trips={originalTrips} onSearch={handleSearch} />
       )}
   
@@ -364,7 +363,14 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                       <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
                     ))}
                   </select>
-                ) : (
+                ) : key === "notes" ? (
+									<textarea
+										id={key}
+										value={newTripComp2[key]}
+										onChange={(e) => handleTripChange(key, e.target.value)}
+
+									/>
+								) :  (
                   <input
                     id={key}
                     type={
