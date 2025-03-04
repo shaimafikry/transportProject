@@ -6,7 +6,7 @@ import { FaSearch, FaIndustry, FaBuilding, FaUserPlus, FaTruck, FaCar, FaRegBuil
 const SidebarRight = ({ role, onSelect, onSearch  }) => {
 	const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/logout", {
+      const response = await fetch("logout", {
         method: "POST",
         credentials: "include", // يضمن إرسال وحذف الكوكيز من المتصفح
       });
