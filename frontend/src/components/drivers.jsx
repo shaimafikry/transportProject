@@ -125,20 +125,27 @@ const Drivers = ({ showFilter, onSearchClick }) => {
       const driverToUpdate = drivers.find((driver) => driver.id === id);
       const updatedDriver = await putData("dashboard?action=drivers-edit", driverToUpdate);
 
+  
+      // ✅ Update state with `updatedDriver`
       setDrivers((prevDrivers) =>
-        prevDrivers.map((driver) => (driver.id === id ? { ...driver, ...updatedDriver, isEditing: false } : driver))
-      );
-
-      // Update originalDrivers
-      setOriginalDrivers((prevOriginalDrivers) =>
-        prevOriginalDrivers.map((driver) =>
+        prevDrivers.map((driver) =>
           driver.id === id ? { ...updatedDriver, isEditing: false } : driver
+        )
+      );
+  
+      // ✅ Fix: Use `updatedDriver`, not `updatedTrip`
+      setOriginalDrivers((prevOriginalDrivers) =>
+        prevOriginalDrivers.map((trip) =>
+          trip.id === id
+            ? { ...updatedDriver, trip_date: trip.trip_date.split("T")[0], isEditing: false }
+            : trip
         )
       );
     } catch (error) {
       console.error("Error updating driver:", error);
     }
   };
+  
 
   const handleDeleteDriver = async (id) => {
     try {

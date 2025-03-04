@@ -208,25 +208,73 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
   // Add a new trip
   const handleAddTrip = async () => {
     try {
+        const tripData = { ...newTripComp2 };
 
-		const tripData = { ...newTripComp2 };
-    Object.keys(tripData).forEach((key) => {
-      if (tripData[key] === "") {
-        tripData[key] = "";
-      }
-    });
+        // Sanitize input
+        Object.keys(tripData).forEach((key) => {
+            let value = tripData[key];
 
-      const data = await postData("dashboard?action=comp2Trips-add", tripData);
-      setTripsComp2([...tripsComp2, data]);
-      setNewTripComp2(Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""])));
+            if (value === "" || value === null || value === undefined) {
+                // Default numeric fields to 0
+                if ([
+                    "nights_count",
+                    "night_value",
+                    "total_nights_value",
+                    "transport_fee",
+                    "expenses",
+                    "total_transport",
+                    "deposit",
+                    "total_received_cash"
+                ].includes(key)) {
+                    tripData[key] = 0;
+                } else {
+                    tripData[key] = ""; // Default empty fields to an empty string
+                }
+            } else {
+                // Convert national_id and phone_number to strings
+                if (key === "national_id" || key === "phone_number") {
+                    tripData[key] = String(value).trim();
+                }
+                // Convert numeric fields to numbers
+                else if (!isNaN(value) && typeof value !== "boolean") {
+                    tripData[key] = parseFloat(value);
+                } else {
+                    tripData[key] = value.toString().trim();
+                }
+            }
+        });
 
+        // Validate required fields before submission
+        if (!tripData.driver_name) {
+            setMessage("يجب إدخال اسم السائق");
+            return;
+        }
+        if (!tripData.client_name) {
+            setMessage("يجب إدخال اسم العميل");
+            return;
+        }
+        if (!tripData.fo_number) {
+            setMessage("يجب إدخال رقم FO");
+            return;
+        }
+        if (!tripData.national_id) {
+            setMessage("يجب إدخال الرقم القومي للسائق");
+            return;
+        }
 
-			setMessage("تم اضافة الرحلة بنجاح")
+        // Send sanitized data to backend
+        const data = await postData("dashboard?action=comp2Trips-add", tripData);
+        setTripsComp2([...tripsComp2, data]);
+
+        // Reset form fields
+        setNewTripComp2(Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""])));
+
+        setMessage("تم اضافة الرحلة بنجاح");
     } catch (error) {
-      console.error("Error adding trip:", error);
-			setMessage(error.message);
+        console.error("Error adding trip:", error);
+        setMessage(error.message);
     }
-  };
+};
 
 
   // Toggle edit mode for a trip

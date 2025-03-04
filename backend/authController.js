@@ -17,7 +17,7 @@ const addUser = async (req, res) => {
 	const user = await Users.findOne({ where: { username: newUser.username } });
 
 	if (user && user.username === newUser.username) {
-		return res.status(400).json('Email already exists');
+		return res.status(400).json('User Name already exists');
 	}
 
 	const password_hash = await bcrypt.hash(newUser.password, 10);
