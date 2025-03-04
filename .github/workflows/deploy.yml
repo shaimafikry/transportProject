@@ -1,0 +1,41 @@
+# name: Deploy to Vercel and Railway
+
+# on:
+#   push:
+#     branches:
+#       - master  # Change this if your branch is different
+
+# jobs:
+#   deploy-frontend:
+#     name: Deploy Frontend to Vercel
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       - name: Install Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18  # Use a stable version
+
+#       - name: Install Dependencies
+#         run: npm install
+#         working-directory: ./frontend  # Change if your frontend is in a different folder
+
+#       - name: Build Project
+#         run: npm run build
+#         working-directory: ./frontend
+
+#       - name: Deploy to Vercel
+#         run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+#         working-directory: ./frontend
+
+#   deploy-backend:
+#     name: Deploy Backend to Railway
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       - name: Deploy to Railway
+#         run: curl -X POST ${{ secrets.RAILWAY_DEPLOY_HOOK }}  
