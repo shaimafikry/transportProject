@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000';
+// const API_URL = 'http://localhost:5000';
+const API_URL = 'https://transportprojectbackend-production.up.railway.app/';
 
 // Function to get the token
 const getToken = () => sessionStorage.getItem('token');
