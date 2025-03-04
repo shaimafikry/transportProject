@@ -47,7 +47,7 @@ app.use(cors({
 }));
 
 // API Routes
-app.use('/api', allRoutes);
+app.use('/', allRoutes);
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
