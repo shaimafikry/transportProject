@@ -45,15 +45,19 @@ const editUser= async(req, res)=> {
     if (updateData.password && updateData.password.trim() !== "") {
       const password_hash = await bcrypt.hash(updateData.password, 10);
       updateData.password = password_hash;
-    } else {
-      // Remove the password field if it's empty or undefined
-      delete updateData.password;
     }
 
 		try {
 
-		await Users.update(updateData, { where: { id } });
-		return Users.findOne({ where: { id } }); 
+		const response = await Users.update(updateData, { where: { id } });
+
+		const updatedUser = await Users.findOne({ where: { id } });
+		const userData = updatedUser.get({ plain: true });
+
+		console.log("data",{...userData, password:""})
+
+
+		return res.status(200).json({...userData, password:""});
 		
 	}catch(error){
 		console.error('error in edit user', error);
