@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const allRoutes = require('./allRoute');
 
 const app = express();
@@ -16,6 +15,15 @@ const allowedOrigins = [
   "http://localhost:3000" // Local development
 ];
 
+// ✅ Log Incoming Requests
+app.use((req, res, next) => {
+  console.log(`📡 Incoming Request: ${req.method} ${req.url}`);
+  console.log(`🌍 Origin: ${req.headers.origin || "Unknown"}`);
+  console.log(`🕵️‍♂️ User-Agent: ${req.headers["user-agent"]}`);
+  next();
+});
+
+// ✅ Handle CORS
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -40,7 +48,6 @@ app.use(cors({
 
 // API Routes
 app.use('/api', allRoutes);
-
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
