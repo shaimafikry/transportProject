@@ -3,7 +3,7 @@ import { fetchData, postData, putData, deleteData } from "../api";
 import TripFilterSortComp1 from "./Comp1Filter";
 import ImportTripsFile from "./import_stones";
 
-const Comp1 = ({ showFilter, onSearchClick }) => {
+const Comp1 = () => {
   const [viewComp1, setViewComp1] = useState("");
   const [showImportModal, setShowImportModal] = useState(false);
   const [tripsComp1, setTripsComp1] = useState([]);
@@ -143,6 +143,21 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
 				...newTripComp1,
 				added_by: sessionStorage.getItem("username"),
 			};
+
+			Object.keys(tripToSend).forEach((key) => {
+				let value = tripToSend[key];
+
+				if (value === "" || value === null || value === undefined) {
+						// Default numeric fields to 0
+						if (["price", "quantity"].includes(key)) {
+							tripToSend[key] = 0;
+						} else {
+							tripToSend[key] = ""; // Default empty fields to an empty string
+						}
+				}
+		});
+
+			console.log(tripToSend)
       const data = await postData("dashboard?action=comp1Trips-add", tripToSend);
       setTripsComp1([...tripsComp1, data]);
       setNewTripComp1({
@@ -282,6 +297,7 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
                           />
                         </td>
                       ))}
+											<td>{trip.added_by}</td> {/* Display added_by as plain text */}
                       <td>
 											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
@@ -293,7 +309,7 @@ const Comp1 = ({ showFilter, onSearchClick }) => {
                     </>
                   ) : (
                     <>
-                      {["bon_number", "driver_name", "car_number", "quantity", "trip_date", "price"].map((name) => (
+                      {["bon_number", "driver_name", "car_number", "quantity", "trip_date", "price", "added_by"].map((name) => (
                         <td key={name}>{trip[name]}</td>
                       ))}
                       <td>

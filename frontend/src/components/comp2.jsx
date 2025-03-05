@@ -393,7 +393,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       {viewComp2 === "add" && (
         <>
           <div className="comp2-dashboard-form-group">
-            {Object.entries(initialTripState).map(([key, label]) => (
+            {Object.entries(initialTripState) .filter(([key]) => key !== "added_by").map(([key, label]) => (
               <div key={key} className="comp2-form-field">
                 <label htmlFor={key}>{label}</label>
                 {key === "car_type" ? (
@@ -546,6 +546,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                         <input type="text" defaultValue={trip.notes}
 												onChange={(e) => handleEditTripChange(trip.id, "notes", e.target.value)} />
                       </td>
+											<td>{trip.added_by}</td>
                       <td>
 											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
@@ -571,8 +572,6 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                       <td>{trip.remain_cash}</td>
                       <td>{trip.notes}</td>
                       <td>{trip.added_by}</td>
-
-
                       <td>
                         <button onClick={() => handleEditTrip(trip.id)}>تعديل</button>
                       </td>

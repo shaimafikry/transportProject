@@ -15,6 +15,7 @@ const handleRequest = async (model, action, data) => {
 
   try {
     if (action.includes("add")) {
+			console.log("add", data)
       await model.create(data);
       return { message: "تمت الإضافة بنجاح" };
     }

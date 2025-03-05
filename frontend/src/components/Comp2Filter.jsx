@@ -65,25 +65,28 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     
     if (searchQuery) {
       result = result.filter((trip) =>
-        trip.driver_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        trip.car_type.toLowerCase().includes(searchQuery.toLowerCase())    ||
-        trip.cargo_type.toLowerCase().includes(searchQuery.toLowerCase())  ||
-        trip.fo_number.toLowerCase().includes(searchQuery.toLowerCase())   ||
-        trip.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        trip.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        trip.leader_name.toLowerCase().includes(searchQuery.toLowerCase())
+				(trip.driver_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.car_type?.toLowerCase() || "").includes(searchQuery.toLowerCase())    ||
+			(trip.cargo_type?.toLowerCase() || "").includes(searchQuery.toLowerCase())  ||
+			(trip.fo_number?.toLowerCase() || "").includes(searchQuery.toLowerCase())   ||
+			(trip.client_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.destination?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.leader_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.added_by?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+
       );
     }
 
     if (filters.client_name) {
-      result = result.filter((trip) => trip.client_name.toLowerCase().includes(filters.client_name.toLowerCase()));
+      result = result.filter((trip) => (trip.client_name?.toLowerCase() || "").includes(filters.client_name.toLowerCase()));
     }
     if (filters.destination) {
-      result = result.filter((trip) => trip.destination.toLowerCase().includes(filters.destination.toLowerCase()));
+      result = result.filter((trip) => (trip.destination?.toLowerCase() || "").includes(filters.destination.toLowerCase()));
     }
     if (filters.leader_name) {
-      result = result.filter((trip) => trip.leader_name.toLowerCase().includes(filters.leader_name.toLowerCase()));
+      result = result.filter((trip) => (trip.leader_name?.toLowerCase() || "").includes(filters.leader_name.toLowerCase()));
     }
+		
 		//filter acordong to cmpny loading date
     if (filters.startDate && filters.endDate) {
       result = result.filter((trip) => {

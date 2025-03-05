@@ -88,6 +88,7 @@ h2 {
   max-width: 1200px;
   padding: 10px;
   overflow-x: auto;
+	gap: 10px;
 }
 
 /* Responsive Adjustments */
@@ -109,7 +110,7 @@ h2 {
 	background: rgba(249, 249, 249, 0.8); /* 80% opacity */
 	border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .comp2-dashboard-form-group {

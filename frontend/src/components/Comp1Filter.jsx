@@ -30,7 +30,9 @@ const TripFilterSortComp1 = ({ trips, onSearch }) => {
         (trip) =>
           trip.driver_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           trip.car_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          trip.bon_number.toLowerCase().includes(searchQuery.toLowerCase())
+          trip.bon_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          trip.added_by.toLowerCase().includes(searchQuery.toLowerCase())
+
       );
     }
 
@@ -47,6 +49,11 @@ const TripFilterSortComp1 = ({ trips, onSearch }) => {
     if (filters.bon_number) {
       result = result.filter((trip) =>
         trip.bon_number.toLowerCase().includes(filters.bon_number.toLowerCase())
+      );
+    }
+		if (filters.added_by) {
+      result = result.filter((trip) =>
+        trip.added_by.toLowerCase().includes(filters.added_by.toLowerCase())
       );
     }
     if (filters.startDate && filters.endDate) {
