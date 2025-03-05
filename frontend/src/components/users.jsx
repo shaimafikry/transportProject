@@ -8,6 +8,10 @@ const Users = ({ showFilter, onSearchClick }) => {
   const [originalUsers, setOriginalUsers] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [editedFields, setEditedFields] = useState({}); // Track edited fields
+	const [message, setMessage]= useState("");
+	const [errMessage, setErrMessage] = useState("");
+	
+	
 
   const initialUserState = {
     username: "اسم المستخدم",
@@ -84,14 +88,30 @@ const Users = ({ showFilter, onSearchClick }) => {
   };
 
   const handleAddUser = async () => {
+
+		// Check if any field is empty
+		const isEmptyField = Object.values(newUser).some((value) => value.trim() === "");
+			if (isEmptyField) {
+				setErrMessage("جميع الحقول مطلوبة، لا يمكن إضافة بيانات فارغة");
+				return;
+			}
+
+		if (newUser.password.length < 6) {
+      setErrMessage("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
+      return;
+    }
     try {
       const data = await postData("dashboard?action=users-add", newUser);
       setUsers([...users, { ...data, isEditing: false }]);
       setNewUser(
         Object.fromEntries(Object.keys(initialUserState).map((key) => [key, ""]))
       );
+			setMessage('تم اضافة المستخدم بنجاح')
+
     } catch (error) {
       console.error("Error adding user:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
 
@@ -121,12 +141,18 @@ const Users = ({ showFilter, onSearchClick }) => {
   };
 
   const handleSaveUser = async (id) => {
+
     try {
-      const fieldsToUpdate = editedFields[id] || {}; // Get edited fields for this user
+      const fieldsToUpdate = editedFields[id] || {}; 
       if (Object.keys(fieldsToUpdate).length === 0) {
         console.log("No changes to save");
         return;
       }
+
+			if (fieldsToUpdate.password && fieldsToUpdate.password.length < 6) {
+				setErrMessage("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
+				return;
+			}
 
       // Send only the edited fields and the user ID to the backend
       const dataToUpdate = { id, ...fieldsToUpdate };
@@ -152,12 +178,18 @@ const Users = ({ showFilter, onSearchClick }) => {
         delete updated[id];
         return updated;
       });
+			setMessage('تم تعديل المستخدم بنجاح')
+
     } catch (error) {
       console.error("Error updating user:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
 
   const handleDeleteUser = async (id) => {
+		const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذا المستخدم");
+    if (!confirmDelete) return;
     try {
       await deleteData("dashboard?action=users-del", { id });
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
@@ -166,41 +198,39 @@ const Users = ({ showFilter, onSearchClick }) => {
       setOriginalUsers((prevOriginalUsers) =>
         prevOriginalUsers.filter((user) => user.id !== id)
       );
+			setMessage('تم حذف المستخدم بنجاح')
+
     } catch (error) {
       console.error("Error deleting user:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
-
-  useEffect(() => {
-    if (!showFilter) {
-      resetSearch();
-    } else {
-      setUsersView("edit");
-    }
-  }, [showFilter]);
 
   // Filter out the signed-in user
   const filteredUsers = users.filter((user) => user.username !== signedInUsername);
 
   return (
     <>
+		  <h2>سجل الموظفين</h2>
       <div className="user-options">
-        <button onClick={() => setUsersView("add")}>إضافة مستخدم</button>
-        <button onClick={() => { fetchUsers(); setUsersView("edit"); }}>
-          تعديل المستخدمين
+        <button onClick={() =>{ setUsersView("add"); setMessage(""); setErrMessage("");}}>إضافة موظف</button>
+        <button onClick={() => { fetchUsers(); setUsersView("edit"); setErrMessage(""); setMessage("");}}>
+          تعديل الموظفين
         </button>
       </div>
 
-      {showFilter && usersView !== "add" && (
+      {usersView === "edit" && (
         <UserFilter users={originalUsers} onSearch={handleSearch} />
       )}
 
       {usersView === "add" && (
         <>
-          <h2>إضافة مستخدم جديد</h2>
           <div className="dashboard-form-group">
-            {Object.entries(initialUserState).map(([key, label]) =>
-              key === "role" ? (
+            {Object.entries(initialUserState).map(([key, label]) =>(
+						<div key={key} className="form-field">
+            <label htmlFor={key}>{label}</label>
+              {key === "role" ? (
                 <select
                   key={key}
                   value={newUser[key]}
@@ -226,16 +256,21 @@ const Users = ({ showFilter, onSearchClick }) => {
                   value={newUser[key]}
                   onChange={(e) => handleUserChange(key, e.target.value)}
                 />
+							)}
+							</div>
               )
             )}
           </div>
           <button onClick={handleAddUser}>حفظ المستخدم</button>
+					{message && (<p className="suc-message">{message}</p>)}
+					{errMessage && (<p className="err-message">{errMessage}</p>)}
         </>
       )}
 
       {usersView === "edit" && (
         <>
-          <h2>تعديل المستخدمين</h2>
+				{message && (<p className="suc-message">{message}</p>)}
+				{errMessage && (<p className="err-message">{errMessage}</p>)}
           <div className="table-container">
             <table>
               <thead>

@@ -100,20 +100,22 @@ const TripFilterSortComp1 = ({ trips, onSearch }) => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <label> البدء:</label>
-        <input
+					<div className="date-filter">
+					<label htmlFor="startDate">البدء:</label>
+					<input
           type="date"
           name="startDate"
           value={filters.startDate}
           onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
         />
-        <label> الانتهاء:</label>
-        <input
+				<label htmlFor="endDate">النهاية:</label>
+				<input
           type="date"
           name="endDate"
           value={filters.endDate}
           onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
         />
+				</div>
 
         <button className="export-btn" onClick={exportToExcel}>
           حفظ الي ملف اكسيل

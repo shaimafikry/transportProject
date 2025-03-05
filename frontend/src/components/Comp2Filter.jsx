@@ -209,7 +209,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
   />
 </div>
-  <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
+  <button className="exl-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
     ترتيب حسب التعتيق ({sortOrder === "asc" ? "تصاعدي" : "تنازلي"})
   </button>
 

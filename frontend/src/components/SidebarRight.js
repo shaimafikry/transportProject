@@ -3,7 +3,7 @@ import { FaSearch, FaIndustry, FaBuilding, FaUserPlus, FaTruck, FaCar, FaRegBuil
 
 
 
-const SidebarRight = ({ role, onSelect, onSearch  }) => {
+const SidebarRight = ({role, onSelect}) => {
 	const handleLogout = async () => {
     try {
       const response = await fetch("logout", {
@@ -28,26 +28,21 @@ const SidebarRight = ({ role, onSelect, onSearch  }) => {
       className={"sidebar-right"} >
         <>
 				<img src="/logo.jpg" alt="Logo"/>
-
-          <button onClick={onSearch} title="البحث">
-            <FaSearch /> البحث
-          </button>
           <button onClick={() => onSelect("add-comp1")} title="المحاجر">
             <FaIndustry /> المحاجر
           </button>
           <button onClick={() => onSelect("add-comp2")} title="النقل">
             <FaTruck /> النقل
           </button>
-          <button onClick={() => onSelect("drivers")} title="اضافة سائق">
-            <FaUserPlus /> اضافة سائق
+          <button onClick={() => onSelect("drivers")} title="السائقين">
+            <FaUserPlus />السائقين
           </button>
-          <button onClick={() => onSelect("add-org")} title="اضافة عميل">
-            <FaRegBuilding /> اضافة عميل
+          <button onClick={() => onSelect("add-org")} title="العملاء">
+            <FaRegBuilding />العملاء
           </button>
 					{role === "manager" && (
-            <button onClick={() => onSelect("users")} title="اضافة مستخدم">
-              <FaUserPlus /> اضافة مستخدم
-            </button>
+            <button onClick={() => onSelect("users")} title="الموظفين">
+              <FaUserPlus />الموظفين</button>
           )}
 
           <button onClick={() => onSelect("profile")} title="الملف الشخصي">

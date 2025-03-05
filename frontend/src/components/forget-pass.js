@@ -29,7 +29,7 @@ const ForgetPass = () => {
     e.preventDefault();
 
     if (newPassword.length < 6) {
-      setStatus("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
+      setStatus("يجب أن تكون كلمة السر أكثر من 5 أحرف أو أرقام");
       return;
     }
 

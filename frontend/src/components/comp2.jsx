@@ -12,6 +12,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 	const [isSearching, setIsSearching] = useState(false);
 	const [originalTrips, setOriginalTrips] = useState([]); // To store the original data
 	const [message, setMessage]= useState("");
+	const [errMessage, setErrMessage] = useState("");
+
 	
 
   const initialTripState = {
@@ -246,24 +248,28 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
         // Validate required fields before submission
         if (!tripData.driver_name) {
-            setMessage("يجب إدخال اسم السائق");
+            setErrMessage("يجب إدخال اسم السائق");
             return;
         }
         if (!tripData.client_name) {
-            setMessage("يجب إدخال اسم العميل");
+            setErrMessage("يجب إدخال اسم العميل");
             return;
         }
         if (!tripData.fo_number) {
-            setMessage("يجب إدخال رقم FO");
+            setErrMessage("يجب إدخال رقم FO");
             return;
         }
         if (!tripData.national_id) {
-            setMessage("يجب إدخال الرقم القومي للسائق");
+            setErrMessage("يجب إدخال الرقم القومي للسائق");
             return;
         }
 
         // Send sanitized data to backend
-        const data = await postData("dashboard?action=comp2Trips-add", tripData);
+				const tripToSend = {
+					...tripData, // Copy existing trip data
+					added_by: sessionStorage.getItem("username"), // Add new key-value pair
+				};
+        const data = await postData("dashboard?action=comp2Trips-add", tripToSend);
         setTripsComp2([...tripsComp2, data]);
 
         // Reset form fields
@@ -272,7 +278,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
         setMessage("تم اضافة الرحلة بنجاح");
     } catch (error) {
         console.error("Error adding trip:", error);
-        setMessage(error.message);
+        setErrMessage(error.message);
     }
 };
 
@@ -304,8 +310,15 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
   // Update trip
   const handleSaveTrip = async (id) => {
+
     try {
-      const tripToUpdate = tripsComp2.find((trip) => trip.id === id);
+      const tripToUpdate = tripsComp2.find((trip) => trip.id === id) || {};
+			
+			if (Object.keys(tripToUpdate).length === 0) {
+				console.log("No changes to save");
+				return;
+			}
+
 				const tripData = { ...tripToUpdate };
 				Object.keys(tripData).forEach((key) => {
 					if (tripData[key] === "") {
@@ -329,14 +342,17 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 						: trip
 				)
 			);
+			setMessage('تم تعديل الرحلة بنجاح')
 		}catch (error) {
       console.error("Error updating trip:", error);
-			setMessage(`${error.message}`)
+			setErrMessage(`${error.message}`)
     }
   };
 
   // Delete trip
   const handleDeleteTrip = async (id) => {
+		const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذه الرحلة");
+    if (!confirmDelete) return;
     try {
       const tripToDel = tripsComp2.find((trip) => trip.id === id);
       await deleteData('dashboard?action=comp2Trips-del', tripToDel);
@@ -346,41 +362,35 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 			 setOriginalTrips((prevOriginalTrips) =>
 				prevOriginalTrips.filter((trip) => trip.id !== id)
 			);
+			setMessage('تم حذف الرحلة بنجاح')
 
 
     } catch (error) {
       console.error("Error deleting trip:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
 
-		useEffect(() => {
-			if (!showFilter) {
-				resetSearch();
-			}
-			else{
-						setViewComp2("edit");
-			}
-		}, [showFilter]);
 
   return (
     <>
-
-  
+		  <h2>رحلات شركة النقل</h2>
       <div className="trip-options">
-        <button onClick={() => { fetchAgents(); setViewComp2("add"); }}>إضافة رحلة</button>
-        <button onClick={() => setViewComp2("import")}>اضافة من ملف اكسيل</button>
-        <button onClick={() => { fetchTrips(); setViewComp2("edit"); }}>تعديل رحلة</button>
-        <button onClick={() => { fetchTrips(); setViewComp2("all"); }}>الرحلات</button>
+        <button onClick={() => { setMessage(""); fetchAgents(); setViewComp2("add"); setErrMessage("");}}>إضافة رحلة</button>
+        <button onClick={() =>{ setViewComp2("import"); setMessage(""); setErrMessage("");}}>اضافة من ملف اكسيل</button>
+        <button onClick={() => { setMessage(""); fetchTrips(); setViewComp2("edit"); setErrMessage("");}}>تعديل رحلة</button>
+        <button onClick={() => {setMessage(""); fetchTrips(); setViewComp2("all"); setErrMessage("");}}>الرحلات</button>
       </div>
       
       {/*//MARK: call FilterSort*/}
-			{showFilter && viewComp2 == "edit" && (
+			{/*i need to make it work with all too */}
+			{(viewComp2 === "edit" || viewComp2 === "all") && (
         <TripFilterSortComp2 trips={originalTrips} onSearch={handleSearch} />
       )}
   
       {viewComp2 === "add" && (
         <>
-          <h2>إضافة رحلات لشركة النقل</h2>
           <div className="comp2-dashboard-form-group">
             {Object.entries(initialTripState).map(([key, label]) => (
               <div key={key} className="comp2-form-field">
@@ -443,15 +453,15 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
             ))}
           </div>
           <button onClick={handleAddTrip}>حفظ الرحلة</button>
-					{message && (
-          <p style={{ color: "white", backgroundColor: "red", padding: "8px", borderRadius: "4px" }} className="mt-2">{message}</p>
-        )}
+					{message && (<p className="suc-message">{message}</p>)}
+					{errMessage && (<p className="err-message">{errMessage}</p>)}
         </>
       )}
 
       {viewComp2 === "edit" && (
         <>
-          <h2>تعديل رحلات شركة النقل </h2>
+				{message && (<p className="suc-message">{message}</p>)}
+				{errMessage && (<p className="err-message">{errMessage}</p>)}
 					<div className="table-container">
           <table >
             <thead>
@@ -559,6 +569,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                       <td>{trip.total_received_cash}</td>
                       <td>{trip.remain_cash}</td>
                       <td>{trip.notes}</td>
+                      <td>{trip.added_by}</td>
+
 
                       <td>
                         <button onClick={() => handleEditTrip(trip.id)}>تعديل</button>
@@ -573,9 +585,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
         </>
       )}
 			
-      {!showFilter && viewComp2 === "all" && (
+      {viewComp2 === "all" && (
         <>
-          <h2>سجل رحلات شركة النقل </h2>
           <table className="table-large">
             <thead>
               <tr>
@@ -599,7 +610,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
 			{/* Import Excel Modal */}
       {viewComp2 === "import" && (
-        <ImportTrips        />
+        <ImportTrips />
       )}
     </>
   );

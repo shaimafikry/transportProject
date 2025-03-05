@@ -87,7 +87,8 @@ h2 {
   width: 100%;
   max-width: 1200px;
   padding: 10px;
-  overflow-x: hidden; /* Prevents horizontal scrolling */
+  overflow-x: auto;
+	gap: 10px;
 }
 
 /* Responsive Adjustments */
@@ -369,4 +370,20 @@ table button:hover {
 .user-options button:hover,
 .driver-options button:hover {
   background-color: #71483c;
+}
+
+
+.suc-message ,
+.err-message {
+	color: white;
+	padding: 8px;
+	border-radius: 4px; 
+
+}
+.suc-message {
+	background-color: green;
+}
+
+.err-message {
+	background-color: red;
 }

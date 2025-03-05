@@ -25,8 +25,8 @@ const [role, setRole] = useState("");
 
 return (
 	<div className="container-fluid">
-		<SidebarRight  role={role} onSelect={setSelectedSection} onSearch={toggleFilter} />
-		<Content selected={selectedSection} showFilter={showFilter} onSearchClick={toggleFilter} />
+		<SidebarRight  role={role} onSelect={setSelectedSection}/>
+		<Content selected={selectedSection} />
 	</div>
 );
 };

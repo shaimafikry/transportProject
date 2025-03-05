@@ -5,6 +5,8 @@ import DriverFilter from "./driverFilter";
 const Drivers = ({ showFilter, onSearchClick }) => {
   const [viewDrivers, setViewDrivers] = useState("");
   const [drivers, setDrivers] = useState([]);
+	const [message, setMessage]= useState("");
+	const [errMessage, setErrMessage] = useState("");
   const [newDriver, setNewDriver] = useState({
     leader_name: "",
     driver_name: "",
@@ -104,7 +106,13 @@ const Drivers = ({ showFilter, onSearchClick }) => {
   };
 
   const handleAddDriver = async () => {
+
+		if (newDriver.phone_number === "" || newDriver.driver_name === "" || newDriver.national_id === ""){
+			setErrMessage('رقم التليفون، اسم السائق، الرقم القومي : هذه الحقول لا يجب ان تكون فارغة')
+			return
+		}
     try {
+
       const data = await postData("dashboard?action=drivers-add", newDriver);
       setDrivers([...drivers, { ...data, isEditing: false }]);
       setNewDriver({
@@ -115,14 +123,22 @@ const Drivers = ({ showFilter, onSearchClick }) => {
         passport_number: "",
         company: "",
       });
+			setMessage('تم اضافة السائق  بنجاح')
+
     } catch (error) {
       console.error("Error adding driver:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
 
   const handleSaveDriver = async (id) => {
     try {
-      const driverToUpdate = drivers.find((driver) => driver.id === id);
+      const driverToUpdate = drivers.find((driver) => driver.id === id) || {};
+      if (Object.keys(driverToUpdate).length === 0) {
+        console.log("No changes to save");
+        return;
+      }
       const updatedDriver = await putData("dashboard?action=drivers-edit", driverToUpdate);
 
   
@@ -137,17 +153,23 @@ const Drivers = ({ showFilter, onSearchClick }) => {
       setOriginalDrivers((prevOriginalDrivers) =>
         prevOriginalDrivers.map((trip) =>
           trip.id === id
-            ? { ...updatedDriver, trip_date: trip.trip_date.split("T")[0], isEditing: false }
+            ? { ...updatedDriver, isEditing: false }
             : trip
         )
       );
+			setMessage('تم تعديل بيانات السائق بنجاح')
+
     } catch (error) {
       console.error("Error updating driver:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
   
 
   const handleDeleteDriver = async (id) => {
+		const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذا السائق؟");
+    if (!confirmDelete) return;
     try {
       const driverToDel = drivers.find((driver) => driver.id === id);
       await deleteData("dashboard?action=drivers-del", driverToDel);
@@ -157,8 +179,12 @@ const Drivers = ({ showFilter, onSearchClick }) => {
       setOriginalDrivers((prevOriginalDrivers) =>
         prevOriginalDrivers.filter((driver) => driver.id !== id)
       );
+			setMessage('تم حذف السائق بنجاح')
+
     } catch (error) {
       console.error("Error deleting driver:", error);
+			setErrMessage(`${error.message}`)
+
     }
   };
 
@@ -172,36 +198,56 @@ const Drivers = ({ showFilter, onSearchClick }) => {
 
   return (
     <>
+		 <h2>سجل السائقين</h2>
       <div className="driver-options">
-        <button onClick={() => setViewDrivers("add")}>إضافة سائق</button>
-        <button onClick={() => { fetchDrivers(); setViewDrivers("edit"); }}>تعديل سائق</button>
+        <button onClick={() => {setViewDrivers("add"); setErrMessage(""); setMessage("");}}>إضافة سائق</button>
+        <button onClick={() => {setMessage(""); setErrMessage(""); fetchDrivers(); setViewDrivers("edit"); }}>تعديل سائق</button>
       </div>
 
-      {showFilter && viewDrivers !== "add" && (
+      {viewDrivers === "edit" && (
         <DriverFilter drivers={originalDrivers} onSearch={handleSearch} />
       )}
 
       {viewDrivers === "add" && (
         <>
-          <h2>اضافة سائق</h2>
           <div className="dashboard-form-group">
             {driverFields.map(({ name, type, placeholder }) => (
-              <input
-                key={name}
-                type={type}
-                placeholder={placeholder}
-                value={newDriver[name]}
-                onChange={(e) => handleDriverChange(name, e.target.value)}
-              />
-            ))}
+							<div key={name} className="form-field">
+                <label htmlFor={name}>{placeholder}</label>
+								{name === "company" ? (
+                <select
+                  key={name}
+                  value={newDriver[name]}
+                  onChange={(e) => handleDriverChange(name, e.target.value)}
+                >
+                  <option value="">اختر الشركة</option>
+                  <option value="النقل">النقل</option>
+                  <option value="المحاجر">المحاجر</option>
+                </select>
+								):(
+								<input
+									key={name}
+									type={type}
+									placeholder={placeholder}
+									value={newDriver[name]}
+									onChange={(e) => handleDriverChange(name, e.target.value)}
+								/>
+								)}
+								</div>
+								
+							))}
           </div>
           <button onClick={handleAddDriver}>حفظ السائق</button>
+					{message && (<p className="suc-message">{message}</p>)}
+					{errMessage && (<p className="err-message">{errMessage}</p>)}
+
         </>
       )}
 
       {viewDrivers === "edit" && (
         <>
-          <h2>تعديل السائقين</h2>
+				  {message && (<p className="suc-message">{message}</p>)}
+					{errMessage && (<p className="err-message">{message}</p>)}
           <div className="table-container">
             <table>
               <thead>
@@ -219,12 +265,24 @@ const Drivers = ({ showFilter, onSearchClick }) => {
                       <>
                         {editFields.map(({ name, disabled }) => (
                           <td key={name}>
+														 {name === "company" ? (
+                              <select
+                                value={driver[name]}
+                                onChange={(e) =>
+                                  handleEditDriverChange(driver.id, name, e.target.value)
+                                }
+                              >
+                                <option value="النقل">النقل</option>
+                                <option value="المحاجر">المحاجر</option>
+                              </select>
+														 ):(
                             <input
                               type="text"
                               value={driver[name] || ""}
                               onChange={(e) => handleEditDriverChange(driver.id, name, e.target.value)}
                               disabled={disabled}
                             />
+														 )}
                           </td>
                         ))}
                         <td>
