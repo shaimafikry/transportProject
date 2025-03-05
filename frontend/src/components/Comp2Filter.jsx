@@ -213,11 +213,11 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   />
 </div>
   <button className="exl-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-    ترتيب حسب التعتيق ({sortOrder === "asc" ? "تصاعدي" : "تنازلي"})
+ترتيب ({sortOrder === "asc" ? "تصاعدي" : "تنازلي"})
   </button>
 
   <button className="export-btn" onClick={exportToExcel}>
-    حفظ إلى ملف إكسيل
+    حفظ
   </button>
 </div>
     </div>

@@ -27,7 +27,7 @@ const Comp1 = () => {
     { name: "bon_number", type: "text", placeholder: "رقم البون" },
     { name: "driver_name", type: "text", placeholder: "اسم السائق" },
     { name: "car_number", type: "text", placeholder: "رقم السيارة" },
-    { name: "quantity", type: "text", placeholder: "الكمية" },
+    { name: "quantity", type: "number", placeholder: "الكمية" },
     { name: "trip_date", type: "date", placeholder: "تاريخ التحميل" },
     { name: "price", type: "number", placeholder: "السعر" },
 		{ name: "added_by", type: "text", placeholder: "بواسطة" },
@@ -132,12 +132,12 @@ const Comp1 = () => {
 		);
 	};
 
-  // Add a new trip
+  //MARK: Add a new trip
   const handleAddTrip = async () => {
-			if (newTripComp1.bon_number === "" || newTripComp1.driver_name === "" || newTripComp1.car_number === ""){
-        setErrMessage('رقم البون، اسم السائق، اسم السيارة : هذه الحقول لا يجب ان تكون فارغة')
-				return
-			}
+			// if (newTripComp1.bon_number === "" || newTripComp1.driver_name === "" || newTripComp1.car_number === ""){
+      //   setErrMessage('رقم البون، اسم السائق، اسم السيارة : هذه الحقول لا يجب ان تكون فارغة')
+			// 	return
+			// }
 		try {
 			const tripToSend = {
 				...newTripComp1,
@@ -177,7 +177,7 @@ const Comp1 = () => {
     }
   };
 
-  // Save updated trip
+  // MARK: Save updated trip
   const handleSaveTrip = async (id) => {
     try {
       const tripToUpdate = tripsComp1.find((trip) => trip.id === id) || {};
@@ -197,7 +197,7 @@ const Comp1 = () => {
       );
 
 
-			 // Update originalTrips
+			 // MARK: Update originalTrips
 			 setOriginalTrips((prevOriginalTrips) =>
 				prevOriginalTrips.map((trip) =>
 					trip.id === id

@@ -208,7 +208,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 
 		};
 
-  // Add a new trip
+  // MARK:Add a new trip
   const handleAddTrip = async () => {
     try {
         const tripData = { ...newTripComp2 };
@@ -252,14 +252,18 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
             setErrMessage("يجب إدخال اسم السائق");
             return;
         }
-        if (!tripData.client_name) {
-            setErrMessage("يجب إدخال اسم العميل");
-            return;
-        }
-        if (!tripData.fo_number) {
-            setErrMessage("يجب إدخال رقم FO");
-            return;
-        }
+        if (!tripData.leader_name) {
+          setErrMessage("يجب إدخال اسم المندوب");
+          return;
+      }
+        // if (!tripData.client_name) {
+        //     setErrMessage("يجب إدخال اسم العميل");
+        //     return;
+        // }
+        // if (!tripData.fo_number) {
+        //     setErrMessage("يجب إدخال رقم FO");
+        //     return;
+        // }
         if (!tripData.national_id) {
             setErrMessage("يجب إدخال الرقم القومي للسائق");
             return;
@@ -270,6 +274,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 					...tripData, // Copy existing trip data
 					added_by: sessionStorage.getItem("username"), // Add new key-value pair
 				};
+        console.log('added by ', added_by);
         const data = await postData("dashboard?action=comp2Trips-add", tripToSend);
         setTripsComp2([...tripsComp2, data]);
 

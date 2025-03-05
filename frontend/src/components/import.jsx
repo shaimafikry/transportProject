@@ -88,7 +88,11 @@ const ImportTrips = () => {
   const handleSave = async () => {
     try {
       for (const trip of importedData) {
-        await postData("dashboard?action=comp2Trips-add", trip);
+        const tripToSend = {
+					...trip, // Copy existing trip data
+					added_by: sessionStorage.getItem("username"), // Add new key-value pair
+				};
+        await postData("dashboard?action=comp2Trips-add", tripToSend);
       }
       alert("تم حفظ البيانات");
       setShowModal(false);

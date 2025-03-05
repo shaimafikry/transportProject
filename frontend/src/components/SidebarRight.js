@@ -1,22 +1,19 @@
 import React, { useState } from "react";
 import { FaSearch, FaIndustry, FaBuilding, FaUserPlus, FaTruck, FaCar, FaRegBuilding, FaUser, FaSignOutAlt } from "react-icons/fa"; 
+import { postData } from "../api";
 
 
 
 const SidebarRight = ({role, onSelect}) => {
 	const handleLogout = async () => {
     try {
-      const response = await fetch("logout", {
-        method: "POST",
-        credentials: "include", // يضمن إرسال وحذف الكوكيز من المتصفح
-      });
+      const response = await postData("logout");
 
-      const data = await response.json();
       if (response.ok) {
-        console.log("log out successfully")
         window.location.href = "/"; // إعادة توجيه المستخدم لصفحة تسجيل الدخول
+        console.log("log out successfully")
       } else {
-        alert("فشل تسجيل الخروج");
+        console.error(response)
       }
     } catch (error) {
       console.error("Error logging out:", error);
