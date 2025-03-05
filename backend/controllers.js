@@ -31,8 +31,8 @@ const handleRequest = async (model, action, data) => {
     }
     return { [action]: await model.findAll() };
   } catch (error) {
-    console.error(`Error processing ${action}:`, error);
-    return { error: "حدث خطأ أثناء معالجة الطلب" };
+    console.error(`Error processing ${action}:`, error.message);
+    return { error: `${error.message}` };
   }
 };
 
