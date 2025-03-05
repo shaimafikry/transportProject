@@ -48,6 +48,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
     total_received_cash: "إجمالي النقدية المستلمة",
     remain_cash: " المتبقى",
     notes: "ملاحظات",
+		added_by: "بواسطة",
   };
 
   const [newTripComp2, setNewTripComp2] = useState(
@@ -480,7 +481,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                 <th>إجمالي النقدية المستلمة</th>
                 <th>المتبقى</th>
                 <th>ملاحظات</th>
-
+                <th>بواسطة</th>
                 <th>الإجراءات</th>
               </tr>
             </thead>
