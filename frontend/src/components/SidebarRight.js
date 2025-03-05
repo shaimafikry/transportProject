@@ -8,15 +8,9 @@ const SidebarRight = ({role, onSelect}) => {
 	const handleLogout = async () => {
     try {
       const response = await postData("logout");
-
-      if (response.ok) {
-        window.location.href = "/"; // إعادة توجيه المستخدم لصفحة تسجيل الدخول
-        console.log("log out successfully")
-      } else {
-        console.error(response)
-      }
+        window.location.href = "/"; 
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error("Error logging out:", error.message);
     }
   };
 
