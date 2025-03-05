@@ -49,6 +49,7 @@ const ConstructTrips = sequelize.define("ConstructTrips", {
   quantity: { type: DataTypes.DECIMAL(10, 2) },
   trip_date: { type: DataTypes.STRING },
   price: { type: DataTypes.DECIMAL(10, 2) },
+	added_by: { type: DataTypes.STRING, allowNull: false  },
 });
 
 
@@ -100,6 +101,8 @@ const TransportTrips = sequelize.define("TransportTrips", {
   total_received_cash: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
 	remain_cash:{ type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
   notes: { type: DataTypes.TEXT, allowNull: true },
+	added_by: { type: DataTypes.STRING, allowNull: false },
+
 });
 
 
