@@ -384,10 +384,19 @@ const updatePassword = async (req, res) => {
 };
 
 
-
+//MARK: log out
  const logout = (req, res) => {
-	res.clearCookie("token"); // حذف الكوكيز التي تحتوي على التوكن
-	return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+  try{
+
+    res.clearCookie("token"); // حذف الكوكيز التي تحتوي على التوكن
+  
+    return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+  }
+  catch(error){
+    console.log(error)
+    return res.status(400).json({ message: error.message });
+
+  }
   };
   
 

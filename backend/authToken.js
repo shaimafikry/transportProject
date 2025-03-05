@@ -9,7 +9,7 @@ const authToken = (req, res, next) => {
 	}
 
 	jwt.verify(token, process.env.SECRET_KEY , (err, user) => {
-	  if (err) return res.status(403).json('التوكن فير صحيح');
+	  if (err) return res.status(403).json('التوكن غير صحيح');
     req.user = user;
     next();
 	});
