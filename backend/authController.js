@@ -172,6 +172,22 @@ const allUsers = async (req, res) => {
 // MARK: ADD Trip
 const addTripAndDriver = async (req, res) => {
   try {
+     // Extract token from the Authorization header
+     const authHeader = req.headers.authorization;
+     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+       return res.status(401).json({ error: "Unauthorized: No token provided" });
+     }
+ 
+     const token = authHeader.split(" ")[1]; // Extract the token after "Bearer"
+     let decoded;
+     try {
+       decoded = jwt.verify(token, secret_key); // Verify and decode the token
+     } catch (err) {
+       return res.status(403).json({ error: "Invalid or expired token" });
+     }
+ 
+     const username = decoded.name; // Extract username from the token payload
+ 
     // Sanitize input data
     const sanitizeInput = (key, value) => {
       if (value === "" || value === null || value === undefined) {
@@ -225,12 +241,12 @@ const addTripAndDriver = async (req, res) => {
     if (!sanitizedData.driver_name){
       return res.status(400).json({ error: "يجب إدخال اسم السائق " });
     }
-		if (!sanitizedData.client_name) {
-      return res.status(400).json({ error: "يجب إدخال اسم العميل" });
-    }
-		if (!sanitizedData.fo_number) {
-      return res.status(400).json({ error: "يجب إدخال رقم FO" });
-    }
+		// if (!sanitizedData.client_name) {
+    //   return res.status(400).json({ error: "يجب إدخال اسم العميل" });
+    // }
+		// if (!sanitizedData.fo_number) {
+    //   return res.status(400).json({ error: "يجب إدخال رقم FO" });
+    // }
 
 		if (!sanitizedData.national_id) {
       return res.status(400).json({ error: "يجب إدخال الرقم القومي  للسائق  " });
@@ -240,6 +256,7 @@ const addTripAndDriver = async (req, res) => {
     // Check if the driver already exists
     let driver = await Drivers.findOne({ where: { national_id } });
 
+    sanitizedData.added_by = username;
     // Create the trip
     await TransportTrips.create(sanitizedData);
     console.log("تمت إضافة بيانات الرحلة بنجاح");
@@ -293,13 +310,22 @@ const signIn = async (req, res) => {
 	}
 	// generate JWT token and send it back to the client
 	const payload = {
-		name: user.name,
+    name: user.name,
     id: user.id,
-    iat: Math.floor(Date.now() / 1000) - 60 * 60 * 24 , // token will expire in 24 day
-	}
-	const token = jwt.sign(payload, secret_key, { algorithm: 'HS256' });
-
-  return res.status(200).json({ token: token , role: user.role, id: user.id, username:  user.username, message: 'Login successful', redirectUrl: '/dashboard' });
+    iat: Math.floor(Date.now() / 1000), // Current timestamp in seconds
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 24, // Expires in 24 days
+  };
+  
+  const token = jwt.sign(payload, secret_key, { algorithm: "HS256" });
+  
+  return res.status(200).json({
+    token: token,
+    role: user.role,
+    id: user.id,
+    username: user.username,
+    message: "Login successful",
+    redirectUrl: "/dashboard",
+  });
 }catch(error){
 	console.error('Error updating password:', error);
 	return res.status(500).json({ message: 'خطأ في الاتصال' });
@@ -385,19 +411,17 @@ const updatePassword = async (req, res) => {
 
 
 //MARK: log out
- const logout = (req, res) => {
-  try{
+const logout = (req, res) => {
+  try {
+    res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "strict" }); // حذف الكوكيز
 
-    res.clearCookie("token");
-  
     return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({ message: "حدث خطأ أثناء تسجيل الخروج" });
   }
-  catch(error){
-    console.log(error)
-    return res.status(500).json({ error: error.message });
+};
 
-  }
-  };
   
 
 module.exports = { signIn, addUser,editUser, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver };
