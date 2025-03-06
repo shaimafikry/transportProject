@@ -67,3 +67,13 @@
     align-items: flex-start;
   }
 }
+
+.search-container{
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.rock-search-container{
+  grid-template-columns: repeat(3, 1fr);
+
+}
