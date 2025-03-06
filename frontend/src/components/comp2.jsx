@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { fetchData, postData, putData, deleteData } from "../api";
+import { fetchData, postData } from "../api";
 import TripFilterSortComp2 from "./Comp2Filter";
 import ImportTrips from "./import"
+import TripEditModal from "./tripModal"
 
-const Comp2 = ({ showFilter, onSearchClick }) => {
-	const [showImportModal, setShowImportModal] = useState(false);
+const Comp2 = () => {
+	const [selectedTrip, setSelectedTrip] = useState(null);
   const [viewComp2, setViewComp2] = useState("");
   const [tripsComp2, setTripsComp2] = useState([]);
   const [agents, setAgents] = useState([]);
   const [selectedAgentType, setSelectedAgentType] = useState("");
-	const [isSearching, setIsSearching] = useState(false);
-	const [originalTrips, setOriginalTrips] = useState([]); // To store the original data
+	const [originalTrips, setOriginalTrips] = useState([]); 
 	const [message, setMessage]= useState("");
 	const [errMessage, setErrMessage] = useState("");
 
@@ -85,7 +85,6 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       setTripsComp2(Array.isArray(formattedTrips) ? formattedTrips : []);
 			// setTripsComp2(formattedTrips);
       setOriginalTrips(formattedTrips); 
-      setIsSearching(false); // Reset search state
     } catch (error) {
       console.error("Error fetching trips:", error);
       setTripsComp2([]);
@@ -106,24 +105,43 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
   useEffect(() => {
     setViewComp2("");
     fetchAgents();
-    fetchTrips();
+  }, []);
 
-  }, [onSearchClick]);
 
-				
+	const validateDates = () => {
+		if (newTripComp2.aging_date) {
+			const agingDate = new Date(newTripComp2.aging_date);
+			const dateFields = ["arrival_date", "company_loading_date"];
+	
+			for (let field of dateFields) {
+				if (newTripComp2[field] && new Date(newTripComp2[field]) > agingDate) {
+					setErrMessage(`لا يمكن أن يكون ${initialTripState[field]} أكبر من تاريخ التعتيق`);
+					return false;
+				}
+			}
+		}
+		setErrMessage("");
+		return true;
+	};
+	
 
-  // Calculate nights count
-  const calculateNightsCount = () => {
+
+
+  /* // Calculate nights count
+  const calculateNightsCount = (updatedTrip = newTripComp2) => {
 		// subtract company loading date from aging date
     const arrivalDate = new Date(newTripComp2.aging_date);
     const loadingDate = new Date(newTripComp2.company_loading_date);
 		const maxNights = parseFloat(newTripComp2.nights_max) || 0;
 
-    if (!isNaN(arrivalDate) && !isNaN(loadingDate)) {
+    if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())){
       const diffTime = Math.abs(arrivalDate - loadingDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       const nightValue = parseFloat(newTripComp2.night_value) || 0;
-      const totalNightsValue = diffDays > maxNights ? (diffDays-maxNights) * nightValue : 0;
+			let totalNightsValue = 0;
+			if (maxNights > 0) {
+				 totalNightsValue = diffDays > maxNights ? ((diffDays - maxNights) * nightValue) : 0;
+			}
 
       setNewTripComp2((prevState) => ({
         ...prevState,
@@ -132,8 +150,42 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       }));
     }
   };
+ */
 
-  // Calculate total transport
+	const calculateNightsCount = (updatedTrip = newTripComp2) => {
+		const arrivalDate = new Date(updatedTrip.aging_date);
+		const loadingDate = new Date(updatedTrip.company_loading_date);
+		const maxNights = parseFloat(updatedTrip.nights_max) || 0;
+	
+		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
+			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
+			const nightValue = parseFloat(updatedTrip.night_value) || 0;
+			let totalNightsValue = maxNights > 0 && diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
+	
+			setNewTripComp2((prevState) => ({
+				...prevState,
+				nights_count: diffDays,
+				total_nights_value: totalNightsValue,
+			}));
+		}
+	};
+	
+	const calculateTotalTransport = (updatedTrip = newTripComp2) => {
+		const totalNightsValue = parseFloat(updatedTrip.total_nights_value) || 0;
+		const transportFee = parseFloat(updatedTrip.transport_fee) || 0;
+		const expenses = parseFloat(updatedTrip.expenses) || 0;
+		const totalTransport = totalNightsValue + transportFee + expenses;
+		const totalReceivedCash = parseFloat(updatedTrip.total_received_cash) || 0;
+		const remainCash = totalTransport - totalReceivedCash;
+	
+		setNewTripComp2((prevState) => ({
+			...prevState,
+			total_transport: totalTransport,
+			remain_cash: remainCash,
+		}));
+	};
+	
+  /* // Calculate total transport
   const calculateTotalTransport = () => {
     const totalNightsValue = parseFloat(newTripComp2.total_nights_value) || 0;
     const transportFee = parseFloat(newTripComp2.transport_fee) || 0;
@@ -149,12 +201,14 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       remain_cash: remainCash,
     }));
   };
-
+ */
 
   useEffect(() => {
     calculateNightsCount();
     calculateTotalTransport();
   }, [
+		newTripComp2.aging_date,
+		newTripComp2.nights_max,
     newTripComp2.arrival_date,
     newTripComp2.company_loading_date,
     newTripComp2.night_value,
@@ -166,17 +220,19 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 	// Handle search results from TripFilterSortComp2Comp1
   const handleSearch = (searchResults) => {
     setTripsComp2(searchResults); // Update the table with filtered data
-    setIsSearching(true); // Set searching to active
   };
 
   // Reset to show all trips
   const resetSearch = () => {
-    setTripsComp2(originalTrips); // Reset to original data
-    setIsSearching(false); // Set searching to inactive
+    if (originalTrips.length === 0) {
+			fetchTrips();
+		} else {
+			setTripsComp2(originalTrips);
+		}
   };
 
   // Handle trip input changes
-  const handleTripChange = (field, value) => {
+  /* const handleTripChange = (field, value) => {
     setNewTripComp2((prevState) => ({
       ...prevState,
       [field]: value,
@@ -186,30 +242,34 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       const selectedAgent = agents.find((agent) => agent.agent_name === value);
       setSelectedAgentType(selectedAgent ? selectedAgent.agent_type : "");
     }
-  };
+  }; */
 
+	const handleTripChange = (field, value) => {
+		setNewTripComp2((prevState) => {
+			const updatedState = { ...prevState, [field]: value };
+	
+			// If the changed field affects calculations, update derived values
+			if (
+				["aging_date", "nights_max", "company_loading_date", "night_value", "transport_fee", "expenses", "total_received_cash"].includes(field)
+			) {
+				calculateNightsCount(updatedState);
+				calculateTotalTransport(updatedState);
+			}
+	
+			if (field === "client_name") {
+				const selectedAgent = agents.find((agent) => agent.agent_name === value);
+				setSelectedAgentType(selectedAgent ? selectedAgent.agent_type : "");
+			}
+	
+			return updatedState;
+		});
+	};
+	
 
-	  // Handle input changes for editing a trip
-		const handleEditTripChange = (tripId, field, value) => {
-			setTripsComp2((prevTrips) =>
-				prevTrips.map((trip) =>
-					trip.id === tripId ? { ...trip, [field]: value } : trip
-				)
-			);
-
-			
-		// Update originalTrips
-  setOriginalTrips((prevOriginalTrips) =>
-    prevOriginalTrips.map((trip) =>
-      trip.id === tripId ? { ...trip, [field]: value } : trip
-    )
-  );
-
-
-		};
 
   // MARK:Add a new trip
   const handleAddTrip = async () => {
+		if (!validateDates()) return;
     try {
         const tripData = { ...newTripComp2 };
 
@@ -274,7 +334,6 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 				// 	...tripData, // Copy existing trip data
 				// 	added_by: sessionStorage.getItem("username"), // Add new key-value pair
 				// };
-        // console.log('added by ', added_by);
         const data = await postData("dashboard?action=comp2Trips-add", tripData);
         setTripsComp2([...tripsComp2, data]);
 
@@ -285,98 +344,11 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
     } catch (error) {
         console.error("Error adding trip:", error);
         setErrMessage(error.message);
+				setTripsComp2([]);
+
     }
 };
 
-
-  // Toggle edit mode for a trip
-	const handleEditTrip = (id) => {
-		setTripsComp2((prevTrips) =>
-			prevTrips.map((trip) =>
-				trip.id === id
-					? trip.isEditing
-						? { ...trip.originalData, isEditing: false } 
-						: { ...trip, originalData: { ...trip }, isEditing: true } 
-					: trip
-			)
-		);
-		//check here
-
-
-			// Update originalTrips
-			setOriginalTrips((prevOriginalTrips) =>
-				prevOriginalTrips.map((trip) =>
-					trip.id === id
-						? { ...trip, isEditing: !trip.isEditing, originalData: trip.isEditing ? trip.originalData : { ...trip } }
-						: trip
-				)
-			);
-	};
-
-
-  // Update trip
-  const handleSaveTrip = async (id) => {
-
-    try {
-      const tripToUpdate = tripsComp2.find((trip) => trip.id === id) || {};
-			
-			if (Object.keys(tripToUpdate).length === 0) {
-				console.log("No changes to save");
-				return;
-			}
-
-				const tripData = { ...tripToUpdate };
-				Object.keys(tripData).forEach((key) => {
-					if (tripData[key] === "") {
-						tripData[key] = "";
-					}
-				});
-
-      const updatedTrip = await putData('dashboard?action=comp2Trips-edit', tripData );
-
-
-			setTripsComp2((prevTrips) =>
-        prevTrips.map((trip) => (trip.id === id ? { ...updatedTrip, isEditing: false }  : trip)))
-
-
-			
-			 // Update originalTrips
-			 setOriginalTrips((prevOriginalTrips) =>
-				prevOriginalTrips.map((trip) =>
-					trip.id === id
-						? { ...updatedTrip, isEditing: false }
-						: trip
-				)
-			);
-			setMessage('تم تعديل الرحلة بنجاح')
-		}catch (error) {
-      console.error("Error updating trip:", error);
-			setErrMessage(`${error.message}`)
-    }
-  };
-
-  // Delete trip
-  const handleDeleteTrip = async (id) => {
-		const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذه الرحلة");
-    if (!confirmDelete) return;
-    try {
-      const tripToDel = tripsComp2.find((trip) => trip.id === id);
-      await deleteData('dashboard?action=comp2Trips-del', tripToDel);
-      setTripsComp2(tripsComp2.filter((trip) => trip.id !== id));
-
-			 // Update originalTrips
-			 setOriginalTrips((prevOriginalTrips) =>
-				prevOriginalTrips.filter((trip) => trip.id !== id)
-			);
-			setMessage('تم حذف الرحلة بنجاح')
-
-
-    } catch (error) {
-      console.error("Error deleting trip:", error);
-			setErrMessage(`${error.message}`)
-
-    }
-  };
 
 
   return (
@@ -493,75 +465,6 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
             <tbody>
               {tripsComp2.map((trip) => (
                 <tr key={trip.id}>
-                  {trip.isEditing ? (
-                    <>
-                      <td>
-                        <input type="text" defaultValue={trip.driver_name} 
-												 onChange={(e) => handleEditTripChange(trip.id, "driver_name", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="date" defaultValue={trip.arrival_date}
-												 onChange={(e) => handleEditTripChange(trip.id, "arrival_date", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="date" defaultValue={trip.driver_loading_date}
-												 onChange={(e) => handleEditTripChange(trip.id, "driver_loading_date", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="text" defaultValue={trip.fo_number} 
-												onChange={(e) => handleEditTripChange(trip.id, "fo_number", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="text" defaultValue={trip.loading_place} 
-												onChange={(e) => handleEditTripChange(trip.id, "loading_place", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="date" defaultValue={trip.company_loading_date} 
-												onChange={(e) => handleEditTripChange(trip.id, "company_loading_date", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="text" defaultValue={trip.destination} 
-												onChange={(e) => handleEditTripChange(trip.id, "destination", e.target.value)}/>
-                      </td>
-											<td>
-                        <input type="date" defaultValue={trip.aging_date} 
-												onChange={(e) => handleEditTripChange(trip.id, "aging_date", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="text" defaultValue={trip.client_name}
-												onChange={(e) => handleEditTripChange(trip.id, "client_name", e.target.value)} />
-                      </td>
-                      <td>
-                        <input type="number" defaultValue={trip.nights_count} 
-												onChange={(e) => handleEditTripChange(trip.id, "nights_count", e.target.value)}/>
-                      </td>
-                      <td>
-                        <input type="number" defaultValue={trip.total_transport}
-												onChange={(e) => handleEditTripChange(trip.id, "total_transport", e.target.value)} />
-                      </td>
-                      <td>
-                        <input type="number" defaultValue={trip.total_received_cash}
-												onChange={(e) => handleEditTripChange(trip.id, "total_received_cash", e.target.value)} />
-                      </td>
-                      <td>
-                        <input type="number" defaultValue={trip.remain_cash}
-												onChange={(e) => handleEditTripChange(trip.id, "total_received_cash", e.target.value)} />
-                      </td>
-											<td>
-                        <input type="text" defaultValue={trip.notes}
-												onChange={(e) => handleEditTripChange(trip.id, "notes", e.target.value)} />
-                      </td>
-											<td>{trip.added_by}</td>
-                      <td>
-											<div className="action-buttons">
-                        <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
-                        <button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
-                        <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
-												</div>
-                      </td>
-                    </>
-                  ) : (
-                    <>
                       <td>{trip.driver_name}</td>
                       <td>{trip.arrival_date}</td>
                       <td>{trip.driver_loading_date}</td>
@@ -578,10 +481,8 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
                       <td>{trip.notes}</td>
                       <td>{trip.added_by}</td>
                       <td>
-                        <button onClick={() => handleEditTrip(trip.id)}>تعديل</button>
+                        <button onClick={() => setSelectedTrip(trip)}>تعديل</button>
                       </td>
-                    </>
-                  )}
                 </tr>
               ))}
             </tbody>
@@ -589,6 +490,7 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
 					</div>
         </>
       )}
+
 			
       {viewComp2 === "all" && (
         <>
@@ -617,6 +519,19 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
       {viewComp2 === "import" && (
         <ImportTrips />
       )}
+
+		{selectedTrip && (
+						<TripEditModal
+							trip={selectedTrip}
+							initialTripState={initialTripState}
+							carTypes={carTypes}
+							agents={agents}
+							onSave={() => {
+								setSelectedTrip(null);
+								fetchTrips();
+							}}
+						/>
+										)}
     </>
   );
 };
