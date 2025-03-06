@@ -55,10 +55,11 @@ const ImportTrips = () => {
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         if (jsonData.length === 0) return;
-        
-        const headers = jsonData[0]; // الصف الأول كعناوين أعمدة
+
+        const headers = jsonData[0];
         const columnMapping = {};
 
+        // Map column headers to keys in initialTripState
         Object.keys(initialTripState).forEach((key) => {
           const columnIndex = headers.findIndex((col) => col.trim() === initialTripState[key].trim());
           if (columnIndex !== -1) {
@@ -67,14 +68,63 @@ const ImportTrips = () => {
         });
 
         const rows = jsonData.slice(1);
-        const mappedData = rows.map((row) => {
-          let mappedRow = {};
-          Object.keys(columnMapping).forEach((key) => {
-            const value = row[columnMapping[key]];
-            mappedRow[key] = value !== undefined && value !== null ? String(value).trim() : "";
-          });
-          return mappedRow;
-        });
+        const mappedData = rows
+          .map((row) => {
+            let mappedRow = {};
+            let isEmptyRow = true;
+
+            // Map values from Excel row to corresponding keys
+            Object.keys(columnMapping).forEach((key) => {
+              let value = row[columnMapping[key]];
+              if (value === undefined || value === null) {
+                value = "";
+              }
+              mappedRow[key] = String(value).trim();
+
+              if (mappedRow[key] !== "") {
+                isEmptyRow = false;
+              }
+            });
+
+            if (isEmptyRow) return null;
+
+            // Normalize numeric values and strings
+            Object.keys(mappedRow).forEach((key) => {
+              let value = mappedRow[key];
+              if (value === "") {
+                if ([
+                  "nights_count",
+                  "night_value",
+                  "total_nights_value",
+                  "transport_fee",
+                  "expenses",
+                  "total_transport",
+                  "deposit",
+                  "total_received_cash"
+                ].includes(key)) {
+                  mappedRow[key] = 0; // Set default numeric fields to zero
+                } else {
+                  mappedRow[key] = "";
+                }
+              } else {
+                if (key === "national_id" || key === "phone_number") {
+                  mappedRow[key] = String(value).trim();
+                } else if (!isNaN(value) && typeof value !== "boolean") {
+                  mappedRow[key] = parseFloat(value); // Convert to number if applicable
+                } else {
+                  mappedRow[key] = value.toString().trim();
+                }
+              }
+            });
+
+            // Ensure essential fields are not empty
+            if (!mappedRow.driver_name || !mappedRow.leader_name || !mappedRow.national_id) {
+              return null;
+            }
+
+            return mappedRow;
+          })
+          .filter((row) => row !== null);
 
         allData = allData.concat(mappedData);
       });
@@ -89,9 +139,9 @@ const ImportTrips = () => {
     try {
       for (const trip of importedData) {
         const tripToSend = {
-					...trip, // Copy existing trip data
-					added_by: sessionStorage.getItem("username"), // Add new key-value pair
-				};
+          ...trip,
+          added_by: sessionStorage.getItem("username"), // Attach username for tracking
+        };
         await postData("dashboard?action=comp2Trips-add", tripToSend);
       }
       alert("تم حفظ البيانات");
@@ -136,6 +186,7 @@ const ImportTrips = () => {
     </div>
   );
 };
+
 
 const styles = {
   modal: {

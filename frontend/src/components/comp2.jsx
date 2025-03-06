@@ -270,12 +270,12 @@ const Comp2 = ({ showFilter, onSearchClick }) => {
         }
 
         // Send sanitized data to backend
-				const tripToSend = {
-					...tripData, // Copy existing trip data
-					added_by: sessionStorage.getItem("username"), // Add new key-value pair
-				};
-        console.log('added by ', added_by);
-        const data = await postData("dashboard?action=comp2Trips-add", tripToSend);
+				// const tripToSend = {
+				// 	...tripData, // Copy existing trip data
+				// 	added_by: sessionStorage.getItem("username"), // Add new key-value pair
+				// };
+        // console.log('added by ', added_by);
+        const data = await postData("dashboard?action=comp2Trips-add", tripData);
         setTripsComp2([...tripsComp2, data]);
 
         // Reset form fields
