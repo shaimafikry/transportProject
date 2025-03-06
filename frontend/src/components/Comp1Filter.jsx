@@ -100,7 +100,7 @@ const TripFilterSortComp1 = ({ trips, onSearch }) => {
 
   return (
     <div>
-      <div className="search-container">
+      <div className="search-container rock-search-container">
         <input
           type="text"
           placeholder="🔍 البحث..."
