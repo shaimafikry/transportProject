@@ -275,7 +275,7 @@ const addTripAndDriver = async (req, res) => {
         trip_num: 1,
         total_all_transport: sanitizedData.total_transport,
         remaining_money_fees:
-          sanitizedData.total_transport - sanitizedData.total_received_cash,
+          parseInt(sanitizedData.total_transport) - parseInt(sanitizedData.total_received_cash),
       });
       console.log("تمت إضافة بيانات السائق بنجاح");
     }
