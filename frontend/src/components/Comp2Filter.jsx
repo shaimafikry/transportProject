@@ -40,11 +40,13 @@ const initialTripState = {
 const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({ client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
+  const [filters, setFilters] = useState({loading_place:"", client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
 
   const [uniqueClients, setUniqueClients] = useState([]);
   const [uniqueDestinations, setUniqueDestinations] = useState([]);
   const [uniqueLeaders, setUniqueLeaders] = useState([]);
+  const [uniqueLoadingPlaces, setUniquePlaces] = useState([]);
+
 
 	console.log(trips)
 
@@ -53,10 +55,13 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
       const clients = [...new Set(trips.map(trip => trip.client_name))];
       const destinations = [...new Set(trips.map(trip => trip.destination))];
       const leaders = [...new Set(trips.map(trip => trip.leader_name))];
+      const places = [...new Set(trips.map(trip => trip.loading_place))];
+
       
       setUniqueClients(clients);
       setUniqueDestinations(destinations);
       setUniqueLeaders(leaders);
+      setUniquePlaces(places);
     }
   }, [trips]);
 
@@ -72,6 +77,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
 			(trip.client_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.destination?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.leader_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.loading_place?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.added_by?.toLowerCase() || "").includes(searchQuery.toLowerCase())
 
       );

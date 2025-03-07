@@ -34,6 +34,9 @@ const initialTripState = {
   notes: "ملاحظات",
 };
 
+const dateFields = ["arrival_date", "driver_loading_date", "company_loading_date", "aging_date"];
+
+
 const ImportTrips = () => {
   const [importedData, setImportedData] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -75,6 +78,19 @@ const ImportTrips = () => {
               if (columnMapping[key] !== undefined) {
                 let value = row[columnMapping[key]];
                 if (value === undefined || value === null) value = "";
+
+                 // Convert Excel date serial numbers to readable date format
+                 if (dateFields.includes(key) && !isNaN(value) && value > 40000) {
+                  try {
+                    const excelDate = XLSX.SSF.parse_date_code(value);
+                    if (excelDate) {
+                      value = `${excelDate.y}-${String(excelDate.m).padStart(2, '0')}-${String(excelDate.d).padStart(2, '0')}`;
+                    }
+                  } catch (error) {
+                    console.warn(`فشل تحويل التاريخ في الصف ${rowIndex + 2}:`, value);
+                  }
+                }
+
                 mappedRow[key] = String(value).trim();
 
                 if (mappedRow[key] !== "") isEmptyRow = false;

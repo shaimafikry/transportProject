@@ -102,9 +102,15 @@ const Agent = () => {
       setNewAgent({ agent_name: "", agent_type: "" });
       fetchAgents();
       setMessage("تم اضافة العميل بنجاح");
+      setInterval(() => {
+        setMessage("");
+      }, 5000);
     } catch (error) {
       console.error("Error adding agent:", error);
-      setErrMessage(error.message);
+      setErrMessage("المنظمة موجودة مسبقا");
+      setInterval(() => {
+        setErrMessage("");
+      }, 5000);
     }
   };
 
@@ -162,10 +168,10 @@ const Agent = () => {
                 <option value="منظمة">منظمة</option>
               </select>
             </div>
-            <button onClick={addAgent}>حفظ</button>
-          </div>
           {message && <p className="suc-message">{message}</p>}
           {errMessage && <p className="err-message">{errMessage}</p>}
+            <button onClick={addAgent}>حفظ</button>
+          </div>
         </>
       )}
 

@@ -18,33 +18,41 @@ const Comp2 = () => {
 
   const initialTripState = {
     leader_name: "اسم المندوب",
+
     driver_name: "اسم السائق",
     phone_number: "رقم الموبايل",
     national_id: "الرقم القومي",
     passport_number: "رقم الجواز",
+
     car_letters: "حروف السيارة",
     car_numbers: "أرقام السيارة",
     trailer_letters: "حروف المقطورة",
     trailer_numbers: "أرقام المقطورة",
-    arrival_date: "تاريخ الوصول",
-    driver_loading_date: "تاريخ التحميل للسائق",
+
     car_type: "نوع السيارة",
-    fo_number: "رقم FO",
-    loading_place: "مكان التحميل",
-    company_loading_date: "تاريخ التحميل للشركة",
     cargo_type: "نوع الحمولة",
+    loading_place: "مكان التحميل",
     destination: "الجهة",
+
+    driver_loading_date: "تاريخ التحميل للسائق",
+    arrival_date: "تاريخ الوصول",
+    company_loading_date: "تاريخ التحميل للشركة",
+    aging_date: "تاريخ التعتيق",
+
+    fo_number: "رقم FO",
     equipment: "المعدة",
     client_name: "اسم العميل",
-    aging_date: "تاريخ التعتيق",
+
     nights_count: "عدد البياتات",
 		nights_max: " اقصى عدد بياتات",
     night_value: "قيمة البياتة",
     total_nights_value: "إجمالي قيمة البياتات",
+
     transport_fee: "ناوُلون",
     expenses: "مصاريف (كارتة + ميزان)",
-    total_transport: "إجمالي النقلة",
     deposit: "عهدة",
+    total_transport: "إجمالي النقلة",
+    
     total_received_cash: "إجمالي النقدية المستلمة",
     remain_cash: " المتبقى",
     notes: "ملاحظات",
@@ -308,32 +316,74 @@ const Comp2 = () => {
         });
 
         // Validate required fields before submission
-        if (!tripData.driver_name) {
-            setErrMessage("يجب إدخال اسم السائق");
-            return;
-        }
         if (!tripData.leader_name) {
           setErrMessage("يجب إدخال اسم المندوب");
+          setInterval(() => {
+            setErrMessage("");
+          }, 5000);
           return;
       }
-        // if (!tripData.client_name) {
-        //     setErrMessage("يجب إدخال اسم العميل");
-        //     return;
-        // }
-        // if (!tripData.fo_number) {
-        //     setErrMessage("يجب إدخال رقم FO");
-        //     return;
-        // }
-        if (!tripData.national_id) {
-            setErrMessage("يجب إدخال الرقم القومي للسائق");
+        if (!tripData.driver_name) {
+            setErrMessage("يجب إدخال اسم السائق");
+            setInterval(() => {
+              setErrMessage("");
+            }, 5000);
             return;
         }
 
-        // Send sanitized data to backend
-				// const tripToSend = {
-				// 	...tripData, // Copy existing trip data
-				// 	added_by: sessionStorage.getItem("username"), // Add new key-value pair
-				// };
+        if (!tripData.national_id) {
+          setErrMessage("يجب إدخال الرقم القومي للسائق");
+          setInterval(() => {
+            setErrMessage("");
+          }, 5000);
+          return ;
+        }
+        if (tripData.national_id.length !== 14) {
+          setErrMessage("الرقم القومي يجب أن يكون 14 رقمًا");
+          setInterval(() => {
+            setErrMessage("");
+          }, 5000);
+          return ;
+        }
+        if (tripData.arrival_date && tripData.driver_loading_date && tripData.arrival_date < tripData.driver_loading_date) {
+          setErrMessage("تاريخ الوصول لا يمكن أن يكون قبل تاريخ التحميل");
+          setInterval(() => {
+            setErrMessage("");
+          }, 5000);
+          return;
+        }
+        if (tripData.aging_date && tripData.company_loading_date && tripData.aging_date < tripData.company_loading_date) {
+          setErrMessage("تاريخ التعتيق لا يمكن أن يكون قبل تاريخ التحميل للشركة");
+          setInterval(() => {
+            setErrMessage("");
+          }, 5000);
+          return ;
+        }
+        if (tripData.car_letters && !/^\p{Script=Arabic}+\s\p{Script=Arabic}+$/u.test(tripData.car_letters)) {
+          setErrMessage("يجب أن تحتوي حروف السيارة على مسافة بين الحروف");
+          setTimeout(() => {
+            setErrMessage("");
+          }, 5000);
+          return;
+        }
+        
+        if (tripData.trailer_letters && !/^\p{Script=Arabic}+\s\p{Script=Arabic}+$/u.test(tripData.trailer_letters)) {
+          setErrMessage("يجب أن تحتوي حروف المقطورة على مسافة بين الحروف");
+          setTimeout(() => {
+            setErrMessage("");
+          }, 5000);
+          return;
+        }
+        
+        if (tripData.passport_number && tripData.passport_number.length > 9) {
+          setErrMessage("رقم الجواز لا يمكن أن يكون أكثر من 9 أرقام");
+          setInterval(() => {
+            setErrMessage("");
+          }, 5000);
+          return;
+        }
+
+       
         const data = await postData("dashboard?action=comp2Trips-add", tripData);
         setTripsComp2([...tripsComp2, data]);
 
@@ -341,9 +391,15 @@ const Comp2 = () => {
         setNewTripComp2(Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""])));
 
         setMessage("تم اضافة الرحلة بنجاح");
+        setInterval(() => {
+          setMessage("");
+        }, 5000);
     } catch (error) {
         console.error("Error adding trip:", error);
         setErrMessage(error.message);
+        setInterval(() => {
+          setErrMessage("");
+        }, 5000);
 				setTripsComp2([]);
 
     }
@@ -430,9 +486,9 @@ const Comp2 = () => {
               </div>
             ))}
           </div>
-          <button onClick={handleAddTrip}>حفظ الرحلة</button>
 					{message && (<p className="suc-message">{message}</p>)}
 					{errMessage && (<p className="err-message">{errMessage}</p>)}
+          <button onClick={handleAddTrip}>حفظ الرحلة</button>
         </>
       )}
 

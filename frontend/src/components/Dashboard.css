@@ -386,17 +386,64 @@ table button:hover {
 
 
 .suc-message ,
-.err-message {
-	color: white;
+.err-message,
+.error-message {
+  color: white;
+  font-size: 14px;
+  margin-top: 4px;
 	padding: 8px;
 	border-radius: 4px; 
-
+  font-weight: bold;
 }
+
 .suc-message {
 	background-color: green;
 }
 
-.err-message {
+/* General error message styling */
+
+
+/* Align error messages below each input field */
+.comp2-form-field {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Specific error styling for each field */
+.error-leader_name,
+.error-driver_name,
+.error-phone_number,
+.error-national_id,
+.error-passport_number,
+.error-car_letters,
+.error-car_numbers,
+.error-trailer_letters,
+.error-trailer_numbers,
+.error-car_type,
+.error-cargo_type,
+.error-loading_place,
+.error-destination,
+.error-driver_loading_date,
+.error-arrival_date,
+.error-company_loading_date,
+.error-aging_date,
+.error-fo_number,
+.error-equipment,
+.error-client_name,
+.error-nights_count,
+.error-nights_max,
+.error-night_value,
+.error-total_nights_value,
+.error-transport_fee,
+.error-expenses,
+.error-deposit,
+.error-total_transport,
+.error-total_received_cash,
+.error-remain_cash,
+.error-notes,
+.err-message,
+error-message {
 	background-color: red;
 }
 
