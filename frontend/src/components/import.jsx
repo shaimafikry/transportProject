@@ -24,7 +24,6 @@ const initialTripState = {
   client_name: "اسم العميل",
   aging_date: "تاريخ التعتيق",
   nights_count: "عدد البياتات",
-  nights_max: "اقصى عدد بياتات",
   night_value: "قيمة البياتة",
   total_nights_value: "إجمالي قيمة البياتات",
   transport_fee: "ناوُلون",
@@ -32,7 +31,6 @@ const initialTripState = {
   total_transport: "إجمالي النقلة",
   deposit: "عهدة",
   total_received_cash: "إجمالي النقدية المستلمة",
-  remain_cash: "المتبقى",
   notes: "ملاحظات",
 };
 
@@ -54,12 +52,11 @@ const ImportTrips = () => {
         const sheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        if (jsonData.length === 0) return;
+        if (jsonData.length < 2) return;
 
         const headers = jsonData[0];
         const columnMapping = {};
 
-        // Map column headers to keys in initialTripState
         Object.keys(initialTripState).forEach((key) => {
           const columnIndex = headers.findIndex((col) => col.trim() === initialTripState[key].trim());
           if (columnIndex !== -1) {
@@ -69,60 +66,43 @@ const ImportTrips = () => {
 
         const rows = jsonData.slice(1);
         const mappedData = rows
-          .map((row) => {
+          .map((row, rowIndex) => {
             let mappedRow = {};
             let isEmptyRow = true;
+            let hasError = false;
 
-            // Map values from Excel row to corresponding keys
             Object.keys(columnMapping).forEach((key) => {
-              let value = row[columnMapping[key]];
-              if (value === undefined || value === null) {
-                value = "";
-              }
-              mappedRow[key] = String(value).trim();
+              if (columnMapping[key] !== undefined) {
+                let value = row[columnMapping[key]];
+                if (value === undefined || value === null) value = "";
+                mappedRow[key] = String(value).trim();
 
-              if (mappedRow[key] !== "") {
-                isEmptyRow = false;
+                if (mappedRow[key] !== "") isEmptyRow = false;
               }
             });
 
             if (isEmptyRow) return null;
 
-            // Normalize numeric values and strings
             Object.keys(mappedRow).forEach((key) => {
               let value = mappedRow[key];
-              if (value === "") {
-                if ([
-                  "nights_count",
-                  "night_value",
-                  "total_nights_value",
-                  "transport_fee",
-                  "expenses",
-                  "total_transport",
-                  "deposit",
-                  "total_received_cash"
-                ].includes(key)) {
-                  mappedRow[key] = 0; // Set default numeric fields to zero
+              if (["nights_count", "night_value", "total_nights_value", "transport_fee", "expenses", "total_transport", "deposit", "total_received_cash"].includes(key)) {
+                if (value === "") {
+                  mappedRow[key] = 0;
+                } else if (!isNaN(value)) {
+                  mappedRow[key] = parseInt(value);
                 } else {
-                  mappedRow[key] = "";
-                }
-              } else {
-                if (key === "national_id" || key === "phone_number") {
-                  mappedRow[key] = String(value).trim();
-                } else if (!isNaN(value) && typeof value !== "boolean") {
-                  mappedRow[key] = parseFloat(value); // Convert to number if applicable
-                } else {
-                  mappedRow[key] = value.toString().trim();
+                  console.warn(`خطأ في الصف ${rowIndex + 2}: ${key} يجب أن يكون رقمًا`, value);
+                  hasError = true;
                 }
               }
             });
 
-            // Ensure essential fields are not empty
             if (!mappedRow.driver_name || !mappedRow.leader_name || !mappedRow.national_id) {
+              console.warn(`تم تخطي الصف ${rowIndex + 2} بسبب نقص البيانات الأساسية`);
               return null;
             }
 
-            return mappedRow;
+            return hasError ? null : mappedRow;
           })
           .filter((row) => row !== null);
 
@@ -135,14 +115,11 @@ const ImportTrips = () => {
     reader.readAsArrayBuffer(file);
   };
 
+
   const handleSave = async () => {
     try {
       for (const trip of importedData) {
-        const tripToSend = {
-          ...trip,
-          added_by: sessionStorage.getItem("username"), // Attach username for tracking
-        };
-        await postData("dashboard?action=comp2Trips-add", tripToSend);
+        await postData("dashboard?action=comp2Trips-add", trip);
       }
       alert("تم حفظ البيانات");
       setShowModal(false);
