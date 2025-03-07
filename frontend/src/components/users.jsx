@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
 import UserFilter from "./userFilter";
 
-const Users = ({ showFilter, onSearchClick }) => {
+const Users = () => {
   const [usersView, setUsersView] = useState("");
   const [users, setUsers] = useState([]);
   const [originalUsers, setOriginalUsers] = useState([]);
@@ -47,7 +47,7 @@ const Users = ({ showFilter, onSearchClick }) => {
   useEffect(() => {
     setUsersView("");
     fetchUsers();
-  }, [onSearchClick]);
+  }, []);
 
   const handleSearch = (searchResults) => {
     setUsers(searchResults);

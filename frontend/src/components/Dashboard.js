@@ -8,7 +8,6 @@ function Dashboard() {
 
 	
 const [selectedSection, setSelectedSection] = useState(null);
-const [showFilter, setShowFilter] = useState(false);
 const [role, setRole] = useState("");
 
   useEffect(() => {
@@ -19,9 +18,6 @@ const [role, setRole] = useState("");
   }, []);
 	console.log(role);
 
-  const toggleFilter = () => {
-    setShowFilter((prev) => !prev);
-  };
 
 return (
 	<div className="container-fluid">

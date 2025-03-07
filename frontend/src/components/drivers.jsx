@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
 import DriverFilter from "./driverFilter";
 
-const Drivers = ({ showFilter, onSearchClick }) => {
+const Drivers = () => {
   const [viewDrivers, setViewDrivers] = useState("");
   const [drivers, setDrivers] = useState([]);
 	const [message, setMessage]= useState("");
@@ -17,7 +17,6 @@ const Drivers = ({ showFilter, onSearchClick }) => {
   });
 
   const [originalDrivers, setOriginalDrivers] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   const driverFields = [
     { name: "leader_name", type: "text", placeholder: "اسم المندوب" },
@@ -41,7 +40,6 @@ const Drivers = ({ showFilter, onSearchClick }) => {
       const data = await fetchData("dashboard?action=drivers");
       setDrivers(Array.isArray(data.drivers) ? data.drivers.map((driver) => ({ ...driver, isEditing: false })) : []);
       setOriginalDrivers(data.drivers);
-      setIsSearching(false);
     } catch (error) {
       console.error("Error fetching drivers:", error);
       setDrivers([]);
@@ -51,18 +49,16 @@ const Drivers = ({ showFilter, onSearchClick }) => {
   useEffect(() => {
     setViewDrivers("");
     fetchDrivers();
-  }, [onSearchClick]);
+  }, []);
 
   // Handle search results from filterDriver
   const handleSearch = (searchResults) => {
     setDrivers(searchResults);
-    setIsSearching(true);
   };
 
   // Reset to show all drivers
   const resetSearch = () => {
     setDrivers(originalDrivers);
-    setIsSearching(false);
   };
 
   const handleDriverChange = (field, value) => {
@@ -188,13 +184,6 @@ const Drivers = ({ showFilter, onSearchClick }) => {
     }
   };
 
-  useEffect(() => {
-    if (!showFilter) {
-      resetSearch();
-    } else {
-      setViewDrivers("edit");
-    }
-  }, [showFilter]);
 
   return (
     <>

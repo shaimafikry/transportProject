@@ -13,6 +13,25 @@
   margin-bottom: 15px;
 }
 
+
+.user-search-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between; /* Distribute evenly */
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+.user-search-container > * {
+  flex: 1; /* Make items flexible */
+  min-width: 150px; /* Adjust as needed */
+}
+
 .search-container input[type="text"],
 .search-container select,
 .search-container input[type="date"] {

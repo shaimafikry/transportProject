@@ -320,6 +320,18 @@ tr {
 }
 
 
+.agent-table{
+	width: 100%;
+  overflow-x: auto;
+	display: flexbox;
+  justify-self: center;
+	background-color: transparent;
+	white-space: nowrap; /* Prevent wrapping of table content */
+	border-radius: 10px;
+}
+.agent-table button{
+	margin-left: 8px;
+}
 
 
 
