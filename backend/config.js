@@ -25,8 +25,8 @@ const Drivers = sequelize.define("Drivers", {
   passport_number: { type: DataTypes.STRING},
 	company: { type: DataTypes.STRING},
   trip_num: { type: DataTypes.INTEGER, defaultValue: 0 },
-  total_all_transport: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  remaining_money_fees: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  total_all_transport: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  remaining_money_fees: { type: DataTypes.INTEGER, defaultValue: 0.00 },
 });
 
 
@@ -46,9 +46,9 @@ const ConstructTrips = sequelize.define("ConstructTrips", {
   bon_number: { type: DataTypes.STRING },
   driver_name: { type: DataTypes.STRING },
   car_number: { type: DataTypes.STRING },
-  quantity: { type: DataTypes.DECIMAL(10, 2) },
+  quantity: { type: DataTypes.INTEGER },
   trip_date: { type: DataTypes.STRING },
-  price: { type: DataTypes.DECIMAL(10, 2) },
+  price: { type: DataTypes.INTEGER },
 	added_by: { type: DataTypes.STRING, allowNull: false  },
 });
 
@@ -92,14 +92,14 @@ const TransportTrips = sequelize.define("TransportTrips", {
   aging_date: { type: DataTypes.STRING,  allowNull: true  },
 	nights_max:{ type: DataTypes.INTEGER, defaultValue: 0 },
   nights_count: { type: DataTypes.INTEGER, defaultValue: 0 },
-  night_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  total_nights_value: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  transport_fee: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  expenses: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  total_transport: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  deposit: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-  total_received_cash: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
-	remain_cash:{ type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 },
+  night_value: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  total_nights_value: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  transport_fee: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  expenses: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  total_transport: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  deposit: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+  total_received_cash: { type: DataTypes.INTEGER, defaultValue: 0.00 },
+	remain_cash:{ type: DataTypes.INTEGER, defaultValue: 0.00 },
   notes: { type: DataTypes.TEXT, allowNull: true },
 	added_by: { type: DataTypes.STRING, allowNull: false },
 
