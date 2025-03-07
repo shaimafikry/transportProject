@@ -16,7 +16,7 @@ const [role, setRole] = useState("");
       setRole(storedRole);
     }
   }, []);
-	console.log(role);
+	// console.log(role);
 
 
 return (

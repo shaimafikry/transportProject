@@ -134,10 +134,11 @@ const Comp1 = () => {
 
   //MARK: Add a new trip
   const handleAddTrip = async () => {
-			// if (newTripComp1.bon_number === "" || newTripComp1.driver_name === "" || newTripComp1.car_number === ""){
-      //   setErrMessage('رقم البون، اسم السائق، اسم السيارة : هذه الحقول لا يجب ان تكون فارغة')
-			// 	return
-			// }
+		if (Object.values(newTripComp1).every(value => value.trim() === "")) {
+			setErrMessage("لا يمكن حفظ الرحلة بدون بيانات");
+			return;
+		}
+		
 		try {
 			const tripToSend = {
 				...newTripComp1,
@@ -250,7 +251,7 @@ const Comp1 = () => {
       {viewComp1 === "add" && (
         <>
           <div className="dashboard-form-group">
-            {tripFields.map(({ name, type, placeholder }) => (
+            {tripFields.filter((field) => field.name !== "added_by").map(({ name, type, placeholder }) => (
               <div key={name} className="form-field">
                 <label htmlFor={name}>{placeholder}</label>
                 <input
