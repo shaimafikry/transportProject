@@ -1,5 +1,5 @@
 require('dotenv').config({path: '../.env'});
-const { Users, Drivers, TransportTrips, ConstructTrips } = require('./config');
+const { Users, Drivers, TransportTrips, ConstructTrips, Agents } = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
@@ -237,6 +237,10 @@ const comp2EditTrip = async (req, res) => {
     const oldTotalTransport = existingTrip.total_transport || 0;
     const oldTotalReceivedCash = existingTrip.total_received_cash || 0;
 
+
+    const oldClientName = existingTrip.client_name;
+
+
     // Update trip data
     await TransportTrips.update(updateData, { where: { id } });
 
@@ -251,7 +255,7 @@ const comp2EditTrip = async (req, res) => {
 
 
     // Extract updated values
-    const { national_id, total_transport = 0, total_received_cash = 0 } = sanitizedData;
+    const { national_id, total_transport = 0, total_received_cash = 0, client_name="" } = sanitizedData;
 		// console.log("Updated after Data:", sanitizedData);
 
 
@@ -261,7 +265,7 @@ const comp2EditTrip = async (req, res) => {
         // Find the old driver and subtract values
         let oldDriver = await Drivers.findOne({ where: { national_id: oldNationalId } });
         if (oldDriver) {
-          oldDriver.total_trips = Math.max(0, oldDriver.total_trips - 1);
+          oldDriver.trip_num = Math.max(0, oldDriver.trip_num - 1);
           oldDriver.total_all_transport = Math.max(0, oldDriver.total_all_transport - oldTotalTransport);
           oldDriver.remaining_money_fees = Math.max(0, oldDriver.remaining_money_fees - (oldTotalTransport - oldTotalReceivedCash));
           await oldDriver.save();
@@ -273,7 +277,7 @@ const comp2EditTrip = async (req, res) => {
         // Find the new driver and add values
         let newDriver = await Drivers.findOne({ where: { national_id } });
         if (newDriver) {
-          newDriver.total_trips = (newDriver.total_trips || 0) + 1;
+          newDriver.trip_num = (newDriver.trip_num || 0) + 1;
           newDriver.total_all_transport = (newDriver.total_all_transport || 0) + total_transport;
           newDriver.remaining_money_fees = (newDriver.remaining_money_fees || 0) + (total_transport - total_received_cash);
           await newDriver.save();
@@ -293,6 +297,28 @@ const comp2EditTrip = async (req, res) => {
 
     }
 
+		 // Check if client changed
+		 if (client_name !== oldClientName) {
+      if (oldClientName) {
+        // Find the old driver and subtract values
+        let oldAgent = await Agents.findOne({ where: { agent_name: oldClientName } });
+        if (oldAgent) {
+          oldAgent.trip_num = Math.max(0, oldAgent.trip_num - 1);
+          await oldAgent.save();
+          console.log(`تم تحديث بيانات العميل القديم (${oldClientName})`);
+        }
+      }
+
+      if (client_name) {
+        // Find the new driver and add values
+        let newAgent = await Agents.findOne({ where: { agent_name: client_name } });
+        if (newAgent) {
+          newAgent.trip_num = (newAgent.trip_num || 0) + 1;
+          await newAgent.save();
+          console.log(`تم تحديث بيانات العميل الجديد (${client_name})`);
+        }
+      }
+    } 
 
     return res.status(200).json({ ...sanitizedData });
   } catch (error) {
@@ -319,7 +345,7 @@ const comp2DelTrip = async (req, res) => {
     const sanitizedData = tripToDel.get({ plain: true });
 
     // Extract important fields
-    const { national_id, total_transport = 0, total_received_cash = 0 } = sanitizedData;
+    const { national_id, total_transport = 0, total_received_cash = 0, client_name="" } = sanitizedData;
 
     // Delete the trip
     await TransportTrips.destroy({ where: { id } });
@@ -327,6 +353,9 @@ const comp2DelTrip = async (req, res) => {
 
     // Find the driver
     let driver = await Drivers.findOne({ where: { national_id } });
+    let agent = await Agents.findOne({ where: { agent_name: client_name } });
+
+		
 
     if (driver) {
       driver.trip_num = Math.max(0, driver.trip_num - 1);
@@ -334,6 +363,13 @@ const comp2DelTrip = async (req, res) => {
       driver.remaining_money_fees = Math.max(0, driver.remaining_money_fees - (total_transport - total_received_cash));
       await driver.save();
       console.log("تم تعديل بيانات السائق بنجاح");
+    }
+
+		if (agent) {
+      agent.trip_num = Math.max(0, agent.trip_num - 1);
+      
+      await agent.save();
+      console.log("تم تعديل بيانات الرحلة بنجاح");
     }
 
     return res.status(200).json("تم حذف الرحلة بنجاح");
@@ -407,7 +443,8 @@ const addTripAndDriver = async (req, res) => {
     });
 
     // Extract required fields for calculations
-    const { national_id, total_transport, total_received_cash } = sanitizedData;
+    const { national_id, total_transport, total_received_cash, client_name="" } = sanitizedData;
+		console.log(client_name)
 
     // Ensure numeric fields have valid values
     sanitizedData.total_transport = total_transport ?? 0;
@@ -431,6 +468,9 @@ const addTripAndDriver = async (req, res) => {
 
     // Check if the driver already exists
     let driver = await Drivers.findOne({ where: { national_id } });
+    let agent = await Agents.findOne({ where: { agent_name: client_name } });
+		console.log(agent);
+
 
     sanitizedData.added_by = username;
     // Create the trip
@@ -453,6 +493,13 @@ const addTripAndDriver = async (req, res) => {
         remaining_money_fees:
           parseInt(sanitizedData.total_transport) - parseInt(sanitizedData.total_received_cash),
       });
+      console.log("تمت إضافة بيانات السائق بنجاح");
+    }
+
+		 // Update or create the agents
+		 if (agent) {
+      agent.trip_num += 1;
+      await agent.save();
       console.log("تمت إضافة بيانات السائق بنجاح");
     }
 

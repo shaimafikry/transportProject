@@ -37,6 +37,7 @@ const Agents = sequelize.define("Agents", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   agent_name: { type: DataTypes.STRING},
   agent_type: { type: DataTypes.STRING },
+  trip_num: { type: DataTypes.INTEGER, defaultValue: 0 },
 
 });
 

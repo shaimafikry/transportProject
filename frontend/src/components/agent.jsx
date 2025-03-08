@@ -197,6 +197,8 @@ const Agent = () => {
               <tr>
                 <th>اسم العميل</th>
                 <th>نوع العميل</th>
+                <th>عدد الرحلات</th>
+
                 <th>الإجراءات</th>
               </tr>
             </thead>
@@ -223,6 +225,8 @@ const Agent = () => {
                           <option value="منظمة">منظمة</option>
                         </select>
                       </td>
+											<td>{agent.trip_num}</td> 
+
                       <td>
                         <button onClick={() => handleSaveAgent(agent.id)}>حفظ</button>
                         <button onClick={() => handleDeleteAgent(agent.id)}>حذف</button>
@@ -235,6 +239,8 @@ const Agent = () => {
                     <>
                       <td>{agent.agent_name}</td>
                       <td>{agent.agent_type}</td>
+                      <td>{agent.trip_num}</td>
+
                       <td>
                         <button onClick={() => handleEditAgent(agent.id)}>تعديل</button>
                       </td>
