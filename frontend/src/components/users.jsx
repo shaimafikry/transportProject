@@ -161,7 +161,7 @@ const Users = () => {
 				throw new Error("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
 			}
 
-			if (!fieldsToUpdate.username) {
+			if (fieldsToUpdate.username && fieldsToUpdate.username === "") {
 				throw new Error("اسم المستخدم لا يمكن ان يكون فارغا");
 			}
 
