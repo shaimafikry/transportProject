@@ -59,12 +59,12 @@ function Signin() {
         </form>
 				{/* Error Message */}
         {apiError && (
-          <p className="text-red-600 mt-2">{apiError}</p>
+          <p className="err-message">{apiError}</p>
         )}
 
         {/* Success Message */}
         {successMessage && (
-          <p className="text-green-600 mt-2">{successMessage}</p>
+          <p className="suc-message">{successMessage}</p>
         )}
 
         <p className="mt-3">هل نسيت كلمة السر؟ <Link to="/forget-password">اضغط هنا</Link></p>

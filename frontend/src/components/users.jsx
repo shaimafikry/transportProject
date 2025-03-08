@@ -158,11 +158,19 @@ const Users = () => {
       }
 
 			if (fieldsToUpdate.password && fieldsToUpdate.password.length < 6) {
-				throw new Error("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
+				setErrMessage("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
+          setTimeout(() => {
+            setErrMessage("");
+          }, 5000);
+          return ;
 			}
 
-			if (fieldsToUpdate.username && fieldsToUpdate.username === "") {
-				throw new Error("اسم المستخدم لا يمكن ان يكون فارغا");
+			if (!fieldsToUpdate.username) {
+				setErrMessage("اسم المستخدم لا يمكن ان يكون فارغا");
+          setTimeout(() => {
+            setErrMessage("");
+          }, 5000);
+          return ;
 			}
 
       // Send only the edited fields and the user ID to the backend
