@@ -88,12 +88,22 @@ const Agent = () => {
     const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذا العميل؟");
     if (!confirmDelete) return;
     try {
-      await deleteData("dashboard?action=agents-del", { id });
-			window.alert('تم حذف المستخدم بنجاح');
+			const agentToDel = agents.find((agent) => agent.id === id);
+
+      await deleteData("dashboard?action=agents-del", agentToDel);
+
 			setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
+
+			// Update originalAgents
+      setOriginalAgents((prevOriginalAgents) =>
+        prevOriginalAgents.filter((agent) => agent.id !== id)
+      );
+
+			window.alert('تم حذف العميل بنجاح');
 			setTimeout(() => {
         setMessage("");
       }, 3000);
+
     } catch (error) {
       console.error("Error deleting agent:", error);
       setErrMessage(`${error.message}`);
