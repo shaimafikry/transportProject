@@ -502,11 +502,13 @@ const addTripAndDriver = async (req, res) => {
       await agent.save();
       console.log("تمت تعديل بيانات العميل بنجاح");
     }else {
-      agent = await Agents.create({
-        agent_name : client_name,
-        agent_type: "منظمة",
-				trip_num: 1,
-      });
+			if (client_name){
+				agent = await Agents.create({
+					agent_name : client_name ,
+					agent_type: "منظمة",
+					trip_num: 1,
+				});
+			}
       console.log("تمت إضافة بيانات العميل بنجاح");
     }
 

@@ -280,6 +280,13 @@ const Comp2 = () => {
           }, 5000);
           return ;
         }
+				// if (!tripData.client_name) {
+        //   setErrMessage("يجب اداخال اسم العميل");
+        //   setTimeout(() => {
+        //     setErrMessage("");
+        //   }, 5000);
+        //   return ;
+        // }
         if (tripData.arrival_date && tripData.driver_loading_date && tripData.arrival_date < tripData.driver_loading_date) {
           setErrMessage("تاريخ الوصول لا يمكن أن يكون قبل تاريخ التحميل");
           setTimeout(() => {

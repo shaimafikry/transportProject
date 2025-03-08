@@ -89,8 +89,8 @@ const Agent = () => {
     if (!confirmDelete) return;
     try {
       await deleteData("dashboard?action=agents-del", { id });
-      setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
 			window.alert('تم حذف المستخدم بنجاح');
+			setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
 			setTimeout(() => {
         setMessage("");
       }, 3000);
