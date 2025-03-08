@@ -5,10 +5,9 @@ import ImportTripsFile from "./import_stones";
 
 const Comp1 = () => {
   const [viewComp1, setViewComp1] = useState("");
-  const [showImportModal, setShowImportModal] = useState(false);
   const [tripsComp1, setTripsComp1] = useState([]);
-  const [originalTrips, setOriginalTrips] = useState([]); 
-  const [isSearching, setIsSearching] = useState(false);
+  const [originalTrips, setOriginalTrips] = useState([]);
+	const [editedFields, setEditedFields] = useState({});
 	const [message, setMessage]= useState("");
 	const [errMessage, setErrMessage] = useState("");
 	
@@ -47,10 +46,8 @@ const Comp1 = () => {
 
       setTripsComp1(formattedTrips);
       setOriginalTrips(formattedTrips); 
-
-      setIsSearching(false); // Reset search state
     } catch (error) {
-      console.error("Error fetching trips:", error);
+      console.error("Error fetching comp1 trips:", error);
       setTripsComp1([]);
     }
   };
@@ -74,21 +71,14 @@ const Comp1 = () => {
 
   // Handle search results from TripFilterSortComp1
   const handleSearch = (searchResults) => {
-    setTripsComp1(searchResults); // Update the table with filtered data
-    setIsSearching(true); // Set searching to active
-		// Ensure search stays active when editing
-		if (viewComp1 === "edit") {
-			setIsSearching(true);
-		}
+    setTripsComp1(searchResults);
   };
 
   // Reset to show all trips
   const resetSearch = () => {
     setTripsComp1(originalTrips); // Reset to original data
-    setIsSearching(false); // Set searching to inactive
   };
 
-  // Handle input changes for adding a new trip
   const handleTripChange = (field, value) => {
     setNewTripComp1((prev) => ({ ...prev, [field]: value }));
   };
@@ -101,6 +91,15 @@ const Comp1 = () => {
       )
     );
 
+		 // Track edited fields
+		 setEditedFields((prev) => ({
+      ...prev,
+      [tripId]: {
+        ...prev[tripId],
+        [field]: value,
+      },
+    }));
+
 		// Update originalTrips
   setOriginalTrips((prevOriginalTrips) =>
     prevOriginalTrips.map((trip) =>
@@ -111,7 +110,6 @@ const Comp1 = () => {
 
 
 	const handleEditTrip = (id) => {
-		console.log("Edit button clicked for trip ID:", id); // Debugging
 	
 		// Update tripsComp1
 		setTripsComp1((prevTrips) =>
@@ -134,12 +132,12 @@ const Comp1 = () => {
 
   //MARK: Add a new trip
   const handleAddTrip = async () => {
-		if (Object.values(newTripComp1).every(value => value.trim() === "")) {
-			setErrMessage("لا يمكن حفظ الرحلة بدون بيانات");
-			return;
-		}
-		
+
 		try {
+			if (Object.values(newTripComp1).every(value => value.trim() === "")) {
+				throw new Error("لا يمكن حفظ الرحلة بدون بيانات");
+			}
+			
 			const tripToSend = {
 				...newTripComp1,
 				added_by: sessionStorage.getItem("username"),
@@ -158,7 +156,6 @@ const Comp1 = () => {
 				}
 		});
 
-			console.log(tripToSend)
       const data = await postData("dashboard?action=comp1Trips-add", tripToSend);
       setTripsComp1([...tripsComp1, data]);
       setNewTripComp1({
@@ -169,11 +166,17 @@ const Comp1 = () => {
         trip_date: "",
         price: "",
       }); // Reset fields
-			setMessage("تم اضافة الرحلة بنجاح");
+			setMessage(data.message);
+			setInterval(() => {
+				setMessage("");
+			}, 3000);
 
     } catch (error) {
       console.error("Error adding trip:", error);
 			setErrMessage(`${error.message}`);
+			setInterval(() => {
+				setErrMessage("");
+			}, 5000);
 
     }
   };
@@ -181,13 +184,18 @@ const Comp1 = () => {
   // MARK: Save updated trip
   const handleSaveTrip = async (id) => {
     try {
-      const tripToUpdate = tripsComp1.find((trip) => trip.id === id) || {};
-			if (Object.keys(tripToUpdate).length === 0) {
-				console.log("No changes to save");
-				return;
+      const fieldsToUpdate = editedFields[id] || {}; 
+      if (Object.keys(fieldsToUpdate).length === 0) {
+        console.log("No changes to save");
+        return;
+      }
+			if (!fieldsToUpdate.bon_number ) {
+				throw new Error("رقم البون لا يمكن ان يكون فارغا");
 			}
 
-      const updatedTrip = await putData("dashboard?action=comp1Trips-edit", tripToUpdate);
+			const dataToUpdate = { id, ...fieldsToUpdate };
+
+      const updatedTrip = await putData("dashboard?action=comp1Trips-edit", dataToUpdate);
 
       setTripsComp1((prevTrips) =>
         prevTrips.map((trip) =>
@@ -206,10 +214,16 @@ const Comp1 = () => {
 						: trip
 				)
 			);
-			setMessage('تم تعديل الرحلة بنجاح')
+			setMessage('تم تعديل الرحلة بنجاح');
+			setInterval(() => {
+        setMessage("");
+      }, 3000);
     } catch (error) {
       console.error("Error updating trip:", error);
-			setErrMessage(`${error.message}`)
+			setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -227,10 +241,16 @@ const Comp1 = () => {
     setOriginalTrips((prevOriginalTrips) =>
       prevOriginalTrips.filter((trip) => trip.id !== id)
     );
-		setMessage('تم حذف الرحلة بنجاح')
+		window.alert('تم حذف الرحلة بنجاح');
+		setInterval(() => {
+			setMessage("");
+		}, 3000);
     } catch (error) {
       console.error("Error deleting trip:", error);
-			setErrMessage(`${error.message}`)
+			setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -241,7 +261,7 @@ const Comp1 = () => {
         <div className="trip-options">
           <button onClick={() => {setViewComp1("add"); setMessage(""); setErrMessage("");}}>إضافة رحلة</button>
           <button onClick={() => {setViewComp1("import"); setMessage(""); setErrMessage("");}}>اضافة من ملف اكسيل</button>
-          <button onClick={() => { setMessage(""); fetchTrips(); setViewComp1("edit"); setErrMessage(""); setIsSearching(true); }}>تعديل رحلة</button>
+          <button onClick={() => { setMessage(""); fetchTrips(); setViewComp1("edit"); setErrMessage("");}}>تعديل رحلة</button>
         </div>
 
       {viewComp1 === "edit" && (
@@ -264,16 +284,14 @@ const Comp1 = () => {
               </div>
             ))}
           </div>
-          <button onClick={handleAddTrip}>حفظ الرحلة</button>
 					{message && (<p className="suc-message">{message}</p>)}
 					{errMessage && (<p className="err-message">{errMessage}</p>)}
+          <button onClick={handleAddTrip}>حفظ الرحلة</button>
         </>
       )}
 
       {viewComp1 === "edit" && (
         <>
-				{message && (<p className="suc-message">{message}</p>)}
-				{errMessage && (<p className="err-message">{errMessage}</p>)}
 					<div className="table-container">
           <table>
             <thead>
@@ -305,8 +323,9 @@ const Comp1 = () => {
                         <button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
                         <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
 											</div>
+											{message && (<p className="suc-message">{message}</p>)}
+				            	{errMessage && (<p className="err-message">{errMessage}</p>)}
                       </td>
-											
                     </>
                   ) : (
                     <>

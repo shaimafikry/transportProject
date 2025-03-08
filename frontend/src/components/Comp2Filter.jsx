@@ -48,7 +48,23 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [uniqueLoadingPlaces, setUniquePlaces] = useState([]);
 
 
-	console.log(trips)
+	// console.log(trips)
+
+
+	
+	const resetSearch = () => {
+    setSearchQuery(""); // Clear search input
+    setFilters({
+      loading_place: "",
+      client_name: "",
+      destination: "",
+      leader_name: "",
+      driver_name: "",
+      startDate: "",
+      endDate: "",
+    }); // Reset filters
+    onSearch(trips); // Reset displayed trips to original list
+  };
 
   useEffect(() => {
     if (trips.length > 0) {
@@ -154,7 +170,6 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   };
 
   return (
-    <div>
       <div className="search-container">
   <input
     type="text"
@@ -225,8 +240,8 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   <button className="export-btn" onClick={exportToExcel}>
     حفظ
   </button>
+	<button className="export-btn" onClick={resetSearch}>الغاء</button>
 </div>
-    </div>
   );
 };
 

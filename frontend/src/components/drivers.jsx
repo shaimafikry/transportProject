@@ -135,7 +135,7 @@ const Drivers = () => {
 			setMessage(data.message);
 			setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
 
 
     } catch (error) {
@@ -191,7 +191,7 @@ const Drivers = () => {
 			setMessage('تم تعديل بيانات السائق بنجاح');
 			setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
 
     } catch (error) {
       console.error("Error updating driver:", error);
@@ -219,7 +219,7 @@ const Drivers = () => {
 			window.alert('تم حذف المستخدم بنجاح');
 			setInterval(() => {
         setErrMessage("");
-      }, 5000);
+      }, 3000);
 
     } catch (error) {
       console.error("Error deleting driver:", error);

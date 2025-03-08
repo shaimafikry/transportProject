@@ -73,7 +73,7 @@ const Agent = () => {
       setMessage("تم تعديل بيانات العميل بنجاح");
 			setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
     } catch (error) {
       console.error("Error updating agent:", error);
       setErrMessage();
@@ -91,11 +91,14 @@ const Agent = () => {
       await deleteData("dashboard?action=agents-del", { id });
       setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
 			window.alert('تم حذف المستخدم بنجاح');
+			setInterval(() => {
+        setMessage("");
+      }, 3000);
     } catch (error) {
       console.error("Error deleting agent:", error);
       setErrMessage(`${error.message}`);
 			setInterval(() => {
-        setMessage("");
+        setErrMessage("");
       }, 5000);
 
     }
@@ -114,7 +117,7 @@ const Agent = () => {
       setMessage("تم اضافة العميل بنجاح");
       setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
     } catch (error) {
       console.error("Error adding agent:", error);
       setErrMessage("المنظمة موجودة مسبقا");

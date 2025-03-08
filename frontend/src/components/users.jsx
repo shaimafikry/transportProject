@@ -111,7 +111,7 @@ const Users = () => {
 			setMessage(data.message);
 			setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
 
     } catch (error) {
       console.error("Error adding user:", error);
@@ -161,6 +161,10 @@ const Users = () => {
 				throw new Error("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
 			}
 
+			if (!fieldsToUpdate.username) {
+				throw new Error("اسم المستخدم لا يمكن ان يكون فارغا");
+			}
+
       // Send only the edited fields and the user ID to the backend
       const dataToUpdate = { id, ...fieldsToUpdate };
       const updatedUser = await putData("dashboard?action=users-edit", dataToUpdate);
@@ -188,7 +192,7 @@ const Users = () => {
 			setMessage('تم تعديل المستخدم بنجاح');
 			setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
 
     } catch (error) {
       console.error("Error updating user:", error);
@@ -214,7 +218,7 @@ const Users = () => {
 			window.alert('تم حذف المستخدم بنجاح');
 			setInterval(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
 
     } catch (error) {
       console.error("Error deleting user:", error);

@@ -133,33 +133,6 @@ const Comp2 = () => {
 	};
 	
 
-
-
-  /* // Calculate nights count
-  const calculateNightsCount = (updatedTrip = newTripComp2) => {
-		// subtract company loading date from aging date
-    const arrivalDate = new Date(newTripComp2.aging_date);
-    const loadingDate = new Date(newTripComp2.company_loading_date);
-		const maxNights = parseFloat(newTripComp2.nights_max) || 0;
-
-    if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())){
-      const diffTime = Math.abs(arrivalDate - loadingDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      const nightValue = parseFloat(newTripComp2.night_value) || 0;
-			let totalNightsValue = 0;
-			if (maxNights > 0) {
-				 totalNightsValue = diffDays > maxNights ? ((diffDays - maxNights) * nightValue) : 0;
-			}
-
-      setNewTripComp2((prevState) => ({
-        ...prevState,
-        nights_count: diffDays,
-        total_nights_value: totalNightsValue,
-      }));
-    }
-  };
- */
-
 	const calculateNightsCount = (updatedTrip = newTripComp2) => {
 		const arrivalDate = new Date(updatedTrip.aging_date);
 		const loadingDate = new Date(updatedTrip.company_loading_date);
@@ -193,23 +166,6 @@ const Comp2 = () => {
 		}));
 	};
 	
-  /* // Calculate total transport
-  const calculateTotalTransport = () => {
-    const totalNightsValue = parseFloat(newTripComp2.total_nights_value) || 0;
-    const transportFee = parseFloat(newTripComp2.transport_fee) || 0;
-    const expenses = parseFloat(newTripComp2.expenses) || 0;
-    const totalTransport = totalNightsValue + transportFee + expenses;
-
-    const totalReceivedCash = parseFloat(newTripComp2.total_received_cash) || 0;
-    const remainCash = totalTransport - totalReceivedCash;
-
-    setNewTripComp2((prevState) => ({
-      ...prevState,
-      total_transport: totalTransport,
-      remain_cash: remainCash,
-    }));
-  };
- */
 
   useEffect(() => {
     calculateNightsCount();
@@ -230,27 +186,6 @@ const Comp2 = () => {
     setTripsComp2(searchResults); // Update the table with filtered data
   };
 
-  // Reset to show all trips
-  const resetSearch = () => {
-    if (originalTrips.length === 0) {
-			fetchTrips();
-		} else {
-			setTripsComp2(originalTrips);
-		}
-  };
-
-  // Handle trip input changes
-  /* const handleTripChange = (field, value) => {
-    setNewTripComp2((prevState) => ({
-      ...prevState,
-      [field]: value,
-    }));
-
-    if (field === "client_name") {
-      const selectedAgent = agents.find((agent) => agent.agent_name === value);
-      setSelectedAgentType(selectedAgent ? selectedAgent.agent_type : "");
-    }
-  }; */
 
 	const handleTripChange = (field, value) => {
 		setNewTripComp2((prevState) => {

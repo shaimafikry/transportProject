@@ -1,5 +1,5 @@
 require('dotenv').config({path: '../.env'});
-const { Users, Drivers, TransportTrips } = require('./config');
+const { Users, Drivers, TransportTrips, ConstructTrips } = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
@@ -78,7 +78,6 @@ const addDriver = async (req, res) => {
 
 
 //MARK: EDIT DRIVER;
-
 const editDriver= async(req, res)=> {
 	const { id, ...updateData } = req.body;
 
@@ -114,6 +113,27 @@ const editDriver= async(req, res)=> {
 	
 }catch(error){
 	console.error('error in edit driver', error);
+	return res.status(400).json(`${error.message}`);
+
+}
+
+};
+
+
+
+//MARK: EDIT comp1;
+const editComp1= async(req, res)=> {
+	const { id, ...updateData } = req.body;
+	try {
+	const response = await ConstructTrips.update(updateData, { where: { id } });
+
+	const updatedComp1 = await ConstructTrips.findOne({ where: { id } });
+	const comp1Data = updatedComp1.get({ plain: true });
+	// console.log("data",{...driverData})
+	return res.status(200).json({...comp1Data});
+	
+}catch(error){
+	console.error('error in edit comp1', error);
 	return res.status(400).json(`${error.message}`);
 
 }
@@ -520,4 +540,4 @@ const logout = (req, res) => {
 
   
 
-module.exports = { signIn, addUser,editUser,editDriver,addDriver, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver };
+module.exports = { signIn, addUser,editUser,editDriver,addDriver, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1 };
