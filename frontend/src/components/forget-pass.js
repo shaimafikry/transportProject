@@ -8,10 +8,15 @@ const ForgetPass = () => {
   const [id, setUserId] = useState("");
 
   const [checked, setChecked] = useState(false);
-  const [status, setStatus] = useState(null);
+const [message, setMessage] = useState("");
+const [errMessage, setErrMessage] = useState("");
 
   const handleCheck = async () => {
-    try {
+		try {
+			if (!phone) {
+				throw new Error("رقم الموبايل لا يجب ان يكون فارغا");
+			}
+
       const checkUser = await fetchData(`forget-password?phone=${phone}`);
       if (checkUser) {
         setUserId(checkUser);
@@ -21,9 +26,9 @@ const ForgetPass = () => {
       }
     } catch (error) {
       console.error("Error checking phone number:", error);
-      setStatus(`${error.message}`);
+      setErrMessage(`${error.message}`);
 			setTimeout(() => {
-        setStatus("");
+        setErrMessage("");
       }, 5000);
     }
   };
@@ -35,20 +40,21 @@ const ForgetPass = () => {
 			if (newPassword.length < 6) {
 				throw new Error("يجب أن تكون كلمة السر أكثر من 5 أحرف أو أرقام");
 			}
+
       const formData = { id, newPassword };
-      await putData("forget-password", formData);
-      setStatus(`${formData.message}`);	
+      const response = await putData("forget-password", formData);
+      setMessage(response);	
 			setTimeout(() => {
-        setStatus("");
+        setMessage("");
       }, 3000);
       setPhone("");
       setNewPassword("");
       setChecked(false);
     } catch (error) {
       console.error("Error changing password:", error);
-      setStatus(`${error.message}`);
+      setErrMessage(`${error.message}`);
 			setTimeout(() => {
-        setStatus("");
+        setErrMessage("");
       }, 5000);
     }
   };
@@ -112,9 +118,8 @@ const ForgetPass = () => {
                 تحقق من رقم الموبايل
               </button>
             </div>
-            {status && (
-              <p style={{ color: "#e53e3e", marginTop: "10px" }}>{status}</p>
-            )}
+            {message && <p className="suc-message">{message}</p>}
+            {errMessage && <p className="err-message">{errMessage}</p>}
           </div>
         ) : (
           <div>
@@ -156,17 +161,8 @@ const ForgetPass = () => {
                   حفظ
                 </button>
               </div>
-              {status && (
-                <p
-                  style={{
-                    color:
-                      status === "تم تغيير كلمة السر بنجاح" ? "#38a169" : "#e53e3e", // Green for success, red for error
-                    marginTop: "10px",
-                  }}
-                >
-                  {status}
-                </p>
-              )}
+              {message && <p className="suc-message">{message}</p>}
+              {errMessage && <p className="err-message">{errMessage}</p>}
             </form>
           </div>
         )}

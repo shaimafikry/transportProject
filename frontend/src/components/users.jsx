@@ -108,7 +108,7 @@ const Users = () => {
         Object.fromEntries(Object.keys(initialUserState).map((key) => [key, ""]))
       );
 			// console.log(data.message)
-			setMessage(data.message);
+			setMessage(data);
 			setTimeout(() => {
         setMessage("");
       }, 3000);
