@@ -31,14 +31,15 @@ function Signin() {
 			sessionStorage.setItem('username', data.username);
 
 			setSuccessMessage('تم تسجيل الدخول بنجاح');
-			console.log("Login successful:", data);
+			// console.log("Login successful:", data);
 			navigate(data.redirectUrl);
 
 		} catch (error) {
 			console.error("Error caught during login:", error);
-				// Server responded with a status other than 200 range
-			setApiError(error.message || 'An unexpected error occurred during signin');
-			console.log("API Error:", error.message);
+			setApiError(`${error.message}` || 'An unexpected error occurred during signin');
+			setInterval(() => {
+        setApiError("");
+      }, 5000);
 		}
 	}
 

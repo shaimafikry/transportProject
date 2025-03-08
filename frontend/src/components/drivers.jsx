@@ -31,7 +31,7 @@ const Drivers = () => {
   const editFields = [
     ...driverFields,
     { name: "trip_num", type: "number", placeholder: "عدد الرحلات", disabled: true },
-    { name: "price", type: "number", placeholder: "الحساب الكلي", disabled: true },
+    { name: "total_all_transport", type: "number", placeholder: "الحساب الكلي", disabled: true },
     { name: "remaining_money_fees", type: "number", placeholder: "الحساب المتبقي", disabled: true },
   ];
 

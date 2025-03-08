@@ -14,6 +14,8 @@ const TripEditModal = ({ trip, onSave, initialTripState, carTypes, agents }) => 
 });
 		const [message, setMessage]= useState("");
 		const [errMessage, setErrMessage] = useState("");
+			const [editedFields, setEditedFields] = useState({});
+		
 		const [selectedAgentType, setSelectedAgentType] = useState("");
 
 
@@ -21,6 +23,14 @@ const TripEditModal = ({ trip, onSave, initialTripState, carTypes, agents }) => 
 const handleChange = (field, value) => {
   setFormData((prevState) => {
 		const updatedState = { ...prevState, [field]: value };
+
+
+		
+		  // Track only edited fields
+			setEditedFields((prev) => ({
+				...prev,
+				[field]: value, // Store new value for comparison
+			}));
 
 		// If the changed field affects calculations, update derived values
 		if (
@@ -56,48 +66,60 @@ const handleChange = (field, value) => {
     return true;
   };
 	
-
-		// Calculate nights count
-		const calculateNightsCount = () => {
-			// subtract company loading date from aging date
-			const arrivalDate = new Date(formData.aging_date);
-			const loadingDate = new Date(formData.company_loading_date);
-			const maxNights = parseFloat(formData.nights_max) || 0;
+ //MARK: NIGHTS COUNT
+	const calculateNightsCount = () => {
+		const arrivalDate = new Date(formData.aging_date);
+		const loadingDate = new Date(formData.company_loading_date);
+		const maxNights = parseFloat(formData.nights_max) || 0;
 	
-			if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())){
-				const diffTime = Math.abs(arrivalDate - loadingDate);
-				const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-				const nightValue = parseFloat(formData.night_value) || 0;
-				let totalNightsValue = 0;
-				if (maxNights > 0) {
-					 totalNightsValue = diffDays > maxNights ? ((diffDays - maxNights) * nightValue) : 0;
-				}
-	
-				setFormData((prevState) => ({
-					...prevState,
-					nights_count: diffDays,
-					total_nights_value: totalNightsValue,
-				}));
+		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
+			const diffTime = Math.abs(arrivalDate - loadingDate);
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			const nightValue = parseFloat(formData.night_value) || 0;
+			let totalNightsValue = 0;
+			if (maxNights > 0) {
+				totalNightsValue = diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
 			}
-		};
 	
-		// Calculate total transport
+			setFormData((prevState) => ({
+				...prevState,
+				nights_count: diffDays,
+				total_nights_value: totalNightsValue,
+			}));
+	
+			// 🛠 Mark these fields as edited
+			setEditedFields((prev) => ({
+				...prev,
+				nights_count: diffDays,
+				total_nights_value: totalNightsValue,
+			}));
+		}
+	};
+	
+		//MARK: Calculate total transport
 		const calculateTotalTransport = () => {
 			const totalNightsValue = parseFloat(formData.total_nights_value) || 0;
-
 			const transportFee = parseFloat(formData.transport_fee) || 0;
 			const expenses = parseFloat(formData.expenses) || 0;
 			const totalTransport = totalNightsValue + transportFee + expenses;
-	
+		
 			const totalReceivedCash = parseFloat(formData.total_received_cash) || 0;
 			const remainCash = totalTransport - totalReceivedCash;
-	
+		
 			setFormData((prevState) => ({
 				...prevState,
 				total_transport: totalTransport,
 				remain_cash: remainCash,
 			}));
+		
+			// 🛠 Mark these fields as edited
+			setEditedFields((prev) => ({
+				...prev,
+				total_transport: totalTransport,
+				remain_cash: remainCash,
+			}));
 		};
+		
 
 		useEffect(() => {
 			let sanitizedTrip = { ...trip };
@@ -126,56 +148,78 @@ const handleChange = (field, value) => {
 		]);
 	
 
-
-  const handleSave = async () => {
+  // MARK: Save updated trip
+	const handleSave = async () => {
 		if (!validateDates()) return;
-		try {
-			let updatedData = { ...formData };
-
 	
+		try {
+			let updatedData = { id: formData.id }; // Always include the ID
+	
+			const requiredFields = ["driver_name", "leader_name", "client_name", "fo_number", "national_id"];
+	
+			// Iterate over edited fields
+			Object.keys(editedFields).forEach((key) => {
+				const value = formData[key];
+	
+				// Validate only edited required fields
+				if (requiredFields.includes(key) && (!value || value.trim() === "")) {
+					throw new Error(`يجب إدخال ${getFieldArabicName(key)}`);
+				}
+	
+				// Validate national_id length only if it's edited
+				if (key === "national_id" && value.length !== 14) {
+					throw new Error("الرقم القومي يجب أن يكون 14 رقمًا");
+				}
+	
+				// Add the field to updatedData if it passed validation
+				updatedData[key] = value;
+			});
+	
+			// Ensure numeric fields are properly formatted
 			Object.keys(updatedData).forEach((key) => {
 				let value = updatedData[key];
 	
 				if (value === "" || value === null || value === undefined) {
 					updatedData[key] = ["nights_count", "night_value", "nights_max", "total_nights_value", "transport_fee", "expenses", "total_transport", "deposit", "total_received_cash"].includes(key) ? 0 : "";
+				} else if (!isNaN(value) && typeof value !== "boolean") {
+					updatedData[key] = parseFloat(value);
 				} else {
-					if (key === "national_id" || key === "phone_number") {
-						updatedData[key] = String(value).trim();
-					} else if (!isNaN(value) && typeof value !== "boolean") {
-						updatedData[key] = parseFloat(value);
-					} else {
-						updatedData[key] = value.toString().trim();
-					}
+					updatedData[key] = value.toString().trim();
 				}
 			});
-			
-
-			if (!updatedData.driver_name) {
-            setErrMessage("يجب إدخال اسم السائق");
-            return;
-        }
-        if (!updatedData.leader_name) {
-          setErrMessage("يجب إدخال اسم المندوب");
-          return;
-      }
-        // if (!updatedData.client_name) {
-        //     setErrMessage("يجب إدخال اسم العميل");
-        //     return;
-        // }
-        // if (!updatedData.fo_number) {
-        //     setErrMessage("يجب إدخال رقم FO");
-        //     return;
-        // }
-        if (!updatedData.national_id) {
-            setErrMessage("يجب إدخال الرقم القومي للسائق");
-            return;
-        }
-      const updatedTrip = await putData("dashboard?action=comp2Trips-edit", updatedData);
-      onSave(updatedTrip); // Notify parent about update
-    } catch (error) {
-      console.error("Error updating trip:", error);
-    }
-  };
+	
+			console.log("Updated Data before sending:", updatedData);
+	
+			if (Object.keys(updatedData).length === 1) {
+				alert("لا يوجد تغييرات لحفظها");
+				return;
+			}
+	
+			const updatedTrip = await putData("dashboard?action=comp2Trips-edit", updatedData);
+			onSave(updatedTrip); // Notify parent about update
+			window.alert("تم حفظ الرحلة بنجاح");
+			setEditedFields({}); // Reset after saving
+		} catch (error) {
+			console.error("Error updating trip:", error);
+			setErrMessage(`${error.message}`);
+	
+			setTimeout(() => {
+				setErrMessage("");
+			}, 5000);
+		}
+	};
+	
+	const getFieldArabicName = (field) => {
+		const fieldNames = {
+			driver_name: "اسم السائق",
+			leader_name: "اسم المندوب",
+			client_name: "اسم العميل",
+			fo_number: "رقم FO",
+			national_id: "الرقم القومي",
+		};
+		return fieldNames[field] || field;
+	};
+	
 
 	const handleDeleteTrip = async () => {
     const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذه الرحلة؟");
@@ -183,11 +227,17 @@ const handleChange = (field, value) => {
     
     try {
       await deleteData("dashboard?action=comp2Trips-del", { id: trip.id });
-      setMessage("تم حذف الرحلة بنجاح");
+      window.alert("تم حذف الرحلة بنجاح");
       onSave(null); // Close modal and refresh trips
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
     } catch (error) {
       console.error("Error deleting trip:", error);
-      setErrMessage(error.message);
+      setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
     }
   };
 

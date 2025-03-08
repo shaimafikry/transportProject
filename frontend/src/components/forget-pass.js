@@ -17,32 +17,39 @@ const ForgetPass = () => {
         setUserId(checkUser);
         setChecked(true);
       } else {
-        setStatus("رقم الموبايل غير مسجل");
+        throw new Error("رقم الموبايل غير مسجل");
       }
     } catch (error) {
       console.error("Error checking phone number:", error);
-      setStatus(error.message);
+      setStatus(`${error.message}`);
+			setInterval(() => {
+        setStatus("");
+      }, 5000);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (newPassword.length < 6) {
-      setStatus("يجب أن تكون كلمة السر أكثر من 5 أحرف أو أرقام");
-      return;
-    }
-
     try {
+			if (newPassword.length < 6) {
+				throw new Error("يجب أن تكون كلمة السر أكثر من 5 أحرف أو أرقام");
+			}
       const formData = { id, newPassword };
       await putData("forget-password", formData);
-      setStatus("تم تغيير كلمة السر بنجاح");
+      setStatus(`${formData.message}`);	
+			setInterval(() => {
+        setStatus("");
+      }, 3000);
       setPhone("");
       setNewPassword("");
       setChecked(false);
     } catch (error) {
       console.error("Error changing password:", error);
-      setStatus("فشل تغيير كلمة المرور");
+      setStatus(`${error.message}`);
+			setInterval(() => {
+        setStatus("");
+      }, 5000);
     }
   };
 

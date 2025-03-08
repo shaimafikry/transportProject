@@ -87,6 +87,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     if (searchQuery) {
       result = result.filter((trip) =>
 				(trip.driver_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.national_id?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.car_type?.toLowerCase() || "").includes(searchQuery.toLowerCase())    ||
 			(trip.cargo_type?.toLowerCase() || "").includes(searchQuery.toLowerCase())  ||
 			(trip.fo_number?.toLowerCase() || "").includes(searchQuery.toLowerCase())   ||

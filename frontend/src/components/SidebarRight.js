@@ -9,15 +9,11 @@ const SidebarRight = ({role, onSelect}) => {
     try {
       const response = await postData("logout"); // `response` is just JSON, not full response
   
-      if (response && response.message) { // ✅ Check if response contains a valid message
         console.log("Logout successful:", response.message);
         sessionStorage.removeItem("token"); // حذف التوكن من التخزين المؤقت
         window.location.href = "/"; // ✅ Redirect to login
-      } else {
-        console.error("Unexpected logout response:", response);
-      }
     } catch (error) {
-      console.error("Error logging out:", error.message);
+      console.error(`${error.messasge}`);
     }
   };
 

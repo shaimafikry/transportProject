@@ -211,7 +211,93 @@ const allUsers = async (req, res) => {
 
   } catch (error) {
     console.error('Error in fetching users:', error);
-    return res.status(500).json({ error: `Server error: ${error.message}` });
+    return res.status(500).json(`${error.message}`);
+  }
+};
+
+//MARK: EDit comp2
+const comp2EditTrip = async (req, res) => {
+  try {
+    const data = req.body;
+    const { id, ...updateData } = data;
+
+    if (!id) {
+      throw new Error("معرف الرحلة مفقود");
+    }
+
+    // console.log("Received Data:", data, "ID:", id, "Update Data:", updateData);
+
+    // Fetch the existing trip before updating
+    const existingTrip = await TransportTrips.findOne({ where: { id } });
+    if (!existingTrip) {
+      throw new Error("لم يتم العثور على الرحلة");
+    }
+
+    const oldNationalId = existingTrip.national_id;
+    const oldTotalTransport = existingTrip.total_transport || 0;
+    const oldTotalReceivedCash = existingTrip.total_received_cash || 0;
+
+    // Update trip data
+    await TransportTrips.update(updateData, { where: { id } });
+
+    // Fetch the updated trip data
+    const updatedComp2 = await TransportTrips.findOne({ where: { id } });
+    if (!updatedComp2) {
+      throw new Error("لم يتم العثور على الرحلة بعد التحديث");
+    }
+
+    const sanitizedData = updatedComp2.get({ plain: true });
+		// console.log("Updated Trip Data:", sanitizedData);
+
+
+    // Extract updated values
+    const { national_id, total_transport = 0, total_received_cash = 0 } = sanitizedData;
+		// console.log("Updated after Data:", sanitizedData);
+
+
+    // Check if national_id changed
+    if (national_id !== oldNationalId) {
+      if (oldNationalId) {
+        // Find the old driver and subtract values
+        let oldDriver = await Drivers.findOne({ where: { national_id: oldNationalId } });
+        if (oldDriver) {
+          oldDriver.total_trips = Math.max(0, oldDriver.total_trips - 1);
+          oldDriver.total_all_transport = Math.max(0, oldDriver.total_all_transport - oldTotalTransport);
+          oldDriver.remaining_money_fees = Math.max(0, oldDriver.remaining_money_fees - (oldTotalTransport - oldTotalReceivedCash));
+          await oldDriver.save();
+          console.log(`تم تحديث بيانات السائق القديم (${oldNationalId})`);
+        }
+      }
+
+      if (national_id) {
+        // Find the new driver and add values
+        let newDriver = await Drivers.findOne({ where: { national_id } });
+        if (newDriver) {
+          newDriver.total_trips = (newDriver.total_trips || 0) + 1;
+          newDriver.total_all_transport = (newDriver.total_all_transport || 0) + total_transport;
+          newDriver.remaining_money_fees = (newDriver.remaining_money_fees || 0) + (total_transport - total_received_cash);
+          await newDriver.save();
+          console.log(`تم تحديث بيانات السائق الجديد (${national_id})`);
+        }
+      }
+    } else if (total_transport !== oldTotalTransport || total_received_cash !== oldTotalReceivedCash) {
+      // Update the same driver’s financials if transport/fees changed
+      let driver = await Drivers.findOne({ where: { national_id } });
+      if (driver) {
+        driver.total_all_transport = Math.max(0, driver.total_all_transport - oldTotalTransport + total_transport);
+        driver.remaining_money_fees = Math.max(0, driver.remaining_money_fees - (oldTotalTransport - oldTotalReceivedCash) + (total_transport - total_received_cash));
+        await driver.save();
+        console.log(`تم تعديل بيانات السائق (${national_id})`);
+      }
+			console.log("driver", driver.get({ plain: true }))
+
+    }
+
+
+    return res.status(200).json({ ...sanitizedData });
+  } catch (error) {
+    console.error("Error updating trip:", error);
+    return res.status(400).json(`${error.message}`);
   }
 };
 
@@ -220,70 +306,44 @@ const allUsers = async (req, res) => {
 
 
 
+// MARK: del trip driver
+const comp2DelTrip = async (req, res) => {
+  try {
+    // Extract id properly
+    const { id } = req.body;
+    // Find the trip
+    const tripToDel = await TransportTrips.findOne({ where: { id } });
+    if (!tripToDel) throw new Error ("الرحلة غير موجودة");
 
+    // Convert to plain object
+    const sanitizedData = tripToDel.get({ plain: true });
 
-// MARK: ADD Trip
-// const addTripAndDriver = async (req, res) => {
-// 	try {
-// 		const sanitizeInput = (key, value) => {
-// 			if (value === "" || value === null || value === undefined) {
-// 				if (["nights_count", "night_value", "total_nights_value", "transport_fee", 
-// 					 "expenses", "total_transport", "deposit", "total_received_cash"]
-// 					.includes(key)) {
-// 					return 0;
-// 				}
-// 				return "";
-// 			}
+    // Extract important fields
+    const { national_id, total_transport = 0, total_received_cash = 0 } = sanitizedData;
 
-// 			if (key === "national_id" || key === "phone_number") {
-// 				return value.toString();
-// 			}
+    // Delete the trip
+    await TransportTrips.destroy({ where: { id } });
+    console.log("تم حذف الرحلة بنجاح");
 
-// 			if (!isNaN(value) && typeof value !== "boolean") {
-// 				return parseFloat(value);
-// 			}
-// 			return value;
-// 		};
-		
-// 		const sanitizedData = {};
-// 		Object.keys(req.body).forEach((key) => {
-// 			sanitizedData[key] = sanitizeInput(key, req.body[key]);
-// 		});
+    // Find the driver
+    let driver = await Drivers.findOne({ where: { national_id } });
 
-// 		let { national_id, total_transport, total_received_cash } = sanitizedData;
-		
+    if (driver) {
+      driver.trip_num = Math.max(0, driver.trip_num - 1);
+      driver.total_all_transport = Math.max(0, driver.total_all_transport - total_transport);
+      driver.remaining_money_fees = Math.max(0, driver.remaining_money_fees - (total_transport - total_received_cash));
+      await driver.save();
+      console.log("تم تعديل بيانات السائق بنجاح");
+    }
 
-// 		total_transport = total_transport ?? 0;
-// 		total_received_cash = total_received_cash ?? 0;
+    return res.status(200).json("تم حذف الرحلة بنجاح");
 
-// 		let driver = await Drivers.findOne({ where: { national_id } });
+  } catch (error) {
+    console.error("Error deleting trip and updating driver:", error);
+    return res.status(500).json(`${error.message}`);
+  }
+};
 
-// 		await TransportTrips.create(sanitizedData);
-// 		console.log("تمت إضافة بيانات الرحلة بنجاح");
-
-// 		if (driver) {
-// 			driver.trip_num += 1;
-// 			driver.total_all_transport += total_transport;
-// 			driver.remaining_money_fees += total_transport - total_received_cash;
-// 			await driver.save();
-// 			console.log("تم تعديل بيانات السائق بنجاح");
-// 		} else {
-// 			driver = await Drivers.create({
-// 				...sanitizedData,
-// 				trip_num: 1,
-// 				total_all_transport: total_transport,
-// 				remaining_money_fees: total_transport - total_received_cash
-// 			});
-// 			console.log("تمت إضافة بيانات السائق بنجاح");
-// 		}
-		
-// 		return res.status(201).json({ message: "تمت الإضافة بنجاح" });
-
-// 	} catch (error) {
-// 		console.error("Error adding trip and driver:", error);
-// 		return res.status(500).json({ error: `حدث خطأ أثناء معالجة الطلب, ${error.message}` });
-// 	}
-// };
 
 // MARK: ADD Trip
 const addTripAndDriver = async (req, res) => {
@@ -355,7 +415,7 @@ const addTripAndDriver = async (req, res) => {
 
     // Validate required fields
     if (!sanitizedData.driver_name){
-      return res.status(400).json({ error: "يجب إدخال اسم السائق " });
+      throw new Error("يجب إدخال اسم السائق " );
     }
 		// if (!sanitizedData.client_name) {
     //   return res.status(400).json({ error: "يجب إدخال اسم العميل" });
@@ -365,7 +425,7 @@ const addTripAndDriver = async (req, res) => {
     // }
 
 		if (!sanitizedData.national_id) {
-      return res.status(400).json({ error: "يجب إدخال الرقم القومي  للسائق  " });
+      throw new Error("يجب إدخال الرقم القومي  للسائق  ");
     }
 		
 
@@ -397,19 +457,19 @@ const addTripAndDriver = async (req, res) => {
     }
 
     // Return success response
-    return res.status(201).json({ message: "تمت الإضافة بنجاح" });
+    return res.status(201).json("تمت الإضافة بنجاح");
   } catch (error) {
     console.error("Error adding trip and driver:", error);
     return res
       .status(500)
-      .json({ error: `حدث خطأ أثناء معالجة الطلب, ${error.message}` });
+      .json(`${error.message}`);
   }
 };
 
 
 //MARK: Sign in
 const signIn = async (req, res) => {
-	console.log(req.body, "entry");
+	// console.log(req.body, "entry");
   const { username, password } = req.body;
 
 	try{
@@ -417,12 +477,12 @@ const signIn = async (req, res) => {
 	//console.log
 
 	if (!user) {
-		return res.status(400).json({ message: 'هذا المستخدم غير موجود' });
+		throw new Error('هذا المستخدم غير موجود');
 	}
 
 	const isPasswordValid = await bcrypt.compare(password, user.password)
 	if (!isPasswordValid) {
-		return res.status(400).json({ message: 'كلمة السر غير صحيحة' });
+		throw new Error('كلمة السر غير صحيحة');
 	}
 	// generate JWT token and send it back to the client
 	const payload = {
@@ -444,7 +504,7 @@ const signIn = async (req, res) => {
   });
 }catch(error){
 	console.error('Error updating password:', error);
-	return res.status(500).json({ message: 'خطأ في الاتصال' });
+	return res.status(402).json(`${error.message}`);
 }
 
 
@@ -454,16 +514,23 @@ const signIn = async (req, res) => {
 //MARK: FORGET PSSWORD
 const forgetPasswordCheck = async (req, res) => {
   const phone = req.query.phone;
-  console.log("phone", phone);
+  // console.log("phone", phone);
+
+	try{
 
   const user = await Users.findOne({ where: { phone } });
   console.log(user);
 
   if (!user) {
-    return res.status(404).json({ message: "المستخدم غير موجود في قاعدة البيانات" });
+    throw new Error("المستخدم غير موجود في قاعدة البيانات");
   }
 
   return res.status(200).json(user.id);
+
+}catch(error){
+	console.error('Error updating password:', error);
+	return res.status(402).json(`${error.message}`);
+}
 };
 
 
@@ -471,11 +538,13 @@ const forgetPasswordCheck = async (req, res) => {
 const forgetPassword = async (req, res) => {
   const { id, newPassword } = req.body;
 
+	try{
+
   const user = await Users.findOne({ where: { id } });
   // console.log(user);
 
   if (!user) {
-    return res.status(404).json({ message: "المستخدم غير موجود" });
+    throw new Error("المستخدم غير موجود" );
   }
 
   // Hash the new password
@@ -484,7 +553,12 @@ const forgetPassword = async (req, res) => {
   // Update password in the database
   await Users.update({ password: newHash }, { where: { id } });
 
-  return res.status(200).json({ message: "تم تجديد كلمة السر بنجاح" });
+  return res.status(200).json("تم تجديد كلمة السر بنجاح" );
+}catch(error) {
+	console.error('Error updating password:', error);
+	return res.status(402).json(`${error.message}`);
+
+}
 };
 
 
@@ -497,18 +571,18 @@ const updatePassword = async (req, res) => {
     // Find user by ID
     const user = await Users.findOne({ where: { id } });
     if (!user) {
-      return res.status(403).json({ message: 'هذا المستخدم غير موجود' });
+      throw new Error('هذا المستخدم غير موجود' );
     }
 
     // Check if both old and new passwords are provided
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: 'كلمة السر مطلوبة' });
+      throw new Error('كلمة السر مطلوبة' );
     }
 
     // Validate old password
     const isValid = await validatePass(oldPassword, user.password);
     if (!isValid) {
-      return res.status(401).json({ message: 'كلمة السر القديمة غير صحيحة' });
+      throw new Error ('كلمة السر القديمة غير صحيحة' );
     }
 
     // Hash the new password
@@ -517,11 +591,11 @@ const updatePassword = async (req, res) => {
     // Update password in database
     await Users.update({ password: newHash }, { where: { id } });
 
-    return res.status(200).json({ message: 'تم تجديد كلمة السر بنجاح' });
+    return res.status(200).json('تم تجديد كلمة السر بنجاح' );
 
   } catch (error) {
     console.error('Error updating password:', error);
-    return res.status(500).json({ message: 'حدثت مشكلة أثناء تجديد كلمة السر' });
+    return res.status(402).json(`${error.message}`);
   }
 };
 
@@ -531,13 +605,13 @@ const logout = (req, res) => {
   try {
     res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "strict" }); // حذف الكوكيز
 
-    return res.status(200).json({ message: "تم تسجيل الخروج بنجاح" });
+    return res.status(200).json("تم تسجيل الخروج بنجاح" );
   } catch (error) {
     console.error("Error during logout:", error);
-    return res.status(500).json({ message: "حدث خطأ أثناء تسجيل الخروج" });
+		return res.status(400).json(`${error.message}`);
   }
 };
 
   
 
-module.exports = { signIn, addUser,editUser,editDriver,addDriver, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1 };
+module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip };

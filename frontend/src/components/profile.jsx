@@ -9,18 +9,14 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!oldPassword) {
-      setStatus("يرجى إدخال كلمة السر القديمة");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setStatus("كلمة السر الجديدة يجب أن تكون أكثر من 5 أحرف أو أرقام");
-      return;
-    }
-
     try {
+			if (!oldPassword) {
+				throw new Error("يرجى إدخال كلمة السر القديمة");    }
+	
+			if (newPassword.length < 6) {
+				throw new Error("كلمة السر الجديدة يجب أن تكون أكثر من 5 أحرف أو أرقام");
+			}
+	
       setLoading(true);
       const id = sessionStorage.getItem("userId");
       const formData = { id, oldPassword, newPassword };
@@ -30,8 +26,11 @@ const Profile = () => {
       setOldPassword("");
       setNewPassword("");
     } catch (error) {
-      console.error("خطأ أثناء تغيير كلمة السر:", error);
-      setStatus("كلمة السر القديمة غير صحيحة");
+			setStatus(`${error.message}`);
+
+			setInterval(() => {
+        setStatus("");
+      }, 5000);
     } finally {
       setLoading(false);
     }
