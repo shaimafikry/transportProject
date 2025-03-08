@@ -5,6 +5,7 @@ import DriverFilter from "./driverFilter";
 const Drivers = () => {
   const [viewDrivers, setViewDrivers] = useState("");
   const [drivers, setDrivers] = useState([]);
+	const [editedFields, setEditedFields] = useState({});
 	const [message, setMessage]= useState("");
 	const [errMessage, setErrMessage] = useState("");
   const [newDriver, setNewDriver] = useState({
@@ -72,6 +73,15 @@ const Drivers = () => {
       )
     );
 
+		 // Track edited fields
+		 setEditedFields((prev) => ({
+      ...prev,
+      [driverId]: {
+        ...prev[driverId],
+        [field]: value,
+      },
+    }));
+
     // Update originalDrivers
     setOriginalDrivers((prevOriginalDrivers) =>
       prevOriginalDrivers.map((driver) =>
@@ -103,11 +113,14 @@ const Drivers = () => {
 
   const handleAddDriver = async () => {
 
-		if (newDriver.phone_number === "" || newDriver.driver_name === "" || newDriver.national_id === ""){
-			setErrMessage('رقم التليفون، اسم السائق، الرقم القومي : هذه الحقول لا يجب ان تكون فارغة')
-			return
-		}
     try {
+			if (newDriver.phone_number === "" || newDriver.driver_name === "" || newDriver.national_id === ""){
+				throw new Error('رقم التليفون، اسم السائق، الرقم القومي : هذه الحقول لا يجب ان تكون فارغة')
+			}
+
+			if (newDriver.national_id && newDriver.national_id.length !== 14) {
+				throw new Error("يجب ان يكون الرقم القومي 14 رقم");
+			}
 
       const data = await postData("dashboard?action=drivers-add", newDriver);
       setDrivers([...drivers, { ...data, isEditing: false }]);
@@ -119,23 +132,37 @@ const Drivers = () => {
         passport_number: "",
         company: "",
       });
-			setMessage('تم اضافة السائق  بنجاح')
+			setMessage(data.message);
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
+
 
     } catch (error) {
       console.error("Error adding driver:", error);
-			setErrMessage(`${error.message}`)
+			setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
 
   const handleSaveDriver = async (id) => {
-    try {
-      const driverToUpdate = drivers.find((driver) => driver.id === id) || {};
-      if (Object.keys(driverToUpdate).length === 0) {
+		try {
+      const fieldsToUpdate = editedFields[id] || {}; 
+      if (Object.keys(fieldsToUpdate).length === 0) {
         console.log("No changes to save");
         return;
       }
-      const updatedDriver = await putData("dashboard?action=drivers-edit", driverToUpdate);
+
+			if (fieldsToUpdate.national_id && fieldsToUpdate.national_id.length !== 14) {
+				throw new Error("يجب ان يكون الرقم القومي 14 رقم");
+			}
+
+			const dataToUpdate = { id, ...fieldsToUpdate };
+
+      const updatedDriver = await putData("dashboard?action=drivers-edit", dataToUpdate);
 
   
       // ✅ Update state with `updatedDriver`
@@ -153,11 +180,25 @@ const Drivers = () => {
             : trip
         )
       );
-			setMessage('تم تعديل بيانات السائق بنجاح')
+       
+			// Clear edited fields for this user
+      setEditedFields((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
+
+			setMessage('تم تعديل بيانات السائق بنجاح');
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
 
     } catch (error) {
       console.error("Error updating driver:", error);
-			setErrMessage(`${error.message}`)
+			setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -175,11 +216,17 @@ const Drivers = () => {
       setOriginalDrivers((prevOriginalDrivers) =>
         prevOriginalDrivers.filter((driver) => driver.id !== id)
       );
-			setMessage('تم حذف السائق بنجاح')
+			window.alert('تم حذف المستخدم بنجاح');
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     } catch (error) {
       console.error("Error deleting driver:", error);
-			setErrMessage(`${error.message}`)
+			setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -226,17 +273,14 @@ const Drivers = () => {
 								
 							))}
           </div>
-          <button onClick={handleAddDriver}>حفظ السائق</button>
 					{message && (<p className="suc-message">{message}</p>)}
 					{errMessage && (<p className="err-message">{errMessage}</p>)}
-
+          <button onClick={handleAddDriver}>حفظ السائق</button>
         </>
       )}
 
       {viewDrivers === "edit" && (
         <>
-				  {message && (<p className="suc-message">{message}</p>)}
-					{errMessage && (<p className="err-message">{message}</p>)}
           <div className="table-container">
             <table>
               <thead>
@@ -280,6 +324,8 @@ const Drivers = () => {
                           <button onClick={() => handleDeleteDriver(driver.id)}>حذف</button>
                           <button onClick={() => handleEditDriver(driver.id)}>إلغاء</button>
 													</div>
+													{message && (<p className="suc-message">{message}</p>)}
+													{errMessage && (<p className="err-message">{errMessage}</p>)}
                         </td>
                       </>
                     ) : (

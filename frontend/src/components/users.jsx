@@ -88,29 +88,37 @@ const Users = () => {
   };
 
   const handleAddUser = async () => {
-
-		// Check if any field is empty
-		const isEmptyField = Object.values(newUser).some((value) => value.trim() === "");
-			if (isEmptyField) {
-				setErrMessage("جميع الحقول مطلوبة، لا يمكن إضافة بيانات فارغة");
-				return;
-			}
-
-		if (newUser.password.length < 6) {
-      setErrMessage("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
-      return;
-    }
     try {
+					// Check if any field is empty
+				const isEmptyField = Object.values(newUser).some((value) => value.trim() === "");
+				if (isEmptyField) {
+					throw new Error("جميع الحقول مطلوبة، لا يمكن إضافة بيانات فارغة");
+				}
+
+				if(! /^[a-zA-Z0-9]+$/.test(newUser.username)) {
+					throw new Error("اسم المستخدم يجب ان يحتوى فقط علي حروف او ارقام");
+				}
+
+			if (newUser.password.length < 6) {
+				throw new Error("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
+			}
       const data = await postData("dashboard?action=users-add", newUser);
       setUsers([...users, { ...data, isEditing: false }]);
       setNewUser(
         Object.fromEntries(Object.keys(initialUserState).map((key) => [key, ""]))
       );
-			setMessage('تم اضافة المستخدم بنجاح')
+			// console.log(data.message)
+			setMessage(data.message);
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
 
     } catch (error) {
       console.error("Error adding user:", error);
 			setErrMessage(`${error.message}`)
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -150,8 +158,7 @@ const Users = () => {
       }
 
 			if (fieldsToUpdate.password && fieldsToUpdate.password.length < 6) {
-				setErrMessage("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
-				return;
+				throw new Error("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
 			}
 
       // Send only the edited fields and the user ID to the backend
@@ -178,11 +185,17 @@ const Users = () => {
         delete updated[id];
         return updated;
       });
-			setMessage('تم تعديل المستخدم بنجاح')
+			setMessage('تم تعديل المستخدم بنجاح');
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
 
     } catch (error) {
       console.error("Error updating user:", error);
 			setErrMessage(`${error.message}`)
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -198,11 +211,17 @@ const Users = () => {
       setOriginalUsers((prevOriginalUsers) =>
         prevOriginalUsers.filter((user) => user.id !== id)
       );
-			setMessage('تم حذف المستخدم بنجاح')
+			window.alert('تم حذف المستخدم بنجاح');
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
 
     } catch (error) {
       console.error("Error deleting user:", error);
 			setErrMessage(`${error.message}`)
+			setInterval(() => {
+        setErrMessage("");
+      }, 5000);
 
     }
   };
@@ -261,16 +280,15 @@ const Users = () => {
               )
             )}
           </div>
-          <button onClick={handleAddUser}>حفظ المستخدم</button>
 					{message && (<p className="suc-message">{message}</p>)}
 					{errMessage && (<p className="err-message">{errMessage}</p>)}
+          <button onClick={handleAddUser}>حفظ المستخدم</button>
         </>
       )}
 
       {usersView === "edit" && (
         <>
-				{message && (<p className="suc-message">{message}</p>)}
-				{errMessage && (<p className="err-message">{errMessage}</p>)}
+				
           <div className="table-container">
             <table>
               <thead>
@@ -329,6 +347,8 @@ const Users = () => {
                             إلغاء
                           </button>
 													</div>
+													{message && (<p className="suc-message">{message}</p>)}
+			                  	{errMessage && (<p className="err-message">{errMessage}</p>)}
                         </td>
                       </>
                     ) : (

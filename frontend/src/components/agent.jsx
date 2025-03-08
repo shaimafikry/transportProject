@@ -71,9 +71,15 @@ const Agent = () => {
         )
       );
       setMessage("تم تعديل بيانات العميل بنجاح");
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
     } catch (error) {
       console.error("Error updating agent:", error);
-      setErrMessage(error.message);
+      setErrMessage();
+			setInterval(() => {
+        setErrMessage("العميل موجود مسبقا");
+      }, 5000);
     }
   };
 
@@ -84,10 +90,14 @@ const Agent = () => {
     try {
       await deleteData("dashboard?action=agents-del", { id });
       setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
-      setMessage("تم حذف العميل بنجاح");
+			window.alert('تم حذف المستخدم بنجاح');
     } catch (error) {
       console.error("Error deleting agent:", error);
-      setErrMessage(error.message);
+      setErrMessage(`${error.message}`);
+			setInterval(() => {
+        setMessage("");
+      }, 5000);
+
     }
   };
 
@@ -214,6 +224,8 @@ const Agent = () => {
                         <button onClick={() => handleSaveAgent(agent.id)}>حفظ</button>
                         <button onClick={() => handleDeleteAgent(agent.id)}>حذف</button>
                         <button onClick={() => handleEditAgent(agent.id)}>إلغاء</button>
+												{message && <p className="suc-message">{message}</p>}
+												{errMessage && <p className="err-message">{errMessage}</p>}
                       </td>
                     </>
                   ) : (

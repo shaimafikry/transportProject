@@ -16,44 +16,140 @@ const addUser = async (req, res) => {
 	// username an username found
 	const user = await Users.findOne({ where: { username: newUser.username } });
 
-	if (user && user.username === newUser.username) {
-		return res.status(400).json('اسم المستخدم موجود مسبقا');
-	}
-
-	const userPhone = await Users.findOne({ where: { phone: newUser.phone } });
-	if (userPhone && userPhone.phone === newUser.phone) {
-		return res.status(400).json('رقم الموبايل موجود مسبقا');
-	}
-
-
 	const password_hash = await bcrypt.hash(newUser.password, 10);
 
 	newUser.password = password_hash;
 
 	try {
+		if (user && user.username === newUser.username) {
+			throw new Error('اسم المستخدم موجود مسبقا');
+		}
+	
+		const userPhone = await Users.findOne({ where: { phone: newUser.phone } });
+		if (userPhone && userPhone.phone === newUser.phone) {
+			throw new Error('رقم الموبايل موجود مسبقا');
+		}
 		await Users.create(newUser);
 
-	 return res.status(201).json({message: 'تم اضافة المستخدم بنجاح'});
+	 return res.status(201).json('تم اضافة المستخدم بنجاح');
 
 	}catch(error){
-		console.error('error in signup', error);
-		return res.status(500).json(`server error ${error}`);
+		console.error('error in add user', error);
+		return res.status(400).json(`${error.message}`);
+
+
+	}
+};
+
+//MARK: add driver
+const addDriver = async (req, res) => {
+  const newDriver = req.body;
+	// username an username found
+	try {
+
+		if (newDriver.national_id) {
+			const existingDriver = await Drivers.findOne({ where: { national_id: newDriver.national_id } });
+	
+			if (existingDriver) {
+					throw new Error('الرقم القومي موجود مسبقا');
+			}
+	}
+
+	if (newDriver.phone_number) {
+		const existingDriver = await Drivers.findOne({ where: { phone_number: newDriver.phone_number } });
+
+		if (existingDriver) {
+				throw new Error('رقم الموبايل موجود مسبقا');
+		}
+}
+
+		await Drivers.create(newDriver);
+
+	 return res.status(201).json('تم اضافة السائق بنجاح');
+
+	}catch(error){
+		console.error('error in add driver', error);
+		return res.status(400).json(`${error.message}`);
+
 
 	}
 };
 
 
+
+//MARK: EDIT DRIVER;
+
+const editDriver= async(req, res)=> {
+	const { id, ...updateData } = req.body;
+
+
+	try {
+
+		if (updateData.national_id) {
+			const existingDriver = await Drivers.findOne({ where: { national_id: updateData.national_id } });
+	
+			if (existingDriver && existingDriver.id !== id) {
+					throw new Error('الرقم القومي موجود مسبقا');
+			}
+	}
+
+	if (updateData.phone_number) {
+		const existingDriver = await Drivers.findOne({ where: { phone_number: updateData.phone_number } });
+
+		if (existingDriver && existingDriver.id !== id) {
+				throw new Error('رقم الموبايل موجود مسبقا');
+		}
+}
+
+
+	const response = await Drivers.update(updateData, { where: { id } });
+
+	const updatedDriver = await Drivers.findOne({ where: { id } });
+	const driverData = updatedDriver.get({ plain: true });
+
+	console.log("data",{...driverData})
+
+
+	return res.status(200).json({...driverData});
+	
+}catch(error){
+	console.error('error in edit driver', error);
+	return res.status(400).json(`${error.message}`);
+
+}
+
+};
+
+
+
+//MARK: edituser
 const editUser= async(req, res)=> {
 		const { id, ...updateData } = req.body;
-		console.log(req.body)
-
+	
 	  // Check if the password is being updated
     if (updateData.password && updateData.password.trim() !== "") {
       const password_hash = await bcrypt.hash(updateData.password, 10);
       updateData.password = password_hash;
     }
-
+	
 		try {
+
+			if (updateData.phone) {
+				const existingUser = await Users.findOne({ where: { phone: updateData.phone } });
+		
+				if (existingUser && existingUser.id !== id) {
+						throw new Error('رقم الموبايل موجود مسبقا');
+				}
+		}
+	
+		if (updateData.username) {
+			const existingUser = await Users.findOne({ where: { username: updateData.username } });
+	
+			if (existingUser && existingUser.id !== id) {
+					throw new Error('اسم المستخدم موجود مسبقا');
+			}
+	}
+	
 
 		const response = await Users.update(updateData, { where: { id } });
 
@@ -67,7 +163,7 @@ const editUser= async(req, res)=> {
 		
 	}catch(error){
 		console.error('error in edit user', error);
-		return res.status(500).json(`server error ${error}`);
+		return res.status(400).json(`${error.message}`);
 
 	}
 
@@ -424,4 +520,4 @@ const logout = (req, res) => {
 
   
 
-module.exports = { signIn, addUser,editUser, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver };
+module.exports = { signIn, addUser,editUser,editDriver,addDriver, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver };
