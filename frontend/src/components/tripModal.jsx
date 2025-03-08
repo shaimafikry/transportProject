@@ -229,13 +229,13 @@ const handleChange = (field, value) => {
       await deleteData("dashboard?action=comp2Trips-del", { id: trip.id });
       window.alert("تم حذف الرحلة بنجاح");
       onSave(null); // Close modal and refresh trips
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 5000);
     } catch (error) {
       console.error("Error deleting trip:", error);
       setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
     }

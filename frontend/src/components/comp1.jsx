@@ -167,14 +167,14 @@ const Comp1 = () => {
         price: "",
       }); // Reset fields
 			setMessage(data.message);
-			setInterval(() => {
+			setTimeout(() => {
 				setMessage("");
 			}, 3000);
 
     } catch (error) {
       console.error("Error adding trip:", error);
 			setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
 				setErrMessage("");
 			}, 5000);
 
@@ -215,13 +215,13 @@ const Comp1 = () => {
 				)
 			);
 			setMessage('تم تعديل الرحلة بنجاح');
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
     } catch (error) {
       console.error("Error updating trip:", error);
 			setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
@@ -242,13 +242,13 @@ const Comp1 = () => {
       prevOriginalTrips.filter((trip) => trip.id !== id)
     );
 		window.alert('تم حذف الرحلة بنجاح');
-		setInterval(() => {
+		setTimeout(() => {
 			setMessage("");
 		}, 3000);
     } catch (error) {
       console.error("Error deleting trip:", error);
 			setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 

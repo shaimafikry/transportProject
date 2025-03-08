@@ -253,14 +253,14 @@ const Comp2 = () => {
         // Validate required fields before submission
         if (!tripData.leader_name) {
           setErrMessage("يجب إدخال اسم المندوب");
-          setInterval(() => {
+          setTimeout(() => {
             setErrMessage("");
           }, 5000);
           return;
       }
         if (!tripData.driver_name) {
             setErrMessage("يجب إدخال اسم السائق");
-            setInterval(() => {
+            setTimeout(() => {
               setErrMessage("");
             }, 5000);
             return;
@@ -268,28 +268,28 @@ const Comp2 = () => {
 
         if (!tripData.national_id) {
           setErrMessage("يجب إدخال الرقم القومي للسائق");
-          setInterval(() => {
+          setTimeout(() => {
             setErrMessage("");
           }, 5000);
           return ;
         }
         if (tripData.national_id.length !== 14) {
           setErrMessage("الرقم القومي يجب أن يكون 14 رقمًا");
-          setInterval(() => {
+          setTimeout(() => {
             setErrMessage("");
           }, 5000);
           return ;
         }
         if (tripData.arrival_date && tripData.driver_loading_date && tripData.arrival_date < tripData.driver_loading_date) {
           setErrMessage("تاريخ الوصول لا يمكن أن يكون قبل تاريخ التحميل");
-          setInterval(() => {
+          setTimeout(() => {
             setErrMessage("");
           }, 5000);
           return;
         }
         if (tripData.aging_date && tripData.company_loading_date && tripData.aging_date < tripData.company_loading_date) {
           setErrMessage("تاريخ التعتيق لا يمكن أن يكون قبل تاريخ التحميل للشركة");
-          setInterval(() => {
+          setTimeout(() => {
             setErrMessage("");
           }, 5000);
           return ;
@@ -312,7 +312,7 @@ const Comp2 = () => {
         
         if (tripData.passport_number && tripData.passport_number.length > 9) {
           setErrMessage("رقم الجواز لا يمكن أن يكون أكثر من 9 أرقام");
-          setInterval(() => {
+          setTimeout(() => {
             setErrMessage("");
           }, 5000);
           return;
@@ -326,13 +326,13 @@ const Comp2 = () => {
         setNewTripComp2(Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""])));
 
         setMessage("تم اضافة الرحلة بنجاح");
-        setInterval(() => {
+        setTimeout(() => {
           setMessage("");
         }, 5000);
     } catch (error) {
         console.error("Error adding trip:", error);
         setErrMessage(error.message);
-        setInterval(() => {
+        setTimeout(() => {
           setErrMessage("");
         }, 5000);
 				setTripsComp2([]);

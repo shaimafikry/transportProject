@@ -28,7 +28,7 @@ const Profile = () => {
     } catch (error) {
 			setStatus(`${error.message}`);
 
-			setInterval(() => {
+			setTimeout(() => {
         setStatus("");
       }, 5000);
     } finally {

@@ -71,13 +71,13 @@ const Agent = () => {
         )
       );
       setMessage("تم تعديل بيانات العميل بنجاح");
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
     } catch (error) {
       console.error("Error updating agent:", error);
       setErrMessage();
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("العميل موجود مسبقا");
       }, 5000);
     }
@@ -91,13 +91,13 @@ const Agent = () => {
       await deleteData("dashboard?action=agents-del", { id });
       setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
 			window.alert('تم حذف المستخدم بنجاح');
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
     } catch (error) {
       console.error("Error deleting agent:", error);
       setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
@@ -115,13 +115,13 @@ const Agent = () => {
       setNewAgent({ agent_name: "", agent_type: "" });
       fetchAgents();
       setMessage("تم اضافة العميل بنجاح");
-      setInterval(() => {
+      setTimeout(() => {
         setMessage("");
-      }, 3000);
+      }, 5000);
     } catch (error) {
       console.error("Error adding agent:", error);
       setErrMessage("المنظمة موجودة مسبقا");
-      setInterval(() => {
+      setTimeout(() => {
         setErrMessage("");
       }, 5000);
     }

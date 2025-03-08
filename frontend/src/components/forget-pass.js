@@ -22,7 +22,7 @@ const ForgetPass = () => {
     } catch (error) {
       console.error("Error checking phone number:", error);
       setStatus(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setStatus("");
       }, 5000);
     }
@@ -38,7 +38,7 @@ const ForgetPass = () => {
       const formData = { id, newPassword };
       await putData("forget-password", formData);
       setStatus(`${formData.message}`);	
-			setInterval(() => {
+			setTimeout(() => {
         setStatus("");
       }, 3000);
       setPhone("");
@@ -47,7 +47,7 @@ const ForgetPass = () => {
     } catch (error) {
       console.error("Error changing password:", error);
       setStatus(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setStatus("");
       }, 5000);
     }

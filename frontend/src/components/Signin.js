@@ -37,7 +37,7 @@ function Signin() {
 		} catch (error) {
 			console.error("Error caught during login:", error);
 			setApiError(`${error.message}` || 'An unexpected error occurred during signin');
-			setInterval(() => {
+			setTimeout(() => {
         setApiError("");
       }, 5000);
 		}

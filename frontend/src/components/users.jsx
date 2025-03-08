@@ -109,14 +109,14 @@ const Users = () => {
       );
 			// console.log(data.message)
 			setMessage(data.message);
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
 
     } catch (error) {
       console.error("Error adding user:", error);
 			setErrMessage(`${error.message}`)
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
@@ -190,14 +190,14 @@ const Users = () => {
         return updated;
       });
 			setMessage('تم تعديل المستخدم بنجاح');
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
 
     } catch (error) {
       console.error("Error updating user:", error);
 			setErrMessage(`${error.message}`)
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
@@ -216,14 +216,14 @@ const Users = () => {
         prevOriginalUsers.filter((user) => user.id !== id)
       );
 			window.alert('تم حذف المستخدم بنجاح');
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
 
     } catch (error) {
       console.error("Error deleting user:", error);
 			setErrMessage(`${error.message}`)
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 

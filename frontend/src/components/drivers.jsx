@@ -133,7 +133,7 @@ const Drivers = () => {
         company: "",
       });
 			setMessage(data.message);
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
 
@@ -141,7 +141,7 @@ const Drivers = () => {
     } catch (error) {
       console.error("Error adding driver:", error);
 			setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
@@ -189,14 +189,14 @@ const Drivers = () => {
       });
 
 			setMessage('تم تعديل بيانات السائق بنجاح');
-			setInterval(() => {
+			setTimeout(() => {
         setMessage("");
       }, 3000);
 
     } catch (error) {
       console.error("Error updating driver:", error);
 			setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
@@ -217,14 +217,14 @@ const Drivers = () => {
         prevOriginalDrivers.filter((driver) => driver.id !== id)
       );
 			window.alert('تم حذف المستخدم بنجاح');
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 3000);
 
     } catch (error) {
       console.error("Error deleting driver:", error);
 			setErrMessage(`${error.message}`);
-			setInterval(() => {
+			setTimeout(() => {
         setErrMessage("");
       }, 5000);
 
