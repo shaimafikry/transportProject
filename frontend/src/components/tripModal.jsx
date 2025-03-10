@@ -180,7 +180,7 @@ const handleChange = (field, value) => {
 				let value = updatedData[key];
 	
 				if (value === "" || value === null || value === undefined) {
-					updatedData[key] = ["nights_count", "night_value", "nights_max", "total_nights_value", "transport_fee", "expenses", "total_transport", "deposit", "total_received_cash"].includes(key) ? 0 : "";
+					updatedData[key] = ["nights_count", "night_value", "nights_max", "total_nights_value", "transport_fee", "expenses", "total_transport", "total_received_cash"].includes(key) ? 0 : "";
 				} else if (!isNaN(value) && typeof value !== "boolean") {
 					updatedData[key] = parseFloat(value);
 				} else {

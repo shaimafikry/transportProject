@@ -1,5 +1,6 @@
 const { sequelize, Drivers, Agents, TransportTrips, ConstructTrips, Users } = require('./config');
 const { addUser, editUser,allUsers,editDriver,addDriver,comp2DelTrip, comp2EditTrip, addTripAndDriver,editComp1, updatePassword} = require('./authController');
+const {attendanceLog} = require('./attendanceCont');
 
 const models = {
   comp1Trips: ConstructTrips,
@@ -53,6 +54,7 @@ const dashboard = async (req, res) => {
   if (action === "drivers-edit") return editDriver(req, res);
   if (action === "users") return allUsers(req, res);
   if (action === "profile") return updatePassword(req, res);
+  if (action === "attendance") return attendanceLog(req, res);
 
 
 

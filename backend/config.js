@@ -69,6 +69,37 @@ const Users = sequelize.define("Users", {
 });
 
 
+
+const Attendance = sequelize.define("Attendance", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  type: {
+    type: DataTypes.ENUM("in", "out"), // "in" for check-in, "out" for check-out
+    allowNull: false,
+  },
+}, {
+  tableName: "attendance",
+  timestamps: false, // Since you have a timestamp column, you might not need Sequelize's default timestamps
+});
+
+module.exports = Attendance;
+
+
 const TransportTrips = sequelize.define("TransportTrips", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   leader_name: { type: DataTypes.STRING,  defaultValue: "" },
@@ -98,7 +129,6 @@ const TransportTrips = sequelize.define("TransportTrips", {
   transport_fee: { type: DataTypes.INTEGER, defaultValue: 0 },
   expenses: { type: DataTypes.INTEGER, defaultValue: 0 },
   total_transport: { type: DataTypes.INTEGER, defaultValue: 0 },
-  deposit: { type: DataTypes.INTEGER, defaultValue: 0.00 },
   total_received_cash: { type: DataTypes.INTEGER, defaultValue: 0 },
 	remain_cash:{ type: DataTypes.INTEGER, defaultValue: 0 },
   notes: { type: DataTypes.TEXT, allowNull: true },
@@ -131,4 +161,4 @@ sequelize.sync({ alter: true })
 
 syncDB();
 
-module.exports = { sequelize, Drivers, Agents, TransportTrips, ConstructTrips, Users };
+module.exports = { sequelize, Drivers, Agents,Attendance, TransportTrips, ConstructTrips, Users };

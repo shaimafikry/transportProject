@@ -35,8 +35,15 @@ const SidebarRight = ({role, onSelect}) => {
             <FaRegBuilding />العملاء
           </button>
 					{role === "manager" && (
-            <button onClick={() => onSelect("users")} title="الموظفين">
-              <FaUserPlus />الموظفين</button>
+           <>
+					 <button onClick={() => onSelect("users")} title="الموظفين">
+							 <FaUserPlus />الموظفين
+					 </button>
+					 <button onClick={() => onSelect("attendance")} title="الحضور والانصراف">
+							 <FaUserPlus />الحضور والانصراف
+					 </button>
+			 </>
+
           )}
 
           <button onClick={() => onSelect("profile")} title="الملف الشخصي">

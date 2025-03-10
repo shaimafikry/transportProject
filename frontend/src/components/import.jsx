@@ -29,7 +29,6 @@ const initialTripState = {
   transport_fee: "ناوُلون",
   expenses: "مصاريف (كارتة + ميزان)",
   total_transport: "إجمالي النقلة",
-  deposit: "عهدة",
   total_received_cash: "إجمالي النقدية المستلمة",
   notes: "ملاحظات",
 };
@@ -101,7 +100,7 @@ const ImportTrips = () => {
 
             Object.keys(mappedRow).forEach((key) => {
               let value = mappedRow[key];
-              if (["nights_count", "night_value", "total_nights_value", "transport_fee", "expenses", "total_transport", "deposit", "total_received_cash"].includes(key)) {
+              if (["nights_count", "night_value", "total_nights_value", "transport_fee", "expenses", "total_transport", "total_received_cash"].includes(key)) {
                 if (value === "") {
                   mappedRow[key] = 0;
                 } else if (!isNaN(value)) {

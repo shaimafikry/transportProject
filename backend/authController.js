@@ -1,5 +1,5 @@
 require('dotenv').config({path: '../.env'});
-const { Users, Drivers, TransportTrips, ConstructTrips, Agents } = require('./config');
+const { Users, Drivers, Attendance, TransportTrips, ConstructTrips, Agents } = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
@@ -412,7 +412,6 @@ const addTripAndDriver = async (req, res) => {
             "transport_fee",
             "expenses",
             "total_transport",
-            "deposit",
             "total_received_cash",
           ].includes(key)
         ) {
@@ -443,7 +442,8 @@ const addTripAndDriver = async (req, res) => {
     });
 
     // Extract required fields for calculations
-    const { national_id, total_transport, total_received_cash, client_name="" } = sanitizedData;
+    const { leader_name, driver_name, phone_number, national_id, total_transport, total_received_cash, client_name="" } = sanitizedData;
+
 		console.log(client_name)
 
     // Ensure numeric fields have valid values
@@ -487,7 +487,11 @@ const addTripAndDriver = async (req, res) => {
       console.log("تم تعديل بيانات السائق بنجاح");
     } else {
       driver = await Drivers.create({
-        ...sanitizedData,
+        leader_name: leader_name,
+				driver_name: driver_name,
+				phone_number: phone_number,
+				national_id: national_id,
+				company: "النقل",
         trip_num: 1,
         total_all_transport: sanitizedData.total_transport,
         remaining_money_fees:
@@ -540,6 +544,18 @@ const signIn = async (req, res) => {
 	if (!isPasswordValid) {
 		throw new Error('كلمة السر غير صحيحة');
 	}
+	
+// Add attendance record for sign-in
+const signInRecord = {
+  name: user.name, // Ensure it matches the model field
+  userId: user.id,
+  type: "in",
+  timestamp: new Date(), // Capture current time
+};
+
+const record = await Attendance.create(signInRecord);
+
+
 	// generate JWT token and send it back to the client
 	const payload = {
     name: user.name,
@@ -657,8 +673,21 @@ const updatePassword = async (req, res) => {
 
 
 //MARK: log out
-const logout = (req, res) => {
+const logout = async(req, res) => {
   try {
+		const user = req.user;
+		console.log(user);
+		// Add attendance record for sign-out
+		const signInRecord = {
+				name: user.name, // Ensure it matches the model field
+				userId: user.id,
+				type: "out",
+				timestamp: new Date(), // Capture current time
+		};
+		
+
+		const record = await Attendance.create(signInRecord);
+
     res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "strict" }); // حذف الكوكيز
 
     return res.status(200).json("تم تسجيل الخروج بنجاح" );

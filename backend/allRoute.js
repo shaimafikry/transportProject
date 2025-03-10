@@ -5,7 +5,7 @@ const { dashboard } = require('./controllers');
 const authToken = require('./authToken');
 
 router.post('/', signIn); 
-router.post('/logout', logout); 
+
 router.get('/forget-password', forgetPasswordCheck); 
 router.put('/forget-password', forgetPassword); 
 
@@ -19,6 +19,8 @@ router.route('/dashboard')
   .post(dashboard) 
   .put(dashboard) 
   .delete(dashboard);
+
+	router.post('/logout', logout); 
 
 // Error handling middleware
 router.use((err, req, res, next) => {

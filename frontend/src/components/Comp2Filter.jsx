@@ -31,7 +31,6 @@ const initialTripState = {
     transport_fee: "ناوُلون",
     expenses: "مصاريف (كارتة + ميزان)",
     total_transport: "إجمالي النقلة",
-    deposit: "عهدة",
     total_received_cash: "إجمالي النقدية المستلمة",
     remain_cash: "المتبقى",
     notes: "ملاحظات",
@@ -146,7 +145,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
 		}, [filteredTrips, onSearch]);
 
   const exportToExcel = () => {
-    const exportData = trips.map(trip => {
+    const exportData = filteredTrips.map(trip => {
       let formattedTrip = {};
       Object.keys(initialTripState).forEach(key => {
         formattedTrip[initialTripState[key]] = trip[key];

@@ -437,7 +437,6 @@ table button:hover {
 .error-total_nights_value,
 .error-transport_fee,
 .error-expenses,
-.error-deposit,
 .error-total_transport,
 .error-total_received_cash,
 .error-remain_cash,
@@ -470,4 +469,24 @@ error-message {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 	overflow-y: auto; /* Ensures content scrolls if necessary */
   max-height: 90vh; /* Prevents it from overflowing the viewport */
+}
+
+
+.month-btn{
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	margin-bottom: 20px;
+	gap: 10px;
+	justify-content: center;
+}
+
+
+.record {
+		background-color: #8B0000; /* Dark Red */
+		color: white;
+		padding: 10px;
+		text-align: center;
+		border-radius: 5px;
+	
 }

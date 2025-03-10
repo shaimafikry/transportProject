@@ -50,7 +50,6 @@ const Comp2 = () => {
 
     transport_fee: "ناوُلون",
     expenses: "مصاريف (كارتة + ميزان)",
-    deposit: "عهدة",
     total_transport: "إجمالي النقلة",
     
     total_received_cash: "إجمالي النقدية المستلمة",
@@ -229,7 +228,6 @@ const Comp2 = () => {
                     "transport_fee",
                     "expenses",
                     "total_transport",
-                    "deposit",
                     "total_received_cash"
                 ].includes(key)) {
                     tripData[key] = 0;
