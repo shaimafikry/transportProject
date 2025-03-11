@@ -3,48 +3,68 @@ import * as XLSX from "xlsx";
 import './search.css'
 
 
+	
 const initialTripState = {
-    leader_name: "اسم المندوب",
-    driver_name: "اسم السائق",
-    phone_number: "رقم الموبايل",
-    national_id: "الرقم القومي",
-    passport_number: "رقم الجواز",
-    car_letters: "حروف السيارة",
-    car_numbers: "أرقام السيارة",
-    trailer_letters: "حروف المقطورة",
-    trailer_numbers: "أرقام المقطورة",
-    arrival_date: "تاريخ الوصول",
-    driver_loading_date: "تاريخ التحميل للسائق",
-    car_type: "نوع السيارة",
-    fo_number: "رقم FO",
-    loading_place: "مكان التحميل",
-    company_loading_date: "تاريخ التحميل للشركة",
-    cargo_type: "نوع الحمولة",
-    destination: "الجهة",
-    equipment: "المعدة",
-    client_name: "اسم العميل",
-    aging_date: "تاريخ التعتيق",
-    nights_count: "عدد البياتات",
-    nights_max: "اقصى عدد بياتات",
-    night_value: "قيمة البياتة",
-    total_nights_value: "إجمالي قيمة البياتات",
-    transport_fee: "ناوُلون",
-    expenses: "مصاريف (كارتة + ميزان)",
-    total_transport: "إجمالي النقلة",
-    total_received_cash: "إجمالي النقدية المستلمة",
-    remain_cash: "المتبقى",
-    notes: "ملاحظات",
+  leader_name: "اسم المندوب",
+  driver_name: "اسم السائق",
+  phone_number: "رقم الموبايل",
+  national_id: "الرقم القومي",
+  passport_number: "رقم الجواز",
+
+  car_letters: "حروف السيارة",
+  car_numbers: "أرقام السيارة",
+  trailer_letters: "حروف المقطورة",
+  trailer_numbers: "أرقام المقطورة",
+  car_type: "نوع السيارة",
+
+  cargo_type: "نوع الحمولة",
+  loading_place: "مكان التحميل",
+  destination: "الجهة",
+
+  driver_loading_date: "تاريخ التحميل للسائق",
+  arrival_date: "تاريخ الوصول",
+  company_loading_date: "تاريخ التحميل للشركة",
+  aging_date: "تاريخ التعتيق",
+
+  fo_number: "رقم FO",
+  equipment: "المعدة",
+  client_name: "اسم العميل",
+
+  nights_count: "عدد البياتات",
+  nights_max: "اقصى عدد بياتات",
+  night_value: "قيمة البياتة",
+  total_nights_value: "إجمالي قيمة البياتات",
+
+  company_night_value: "قيمة البياتة للشركة",
+  total_company_nights_value: "إجمالي البياتات للشركة",
+
+
+  transport_fee: "ناولون",
+  company_naulon: "ناولون الشركة",
+
+  expenses: "مصاريف (كارتة + ميزان)",
+  total_transport: "إجمالي النقلة",
+  total_received_cash: "إجمالي النقدية المستلمة",
+  remain_cash: "المتبقى",
+
+  company_toll_fee: "حساب الكارتة للشركة",
+  total_company_account: "الحساب الاجمالي للشركة",
+  net_profit: "صافي الربح",
+
+  notes: "ملاحظات",
+  status: "حالة الرحلة",
+  // added_by: "اضافة بواسطة ",
+  // edited_by: "آخر تعديل بواسطة",
 };
 
 const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({loading_place:"", client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
+  const [filters, setFilters] = useState({client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
 
   const [uniqueClients, setUniqueClients] = useState([]);
   const [uniqueDestinations, setUniqueDestinations] = useState([]);
   const [uniqueLeaders, setUniqueLeaders] = useState([]);
-  const [uniqueLoadingPlaces, setUniquePlaces] = useState([]);
 
 
 	// console.log(trips)
@@ -70,13 +90,11 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
       const clients = [...new Set(trips.map(trip => trip.client_name))];
       const destinations = [...new Set(trips.map(trip => trip.destination))];
       const leaders = [...new Set(trips.map(trip => trip.leader_name))];
-      const places = [...new Set(trips.map(trip => trip.loading_place))];
 
       
       setUniqueClients(clients);
       setUniqueDestinations(destinations);
       setUniqueLeaders(leaders);
-      setUniquePlaces(places);
     }
   }, [trips]);
 
@@ -85,7 +103,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     
     if (searchQuery) {
       result = result.filter((trip) =>
-				(trip.driver_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.driver_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.national_id?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.car_type?.toLowerCase() || "").includes(searchQuery.toLowerCase())    ||
 			(trip.cargo_type?.toLowerCase() || "").includes(searchQuery.toLowerCase())  ||
@@ -94,6 +112,8 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
 			(trip.destination?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.leader_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.loading_place?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.status?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.edited_by?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.added_by?.toLowerCase() || "").includes(searchQuery.toLowerCase())
 
       );
@@ -117,6 +137,16 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
       });
     }
 
+    const filterTripsWithoutFo = () => {
+      const filteredTrips = trips.filter(trip => !trip.fo_number);
+      onSearch(filteredTrips);
+    };
+  
+    const filterTripsWithoutAgingDate = () => {
+      const filteredTrips = trips.filter(trip => !trip.aging_date);
+      onSearch(filteredTrips);
+    };
+  
         // Apply sorting
 				result.sort((a, b) => {
 					const dateA = new Date(a.company_loading_date); // Use the correct field for sorting
@@ -217,6 +247,9 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     ))}
   </select>
 
+  <button className="filter-btn" onClick={filterTripsWithoutFo}>NO FOD 🚚</button>
+  <button className="filter-btn" onClick={filterTripsWithoutAgingDate}>تعتيق بدون ⏳</button>
+
 	<div className="date-filter">
   <label htmlFor="startDate">البدء:</label>
   <input
@@ -236,6 +269,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   <button className="exl-btn" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
 ترتيب ({sortOrder === "asc" ? "تصاعدي" : "تنازلي"})
   </button>
+
 
   <button className="export-btn" onClick={exportToExcel}>
     حفظ

@@ -15,10 +15,8 @@ const Comp2 = () => {
 	const [errMessage, setErrMessage] = useState("");
 
 	
-
   const initialTripState = {
     leader_name: "اسم المندوب",
-
     driver_name: "اسم السائق",
     phone_number: "رقم الموبايل",
     national_id: "الرقم القومي",
@@ -28,8 +26,8 @@ const Comp2 = () => {
     car_numbers: "أرقام السيارة",
     trailer_letters: "حروف المقطورة",
     trailer_numbers: "أرقام المقطورة",
-
     car_type: "نوع السيارة",
+
     cargo_type: "نوع الحمولة",
     loading_place: "مكان التحميل",
     destination: "الجهة",
@@ -44,19 +42,32 @@ const Comp2 = () => {
     client_name: "اسم العميل",
 
     nights_count: "عدد البياتات",
-		nights_max: " اقصى عدد بياتات",
+    nights_max: "اقصى عدد بياتات",
     night_value: "قيمة البياتة",
     total_nights_value: "إجمالي قيمة البياتات",
 
-    transport_fee: "ناوُلون",
+    company_night_value: "قيمة البياتة للشركة",
+    total_company_nights_value: "إجمالي البياتات للشركة",
+
+
+    transport_fee: "ناولون",
+    company_naulon: "ناولون الشركة",
+
     expenses: "مصاريف (كارتة + ميزان)",
     total_transport: "إجمالي النقلة",
-    
     total_received_cash: "إجمالي النقدية المستلمة",
-    remain_cash: " المتبقى",
+    remain_cash: "المتبقى",
+
+    company_toll_fee: "حساب الكارتة للشركة",
+    total_company_account: "الحساب الاجمالي للشركة",
+    net_profit: "صافي الربح",
+
     notes: "ملاحظات",
-		added_by: "بواسطة",
+    status: "حالة الرحلة",
+    // added_by: "اضافة بواسطة ",
+    // edited_by: "آخر تعديل بواسطة",
   };
+  
 
   const [newTripComp2, setNewTripComp2] = useState(
     Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""]))
@@ -221,15 +232,22 @@ const Comp2 = () => {
 
             if (value === "" || value === null || value === undefined) {
                 // Default numeric fields to 0
-                if ([
-                    "nights_count",
+                  if ([
+                    "nights_count", 
+                    "nights_max", 
                     "night_value",
-                    "total_nights_value",
-                    "transport_fee",
-                    "expenses",
-                    "total_transport",
-                    "total_received_cash"
-                ].includes(key)) {
+                    "total_nights_value", 
+                    "transport_fee", 
+                    "expenses", 
+                    "total_transport", 
+                    "total_received_cash",
+                    "company_night_value", 
+                    "company_toll_fee",
+                    "company_naulon", 
+                    "total_company_nights_value",
+                    "total_company_account",
+                      "net_profit"
+                  ].includes(key)) {
                     tripData[key] = 0;
                 } else {
                     tripData[key] = ""; // Default empty fields to an empty string
@@ -241,7 +259,7 @@ const Comp2 = () => {
                 }
                 // Convert numeric fields to numbers
                 else if (!isNaN(value) && typeof value !== "boolean") {
-                    tripData[key] = parseFloat(value);
+                    tripData[key] = parseInt(value);
                 } else {
                     tripData[key] = value.toString().trim();
                 }
