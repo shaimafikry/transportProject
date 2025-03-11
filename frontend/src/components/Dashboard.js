@@ -22,7 +22,7 @@ const [role, setRole] = useState("");
 return (
 	<div className="container-fluid">
 		<SidebarRight  role={role} onSelect={setSelectedSection}/>
-		<Content selected={selectedSection} />
+		<Content selected={selectedSection} role={role} />
 	</div>
 );
 };

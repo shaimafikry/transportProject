@@ -8,7 +8,7 @@ import Profile from "./profile.jsx";
 import Attendance from "./attendance.jsx";
 
 
-const Content = ({ selected}) => {
+const Content = ({ selected, role}) => {
 
 
   return (
@@ -17,7 +17,7 @@ const Content = ({ selected}) => {
       {/* Add Trip Section - Main Buttons */}
 			{selected === "add-comp1" && <Comp1 />}
 
-      {selected === "add-comp2" && <Comp2  />}
+      {selected === "add-comp2" && <Comp2 role={role} />}
 
       {selected === "profile" && <Profile />}
 

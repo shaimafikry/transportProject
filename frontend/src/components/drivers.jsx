@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
+import { useNavigate } from 'react-router-dom';
 import DriverFilter from "./driverFilter";
 
 const Drivers = () => {
+	const navigate = useNavigate();
   const [viewDrivers, setViewDrivers] = useState("");
   const [drivers, setDrivers] = useState([]);
 	const [editedFields, setEditedFields] = useState({});
@@ -61,6 +63,11 @@ const Drivers = () => {
   const resetSearch = () => {
     setDrivers(originalDrivers);
   };
+
+  //MARK: EDIT THIS url
+	const handleDriverProfile = (id)=> {
+		navigate(`${id}`)
+	}
 
   const handleDriverChange = (field, value) => {
     setNewDriver((prev) => ({ ...prev, [field]: value }));
@@ -335,6 +342,8 @@ const Drivers = () => {
                         ))}
                         <td>
                           <button onClick={() => handleEditDriver(driver.id)}>تعديل</button>
+                          <button onClick={() => handleDriverProfile(driver.id)}>زيارة</button>
+
                         </td>
                       </>
                     )}

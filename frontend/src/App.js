@@ -4,6 +4,7 @@ import Signin from './components/Signin';
 import Dashboard from './components/Dashboard';
 import ForgetPass from './components/forget-pass';
 import ProtectedRoute from './components/protectedRoutes';
+import DriverProfile from './components/driverProfile';
 
 
 
@@ -18,6 +19,14 @@ function App() {
               <Dashboard />
           </ProtectedRoute>
 				} />
+				<Route 
+          path="/dashboard/:id"
+          element={
+            <ProtectedRoute>
+              <DriverProfile />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/forget-password" element={<ForgetPass />} />
       </Routes>
     </Router>

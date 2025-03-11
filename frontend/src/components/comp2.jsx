@@ -4,7 +4,7 @@ import TripFilterSortComp2 from "./Comp2Filter";
 import ImportTrips from "./import"
 import TripEditModal from "./tripModal"
 
-const Comp2 = () => {
+const Comp2 = ({role}) => {
 	const [selectedTrip, setSelectedTrip] = useState(null);
   const [viewComp2, setViewComp2] = useState("");
   const [tripsComp2, setTripsComp2] = useState([]);
@@ -13,6 +13,8 @@ const Comp2 = () => {
 	const [originalTrips, setOriginalTrips] = useState([]); 
 	const [message, setMessage]= useState("");
 	const [errMessage, setErrMessage] = useState("");
+	const [tripsCount, setTripsCount] = useState(0); // New state for count
+	const [userRole, setUserRole] = useState(role); // or "employee" or whatever roles you have
 
 	
   const initialTripState = {
@@ -62,10 +64,11 @@ const Comp2 = () => {
     total_company_account: "الحساب الاجمالي للشركة",
     net_profit: "صافي الربح",
 
+		status: "حالة الرحلة",
+
     notes: "ملاحظات",
-    status: "حالة الرحلة",
-    // added_by: "اضافة بواسطة ",
-    // edited_by: "آخر تعديل بواسطة",
+    added_by: "اضافة بواسطة",
+    edited_by: "آخر تعديل بواسطة",
   };
   
 
@@ -101,6 +104,7 @@ const Comp2 = () => {
       const formattedTrips = data.comp2Trips.map((trip) => ({
         ...trip, }));
       setTripsComp2(Array.isArray(formattedTrips) ? formattedTrips : []);
+			console.log("fetch", data);
 			// setTripsComp2(formattedTrips);
       setOriginalTrips(formattedTrips); 
     } catch (error) {
@@ -192,9 +196,15 @@ const Comp2 = () => {
   ]);
 
 	// Handle search results from TripFilterSortComp2Comp1
-  const handleSearch = (searchResults) => {
-    setTripsComp2(searchResults); // Update the table with filtered data
-  };
+  // const handleSearch = (searchResults) => {
+  //   setTripsComp2(searchResults); // Update the table with filtered data
+  // };
+
+	const handleSearch = (searchResults) => {
+		setTripsComp2(searchResults.trips || []);
+		setTripsCount(searchResults.count || 0);
+	};
+	
 
 
 	const handleTripChange = (field, value) => {
@@ -246,7 +256,7 @@ const Comp2 = () => {
                     "company_naulon", 
                     "total_company_nights_value",
                     "total_company_account",
-                      "net_profit"
+                    "net_profit"
                   ].includes(key)) {
                     tripData[key] = 0;
                 } else {
@@ -365,189 +375,202 @@ const Comp2 = () => {
 
 
 
-  return (
-    <>
-		  <h2>رحلات شركة النقل</h2>
-      <div className="trip-options">
-        <button onClick={() => { setMessage(""); fetchAgents(); setViewComp2("add"); setErrMessage("");}}>إضافة رحلة</button>
-        <button onClick={() =>{ setViewComp2("import"); setMessage(""); setErrMessage("");}}>اضافة من ملف اكسيل</button>
-        <button onClick={() => { setMessage(""); fetchTrips(); setViewComp2("edit"); setErrMessage("");}}>تعديل رحلة</button>
-        <button onClick={() => {setMessage(""); fetchTrips(); setViewComp2("all"); setErrMessage("");}}>الرحلات</button>
-      </div>
-      
-      {/*//MARK: call FilterSort*/}
-			{/*i need to make it work with all too */}
-			{(viewComp2 === "edit" || viewComp2 === "all") && (
-        <TripFilterSortComp2 trips={originalTrips} onSearch={handleSearch} />
-      )}
-  
-      {viewComp2 === "add" && (
-        <>
-          <div className="comp2-dashboard-form-group">
-            {Object.entries(initialTripState) .filter(([key]) => key !== "added_by").map(([key, label]) => (
-              <div key={key} className="comp2-form-field">
-                <label htmlFor={key}>{label}</label>
-                {key === "car_type" ? (
-                  <select
-                    id={key}
-                    value={newTripComp2[key]}
-                    onChange={(e) => handleTripChange(key, e.target.value)}
-                  >
+//MARK: RETURN html
+return (
+	<>
+		<h2>رحلات شركة النقل</h2>
+		<div className="trip-options">
+			<button onClick={() => { setMessage(""); fetchAgents(); setViewComp2("add"); setErrMessage("");}}>إضافة رحلة</button>
+			<button onClick={() =>{ setViewComp2("import"); setMessage(""); setErrMessage("");}}>اضافة من ملف اكسيل</button>
+			<button onClick={() => { setMessage(""); fetchTrips(); setViewComp2("edit"); setErrMessage("");}}>تعديل رحلة</button>
+			<button onClick={() => {setMessage(""); fetchTrips(); setViewComp2("all"); setErrMessage("");}}>الرحلات</button>
+		</div>
+		
+		{/*//MARK: call FilterSort*/}
+		{/*i need to make it work with all too */}
+		{(viewComp2 === "edit" || viewComp2 === "all") && (
+			<TripFilterSortComp2 trips={originalTrips} onSearch={handleSearch} />
+		)}
+
+		{viewComp2 === "add" && (
+			<>
+				<div className="comp2-dashboard-form-group">
+					{Object.entries(initialTripState)
+						.filter(([key]) => !["added_by", "edited_by"].includes(key))
+						.map(([key, label]) => (
+							<div key={key} className="comp2-form-field">
+								<label htmlFor={key}>{label}</label>
+								{key === "car_type" ? (
+									<select
+										id={key}
+										value={newTripComp2[key]}
+										onChange={(e) => handleTripChange(key, e.target.value)}
+									>
 										<option value="" disabled>
-											اختر نوع السيارة 
+											اختر نوع السيارة
 										</option>
-                    {carTypes.map((type, index) => (
-                      <option key={index} value={type}>{type}</option>
-                    ))}
-                  </select>
-                ) : key === "client_name" ? (
-                  <select
-                    id={key}
-                    value={newTripComp2[key]}
-                    onChange={(e) => handleTripChange(key, e.target.value)}
-                  >
+										{carTypes.map((type, index) => (
+											<option key={index} value={type}>{type}</option>
+										))}
+									</select>
+								) : key === "client_name" ? (
+									<select
+										id={key}
+										value={newTripComp2[key]}
+										onChange={(e) => handleTripChange(key, e.target.value)}
+									>
 										<option value="" disabled>
 											اختر اسم العميل
 										</option>
-                    {agents.map((agent, index) => (
-                      <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
-                    ))}
-                  </select>
-                ) : key === "notes" ? (
+										{agents.map((agent, index) => (
+											<option key={index} value={agent.agent_name}>{agent.agent_name}</option>
+										))}
+									</select>
+								) : key === "status" ? (
+									<select
+										id={key}
+										value={newTripComp2[key]}
+										onChange={(e) => handleTripChange(key, e.target.value)}
+									>
+										<option value="" disabled>
+											اختر الحالة
+										</option>
+										<option value="مطالبة">مطالبة</option>
+										<option value="غير مطالبة">غير مطالبة</option>
+									</select>
+								) : key === "notes" ? (
 									<textarea
 										id={key}
 										value={newTripComp2[key]}
 										onChange={(e) => handleTripChange(key, e.target.value)}
-
 									/>
-								) :  (
-                  <input
-                    id={key}
-                    type={
-                      key.includes("date") ? "date" : 
-                      [
-                        "nights_count",
-                        "nights_max",
-                        "night_value",
-                        "total_nights_value",
-                        "transport_fee",
-                        "expenses",
-                        "total_transport",
-                        "total_received_cash",
-                        "remain_cash"
-                      ].includes(key) ? "number" : "text"
-                    }
-                    value={newTripComp2[key]}
-                    onChange={(e) => handleTripChange(key, e.target.value)}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-					{message && (<p className="suc-message">{message}</p>)}
-					{errMessage && (<p className="err-message">{errMessage}</p>)}
-          <button onClick={handleAddTrip}>حفظ الرحلة</button>
-        </>
-      )}
-
-      {viewComp2 === "edit" && (
-        <>
+								) : (
+									// Only show these fields if userRole is "manager"
+									![
+										"company_naulon",
+										"company_night_value",
+										"company_toll_fee",
+										"total_company_account",
+										"net_profit",
+										"total_company_nights_value"
+									].includes(key) || userRole === "manager" ? (
+										<input
+											id={key}
+											type={
+												key.includes("date") ? "date" :
+												[
+													"nights_count",
+													"nights_max",
+													"night_value",
+													"total_nights_value",
+													"transport_fee",
+													"expenses",
+													"total_transport",
+													"total_received_cash",
+													"remain_cash"
+												].includes(key) ? "number" : "text"
+											}
+											value={newTripComp2[key]}
+											onChange={(e) => handleTripChange(key, e.target.value)}
+										/>
+									) : null
+								)}
+							</div>
+						))}
+				</div>
 				{message && (<p className="suc-message">{message}</p>)}
 				{errMessage && (<p className="err-message">{errMessage}</p>)}
-					<div className="table-container">
-          <table >
-            <thead>
-              <tr>
-                <th>اسم السائق</th>
-                <th>تاريخ الوصول</th>
-                <th>تاريخ التحميل للسائق</th>
-                <th>رقم FO</th>
-                <th>مكان التحميل</th>
-                <th>تاريخ التحميل للشركة</th>
-                <th>الجهة</th>
-                <th>تاريخ التعتيق</th>
-                <th>اسم العميل</th>
-                <th>عدد البياتات</th>
-                <th>إجمالي النقلة</th>
-                <th>إجمالي النقدية المستلمة</th>
-                <th>المتبقى</th>
-                <th>ملاحظات</th>
-                <th>بواسطة</th>
-                <th>الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tripsComp2.map((trip) => (
-                <tr key={trip.id}>
-                      <td>{trip.driver_name}</td>
-                      <td>{trip.arrival_date}</td>
-                      <td>{trip.driver_loading_date}</td>
-                      <td>{trip.fo_number}</td>
-                      <td>{trip.loading_place}</td>
-                      <td>{trip.company_loading_date}</td>
-                      <td>{trip.destination}</td>
-                      <td>{trip.aging_date}</td>
-                      <td>{trip.client_name}</td>
-                      <td>{trip.nights_count}</td>
-                      <td>{trip.total_transport}</td>
-                      <td>{trip.total_received_cash}</td>
-                      <td>{trip.remain_cash}</td>
-                      <td>{trip.notes}</td>
-                      <td>{trip.added_by}</td>
-                      <td>
-                        <button onClick={() => setSelectedTrip(trip)}>تعديل</button>
-                      </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-					</div>
-        </>
-      )}
+				<button onClick={handleAddTrip}>حفظ الرحلة</button>
+			</>
+		)}
 
-			
-      {viewComp2 === "all" && (
-        <>
-          <table className="table-large">
-            <thead>
-              <tr>
-							{Object.entries(initialTripState).map(([key, label]) => (
-            <th key={key}>{label}</th>
-          ))}
-								</tr>
-							</thead>
-							<tbody>
-								{tripsComp2.map((trip) => (
-									<tr key={trip.id}>
-										{Object.keys(initialTripState).map((key) => (
-											<td key={key}>{trip[key]}</td>
-										))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
+		{viewComp2 === "edit" && (
+			<>
 
-			{/* Import Excel Modal */}
-      {viewComp2 === "import" && (
-        <ImportTrips />
-      )}
+			<div className="trips-count">عدد الرحلات: {tripsCount}</div>
+				<div className="table-container">
+				<table >
+					<thead>
+						<tr>
+							<th>اسم السائق</th>
+							<th>تاريخ الوصول</th>
+							<th>رقم FO</th>
+							<th>تاريخ التحميل للشركة</th>
+							<th>تاريخ التعتيق</th>
+							<th>اسم العميل</th>
+							<th>إجمالي النقلة</th>
+							<th>اضافة بواسطة</th>
+							<th>اخر تعديل بواسطة</th>
+							<th>الإجراءات</th>
+						</tr>
+					</thead>
+					<tbody>
+						{tripsComp2.map((trip) => (
+							<tr key={trip.id}>
+										<td>{trip.driver_name}</td>
+										<td>{trip.arrival_date}</td>
+										<td>{trip.fo_number}</td>
+										<td>{trip.company_loading_date}</td>
+										<td>{trip.aging_date}</td>
+										<td>{trip.client_name}</td>
+										<td>{trip.total_transport}</td>
+										<td>{trip.added_by}</td>
+										<td>{trip.edited_by}</td>
+										<td>
+											<button onClick={() => setSelectedTrip(trip)}>تعديل</button>
+										</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+				</div>
+			</>
+		)}
 
-		{selectedTrip && (
-						<TripEditModal
-							trip={selectedTrip}
-							initialTripState={initialTripState}
-							carTypes={carTypes}
-							agents={agents}
-							onSave={() => {
-								setSelectedTrip(null);
-								fetchTrips();
-							}}
-						/>
-										)}
-    </>
-  );
+		
+		{viewComp2 === "all" && (
+			<>
+			<div className="trips-count">عدد الرحلات: {tripsCount}</div>
+				<table className="table-large">
+					<thead>
+						<tr>
+						{Object.entries(initialTripState).map(([key, label]) => (
+					<th key={key}>{label}</th>
+				))}
+							</tr>
+						</thead>
+						<tbody>
+							{tripsComp2.map((trip) => (
+								<tr key={trip.id}>
+									{Object.keys(initialTripState).map((key) => (
+										<td key={key}>{trip[key]}</td>
+									))}
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</>
+		)}
+
+		{/* Import Excel Modal */}
+		{viewComp2 === "import" && (
+			<ImportTrips />
+		)}
+
+	{selectedTrip && (
+					<TripEditModal
+						trip={selectedTrip}
+						initialTripState={initialTripState}
+						carTypes={carTypes}
+						agents={agents}
+						onSave={() => {
+							setSelectedTrip(null);
+							fetchTrips();
+						}}
+					/>
+									)}
+	</>
+);
 };
 
 export default Comp2;

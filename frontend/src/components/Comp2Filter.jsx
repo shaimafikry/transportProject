@@ -53,14 +53,14 @@ const initialTripState = {
 
   notes: "ملاحظات",
   status: "حالة الرحلة",
-  // added_by: "اضافة بواسطة ",
-  // edited_by: "آخر تعديل بواسطة",
+  added_by: "اضافة بواسطة ",
+  edited_by: "آخر تعديل بواسطة",
 };
 
 const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "" });
+  const [filters, setFilters] = useState({client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "", status: "", hasAgingDate: "", hasFoNumber:"" });
 
   const [uniqueClients, setUniqueClients] = useState([]);
   const [uniqueDestinations, setUniqueDestinations] = useState([]);
@@ -81,6 +81,9 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
       driver_name: "",
       startDate: "",
       endDate: "",
+			status: "",
+			hasAgingDate: "",
+			hasFoNumber: ""
     }); // Reset filters
     onSearch(trips); // Reset displayed trips to original list
   };
@@ -128,6 +131,36 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     if (filters.leader_name) {
       result = result.filter((trip) => (trip.leader_name?.toLowerCase() || "").includes(filters.leader_name.toLowerCase()));
     }
+
+				// Add status filter check
+				if (filters.status) {
+					result = result.filter((trip) => 
+						(trip.status?.toLowerCase() || "") === filters.status.toLowerCase()
+					);
+				}
+
+
+		if (filters.hasAgingDate) {
+      result = result.filter((trip) => {
+        if (filters.hasAgingDate === "yes") {
+          return trip.aging_date && trip.aging_date.trim() !== ""; // Has aging date
+        } else if (filters.hasAgingDate === "no") {
+          return !trip.aging_date || trip.aging_date.trim() === ""; // No aging date
+        }
+        return true; // Shouldn't reach here with proper filter values
+      });
+    }
+
+		if (filters.hasFoNumber) {
+      result = result.filter((trip) => {
+        if (filters.hasFoNumber === "yes") {
+          return trip.fo_number && trip.fo_number.trim() !== ""; // Has aging date
+        } else if (filters.hasFoNumber === "no") {
+          return !trip.fo_number || trip.fo_number.trim() === ""; // No aging date
+        }
+        return true; // Shouldn't reach here with proper filter values
+      });
+    }
 		
 		//filter acordong to cmpny loading date
     if (filters.startDate && filters.endDate) {
@@ -137,16 +170,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
       });
     }
 
-    const filterTripsWithoutFo = () => {
-      const filteredTrips = trips.filter(trip => !trip.fo_number);
-      onSearch(filteredTrips);
-    };
-  
-    const filterTripsWithoutAgingDate = () => {
-      const filteredTrips = trips.filter(trip => !trip.aging_date);
-      onSearch(filteredTrips);
-    };
-  
+   
         // Apply sorting
 				result.sort((a, b) => {
 					const dateA = new Date(a.company_loading_date); // Use the correct field for sorting
@@ -170,9 +194,12 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   }, [trips, searchQuery, filters, sortOrder]);
 
 	// Trigger search automatically when filteredTrips changes
-		useEffect(() => {
-			onSearch(filteredTrips);
-		}, [filteredTrips, onSearch]);
+	useEffect(() => {
+		onSearch({
+			trips: filteredTrips,
+			count: filteredTrips.length, // Add count based on filtered trips
+		});
+	}, [filteredTrips, onSearch]);
 
   const exportToExcel = () => {
     const exportData = filteredTrips.map(trip => {
@@ -200,7 +227,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
   };
 
   return (
-      <div className="search-container">
+      <div className="trans-search-container">
   <input
     type="text"
     placeholder="🔍 البحث..."
@@ -247,8 +274,38 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     ))}
   </select>
 
-  <button className="filter-btn" onClick={filterTripsWithoutFo}>NO FOD 🚚</button>
-  <button className="filter-btn" onClick={filterTripsWithoutAgingDate}>تعتيق بدون ⏳</button>
+	<select
+    name="status"
+    value={filters.status}
+    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+  >
+    <option value="">تصنيف حسب الحالة</option>
+    <option value="غير مطالبة">غير مطالبة</option>
+    <option value="مطالبة">مطالبة</option>
+  </select>
+
+
+	<select
+        name="hasAgingDate"
+        value={filters.hasAgingDate}
+        onChange={(e) => setFilters({ ...filters, hasAgingDate: e.target.value })}
+      >
+        <option value="">الكل (تاريخ التعتيق)</option>
+        <option value="yes">يوجد تاريخ تعتيق</option>
+        <option value="no">لا يوجد تاريخ تعتيق</option>
+      </select>
+
+	<select
+        name="hasFoNumber"
+        value={filters.hasFoNumber}
+        onChange={(e) => setFilters({ ...filters, hasFoNumber: e.target.value })}
+      >
+        <option value=""> (FOD)الكل</option>
+        <option value="yes">يوجد  FOD</option>
+        <option value="no">لا يوجد FOD </option>
+      </select>
+
+  
 
 	<div className="date-filter">
   <label htmlFor="startDate">البدء:</label>

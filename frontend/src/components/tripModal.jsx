@@ -246,7 +246,7 @@ const handleChange = (field, value) => {
     <div className="tripModal-dashboard-form-group">
       {/* Ensure initialTripState is defined */}
       {Object.entries(initialTripState)
-        .filter(([key]) => key !== "added_by")
+        .filter(([key]) => !["added_by", "edited_by"].includes(key))
         .map(([key, label]) => (
           <div key={key} className="comp2-form-field">
             <label htmlFor={key}>{label}</label>
@@ -264,7 +264,19 @@ const handleChange = (field, value) => {
                   <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
                 ))}
               </select>
-            ) : key === "notes" ? (
+            ) : key === "status" ? (
+							<select
+								id={key}
+								value={formData[key]}
+								onChange={(e) => handleChange(key, e.target.value)}
+							>
+								<option value="" disabled>
+									اختر الحالة
+								</option>
+								<option value="مطالبة">مطالبة</option>
+								<option value="غير مطالبة">غير مطالبة</option>
+							</select>
+						): key === "notes" ? (
               <textarea id={key} name={key} value={formData[key]}  onChange={(e) => handleChange(key, e.target.value)} />
             ) : (
               <input
