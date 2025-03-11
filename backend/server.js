@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const allRoutes = require('./allRoute');
+const checkAndSendEmails = require('./sendEmail')
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,3 +60,12 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+
+// Start email checking process every 24 hours
+setInterval(() => {
+  checkAndSendEmails();
+  console.log("✅ Scheduled email check triggered");
+}, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
+console.log("check email sender run");
