@@ -215,9 +215,10 @@ const allUsers = async (req, res) => {
   }
 };
 
-//MARK: EDit comp2
+//MARK: EDIT TRIP
 const comp2EditTrip = async (req, res) => {
   try {
+    const username = req.user.name;
     const data = req.body;
     const { id, ...updateData } = data;
 
@@ -225,9 +226,6 @@ const comp2EditTrip = async (req, res) => {
       throw new Error("معرف الرحلة مفقود");
     }
 
-    // console.log("Received Data:", data, "ID:", id, "Update Data:", updateData);
-
-    // Fetch the existing trip before updating
     const existingTrip = await TransportTrips.findOne({ where: { id } });
     if (!existingTrip) {
       throw new Error("لم يتم العثور على الرحلة");
@@ -236,89 +234,56 @@ const comp2EditTrip = async (req, res) => {
     const oldNationalId = existingTrip.national_id;
     const oldTotalTransport = existingTrip.total_transport || 0;
     const oldTotalReceivedCash = existingTrip.total_received_cash || 0;
-
-
     const oldClientName = existingTrip.client_name;
 
-
-    // Update trip data
+    updateData.edited_by = username;
     await TransportTrips.update(updateData, { where: { id } });
 
-    // Fetch the updated trip data
-    const updatedComp2 = await TransportTrips.findOne({ where: { id } });
-    if (!updatedComp2) {
+    const updatedTrip = await TransportTrips.findOne({ where: { id } });
+    if (!updatedTrip) {
       throw new Error("لم يتم العثور على الرحلة بعد التحديث");
     }
 
-    const sanitizedData = updatedComp2.get({ plain: true });
-		// console.log("Updated Trip Data:", sanitizedData);
+    const sanitizedData = updatedTrip.get({ plain: true });
+    const { national_id, total_transport = 0, total_received_cash = 0, client_name = "" } = sanitizedData;
 
-
-    // Extract updated values
-    const { national_id, total_transport = 0, total_received_cash = 0, client_name="" } = sanitizedData;
-		// console.log("Updated after Data:", sanitizedData);
-
-
-    // Check if national_id changed
     if (national_id !== oldNationalId) {
       if (oldNationalId) {
-        // Find the old driver and subtract values
         let oldDriver = await Drivers.findOne({ where: { national_id: oldNationalId } });
         if (oldDriver) {
-          oldDriver.trip_num = Math.max(0, oldDriver.trip_num - 1);
-          oldDriver.total_all_transport = Math.max(0, oldDriver.total_all_transport - oldTotalTransport);
-          oldDriver.remaining_money_fees = Math.max(0, oldDriver.remaining_money_fees - (oldTotalTransport - oldTotalReceivedCash));
+          oldDriver.trip_counter = Math.max(0, oldDriver.trip_counter - 1);
+          oldDriver.total_all_transport -= oldTotalTransport;
+          oldDriver.remaining_money_fees -= (oldTotalTransport - oldTotalReceivedCash);
           await oldDriver.save();
-          console.log(`تم تحديث بيانات السائق القديم (${oldNationalId})`);
         }
       }
-
       if (national_id) {
-        // Find the new driver and add values
         let newDriver = await Drivers.findOne({ where: { national_id } });
         if (newDriver) {
-          newDriver.trip_num = (newDriver.trip_num || 0) + 1;
-          newDriver.total_all_transport = (newDriver.total_all_transport || 0) + total_transport;
-          newDriver.remaining_money_fees = (newDriver.remaining_money_fees || 0) + (total_transport - total_received_cash);
+          newDriver.trip_counter += 1;
+          newDriver.total_all_transport += total_transport;
+          newDriver.remaining_money_fees += (total_transport - total_received_cash);
           await newDriver.save();
-          console.log(`تم تحديث بيانات السائق الجديد (${national_id})`);
         }
       }
-    } else if (total_transport !== oldTotalTransport || total_received_cash !== oldTotalReceivedCash) {
-      // Update the same driver’s financials if transport/fees changed
-      let driver = await Drivers.findOne({ where: { national_id } });
-      if (driver) {
-        driver.total_all_transport = Math.max(0, driver.total_all_transport - oldTotalTransport + total_transport);
-        driver.remaining_money_fees = Math.max(0, driver.remaining_money_fees - (oldTotalTransport - oldTotalReceivedCash) + (total_transport - total_received_cash));
-        await driver.save();
-        console.log(`تم تعديل بيانات السائق (${national_id})`);
-      }
-			console.log("driver", driver.get({ plain: true }))
-
     }
 
-		 // Check if client changed
-		 if (client_name !== oldClientName) {
+    if (client_name !== oldClientName) {
       if (oldClientName) {
-        // Find the old driver and subtract values
         let oldAgent = await Agents.findOne({ where: { agent_name: oldClientName } });
         if (oldAgent) {
-          oldAgent.trip_num = Math.max(0, oldAgent.trip_num - 1);
+          oldAgent.trip_counter -= 1;
           await oldAgent.save();
-          console.log(`تم تحديث بيانات العميل القديم (${oldClientName})`);
         }
       }
-
       if (client_name) {
-        // Find the new driver and add values
         let newAgent = await Agents.findOne({ where: { agent_name: client_name } });
         if (newAgent) {
-          newAgent.trip_num = (newAgent.trip_num || 0) + 1;
+          newAgent.trip_counter += 1;
           await newAgent.save();
-          console.log(`تم تحديث بيانات العميل الجديد (${client_name})`);
         }
       }
-    } 
+    }
 
     return res.status(200).json({ ...sanitizedData });
   } catch (error) {
@@ -326,7 +291,6 @@ const comp2EditTrip = async (req, res) => {
     return res.status(400).json(`${error.message}`);
   }
 };
-
 
 
 
@@ -358,7 +322,7 @@ const comp2DelTrip = async (req, res) => {
 		
 
     if (driver) {
-      driver.trip_num = Math.max(0, driver.trip_num - 1);
+      driver.trip_counter = Math.max(0, driver.trip_counter - 1);
       driver.total_all_transport = Math.max(0, driver.total_all_transport - total_transport);
       driver.remaining_money_fees = Math.max(0, driver.remaining_money_fees - (total_transport - total_received_cash));
       await driver.save();
@@ -366,7 +330,7 @@ const comp2DelTrip = async (req, res) => {
     }
 
 		if (agent) {
-      agent.trip_num = Math.max(0, agent.trip_num - 1);
+      agent.trip_counter = Math.max(0, agent.trip_counter - 1);
       
       await agent.save();
       console.log("تم تعديل بيانات الرحلة بنجاح");
@@ -384,147 +348,63 @@ const comp2DelTrip = async (req, res) => {
 // MARK: ADD Trip
 const addTripAndDriver = async (req, res) => {
   try {
-     // Extract token from the Authorization header
-     const authHeader = req.headers.authorization;
-     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-       return res.status(401).json({ error: "Unauthorized: No token provided" });
-     }
- 
-     const token = authHeader.split(" ")[1]; // Extract the token after "Bearer"
-     let decoded;
-     try {
-       decoded = jwt.verify(token, secret_key); // Verify and decode the token
-     } catch (err) {
-       return res.status(403).json({ error: "Invalid or expired token" });
-     }
- 
-     const username = decoded.name; // Extract username from the token payload
- 
-    // Sanitize input data
-    const sanitizeInput = (key, value) => {
-      if (value === "" || value === null || value === undefined) {
-        // For numeric fields, default to 0 if null or empty
-        if (
-          [
-            "nights_count",
-            "night_value",
-            "total_nights_value",
-            "transport_fee",
-            "expenses",
-            "total_transport",
-            "total_received_cash",
-          ].includes(key)
-        ) {
-          return 0;
-        }
-        // For other fields, return null
-        return null;
-      }
-
-      // Convert national_id and phone_number to strings
-      if (key === "national_id" || key === "phone_number") {
-        return value.toString();
-      }
-
-      // Convert numeric fields to numbers
-      if (!isNaN(value) && typeof value !== "boolean") {
-        return parseFloat(value);
-      }
-
-      // Return the value as-is
-      return value;
-    };
-
-    // Sanitize all fields in the request body
-    const sanitizedData = {};
-    Object.keys(req.body).forEach((key) => {
-      sanitizedData[key] = sanitizeInput(key, req.body[key]);
-    });
-
-    // Extract required fields for calculations
-    const { leader_name, driver_name, phone_number, national_id, total_transport, total_received_cash, client_name="" } = sanitizedData;
-
-		console.log(client_name)
-
-    // Ensure numeric fields have valid values
-    sanitizedData.total_transport = total_transport ?? 0;
-    sanitizedData.total_received_cash = total_received_cash ?? 0;
+    const username = req.user.name;
+    const sanitizedData = { ...req.body, added_by: username };
 
     // Validate required fields
-    if (!sanitizedData.driver_name){
-      throw new Error("يجب إدخال اسم السائق " );
+    if (!sanitizedData.driver_name) {
+      throw new Error("يجب إدخال اسم السائق");
     }
-		// if (!sanitizedData.client_name) {
-    //   return res.status(400).json({ error: "يجب إدخال اسم العميل" });
-    // }
-		// if (!sanitizedData.fo_number) {
-    //   return res.status(400).json({ error: "يجب إدخال رقم FO" });
-    // }
-
-		if (!sanitizedData.national_id) {
-      throw new Error("يجب إدخال الرقم القومي  للسائق  ");
+    if (!sanitizedData.national_id) {
+      throw new Error("يجب إدخال الرقم القومي للسائق");
     }
-		
 
     // Check if the driver already exists
-    let driver = await Drivers.findOne({ where: { national_id } });
-    let agent = await Agents.findOne({ where: { agent_name: client_name } });
-		console.log(agent);
+    let driver = await Drivers.findOne({ where: { national_id: sanitizedData.national_id } });
+    let agent = await Agents.findOne({ where: { agent_name: sanitizedData.client_name || "" } });
 
-
-    sanitizedData.added_by = username;
     // Create the trip
     await TransportTrips.create(sanitizedData);
     console.log("تمت إضافة بيانات الرحلة بنجاح");
 
     // Update or create the driver
     if (driver) {
-      driver.trip_num += 1;
+      driver.trip_counter += 1;
       driver.total_all_transport += sanitizedData.total_transport;
-      driver.remaining_money_fees +=
-        sanitizedData.total_transport - sanitizedData.total_received_cash;
+      driver.remaining_money_fees += sanitizedData.total_transport - sanitizedData.total_received_cash;
       await driver.save();
-      console.log("تم تعديل بيانات السائق بنجاح");
     } else {
       driver = await Drivers.create({
-        leader_name: leader_name,
-				driver_name: driver_name,
-				phone_number: phone_number,
-				national_id: national_id,
-				company: "النقل",
-        trip_num: 1,
+        leader_name: sanitizedData.leader_name,
+        driver_name: sanitizedData.driver_name,
+        phone_number: sanitizedData.phone_number,
+        national_id: sanitizedData.national_id,
+        company: "النقل",
+        trip_counter: 1,
         total_all_transport: sanitizedData.total_transport,
-        remaining_money_fees:
-          parseInt(sanitizedData.total_transport) - parseInt(sanitizedData.total_received_cash),
+        remaining_money_fees: sanitizedData.total_transport - sanitizedData.total_received_cash,
       });
-      console.log("تمت إضافة بيانات السائق بنجاح");
     }
 
-		 // Update or create the agents
-		 if (agent) {
-      agent.trip_num += 1;
+    // Update or create the agent
+    if (agent) {
+      agent.trip_counter += 1;
       await agent.save();
-      console.log("تمت تعديل بيانات العميل بنجاح");
-    }else {
-			if (client_name){
-				agent = await Agents.create({
-					agent_name : client_name ,
-					agent_type: "منظمة",
-					trip_num: 1,
-				});
-			}
-      console.log("تمت إضافة بيانات العميل بنجاح");
+    } else if (sanitizedData.client_name) {
+      await Agents.create({
+        agent_name: sanitizedData.client_name,
+        agent_type: "منظمة",
+        trip_counter: 1,
+      });
     }
 
-    // Return success response
     return res.status(201).json("تمت الإضافة بنجاح");
   } catch (error) {
     console.error("Error adding trip and driver:", error);
-    return res
-      .status(500)
-      .json(`${error.message}`);
+    return res.status(500).json(`${error.message}`);
   }
 };
+
 
 
 //MARK: Sign in
