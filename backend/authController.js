@@ -583,7 +583,8 @@ const logout = async(req, res) => {
 //MARK: getDriverTrips
 const getDriverTrips = async (req, res) => {
   try {
-    const { id } = req.params;
+		console.log(req.query)
+    const { id } = req.query;
 
     const driver = await Drivers.findOne({ where: { id } });
 
@@ -591,16 +592,20 @@ const getDriverTrips = async (req, res) => {
       return res.status(404).json({ error: "السائق غير موجود" });
     }
 
+		
     // Fetch all trips related to this driver
     const trips = await TransportTrips.findAll({ where: { national_id: driver.national_id } });
 
     // Fetch notes for each trip and attach them
     const tripsWithNotes = await Promise.all(
       trips.map(async (trip) => {
-        const notes = await DriversNotes.findAll({ where: { trip_id: trip.id } });
+        const notes = await DriversNotes.findAll({ where: { trip_id: trip.id },
+					raw: true  });
         return { ...trip.get({ plain: true }), trip_notes: notes };
       })
     );
+     
+		//  console.log({ driver, trips: tripsWithNotes })
 
     res.json({ driver, trips: tripsWithNotes });
   } catch (error) {
@@ -635,12 +640,13 @@ const getDriverTrips = async (req, res) => {
 const addDriverNote = async (req, res) => {
   try {
     const { driver_id, trip_id, note } = req.body;
+		const added_by = req.user.name;
 
     if (!driver_id || !trip_id || !note) {
       return res.status(400).json({ error: "يجب إدخال معرف السائق، الرحلة والملاحظة" });
     }
 
-    const newNote = await DriversNotes.create({ driver_id, trip_id, note });
+    const newNote = await DriversNotes.create({ driver_id, trip_id, note, added_by });
 
     res.json({ message: "تمت إضافة الملاحظة بنجاح", newNote });
   } catch (error) {

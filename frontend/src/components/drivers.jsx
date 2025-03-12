@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
 import { useNavigate } from 'react-router-dom';
 import DriverFilter from "./driverFilter";
+import DriverProfile from "./driverProfile";
+
 
 const Drivers = () => {
-	const navigate = useNavigate();
   const [viewDrivers, setViewDrivers] = useState("");
+	const [selectedDriverId, setSelectedDriverId] = useState(null)
   const [drivers, setDrivers] = useState([]);
 	const [editedFields, setEditedFields] = useState({});
 	const [message, setMessage]= useState("");
@@ -33,8 +35,6 @@ const Drivers = () => {
   const editFields = [
     ...driverFields,
     { name: "trip_num", type: "number", placeholder: "عدد الرحلات", disabled: true },
-    { name: "total_all_transport", type: "number", placeholder: "الحساب الكلي", disabled: true },
-    { name: "remaining_money_fees", type: "number", placeholder: "الحساب المتبقي", disabled: true },
   ];
 
   // Fetch drivers data from API
@@ -65,9 +65,9 @@ const Drivers = () => {
   };
 
   //MARK: EDIT THIS url
-	const handleDriverProfile = (id)=> {
+	/* const handleDriverProfile = (id)=> {
 		navigate(`${id}`)
-	}
+	} */
 
   const handleDriverChange = (field, value) => {
     setNewDriver((prev) => ({ ...prev, [field]: value }));
@@ -240,6 +240,12 @@ const Drivers = () => {
 
 
   return (
+		<>
+				{selectedDriverId ? (
+						<div className="driver-profile-container">
+								<DriverProfile id={selectedDriverId} onBack={() => { setSelectedDriverId(null); setViewDrivers("edit"); }} />
+						</div>
+				) : (
     <>
 		 <h2>سجل السائقين</h2>
       <div className="driver-options">
@@ -341,9 +347,10 @@ const Drivers = () => {
                           <td key={name}>{driver[name]}</td>
                         ))}
                         <td>
+												<div className="action-buttons">
                           <button onClick={() => handleEditDriver(driver.id)}>تعديل</button>
-                          <button onClick={() => handleDriverProfile(driver.id)}>زيارة</button>
-
+                          <button onClick={() => setSelectedDriverId(driver.id)}>زيارة</button>
+													</div>
                         </td>
                       </>
                     )}
@@ -355,6 +362,8 @@ const Drivers = () => {
         </>
       )}
     </>
+		)}
+		</>				
   );
 };
 

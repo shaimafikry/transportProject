@@ -166,7 +166,7 @@ const DriversNotes = sequelize.define("DriversNotes", {
     allowNull: false,
   },
   note: { type: DataTypes.TEXT, allowNull: false },
-  // added_by: { type: DataTypes.STRING, allowNull: false },
+  added_by: { type: DataTypes.STRING, allowNull: true },
   // edited_by: { type: DataTypes.STRING, allowNull: true },
 });
 

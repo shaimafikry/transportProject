@@ -34,10 +34,12 @@ const handleChange = (field, value) => {
 
 		// If the changed field affects calculations, update derived values
 		if (
-			["aging_date", "nights_max", "company_loading_date", "night_value", "transport_fee", "expenses", "total_received_cash"].includes(field)
+			["aging_date", "nights_max", "company_loading_date", "night_value", "transport_fee", "expenses", "total_received_cash", "company_night_value", "company_naulon", "company_toll_fee"].includes(field)
 		) {
 			calculateNightsCount(updatedState);
 			calculateTotalTransport(updatedState);
+			calculateCompanyNights(updatedState);
+		  calculateTotalCompanyTransport(updatedState);
 		}
 
 		if (field === "client_name") {
@@ -119,6 +121,49 @@ const handleChange = (field, value) => {
 				remain_cash: remainCash,
 			}));
 		};
+
+		
+
+	const calculateCompanyNights = (updatedTrip = formData) => {
+		const arrivalDate = new Date(updatedTrip.aging_date);
+		const loadingDate = new Date(updatedTrip.company_loading_date);
+		const maxNights = parseFloat(updatedTrip.nights_max) || 0;
+
+	
+		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
+			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
+			const nightValue = parseFloat(updatedTrip.company_night_value) || 0;
+			let totalCompanyNightsValue = maxNights > 0 && diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
+	
+			setFormData((prevState) => ({
+				...prevState,
+				nights_count: diffDays,
+				total_company_nights_value: totalCompanyNightsValue,
+			}));
+		}
+	};
+
+	const calculateTotalCompanyTransport = (updatedTrip = formData) => {
+		const totalCompanyNightsValue = parseFloat(updatedTrip.total_company_nights_value) || 0;
+
+		const CompanyTollFee = parseFloat(updatedTrip.company_toll_fee) || 0;
+
+		const companyNaulon = parseFloat(updatedTrip.company_naulon) || 0;
+
+		const totalCompanyTransport = totalCompanyNightsValue + CompanyTollFee + companyNaulon;
+		
+		const totalTransport = parseFloat(updatedTrip.total_transport) || 0;
+
+		const netProfit = totalTransport - totalCompanyTransport;
+	
+		setFormData((prevState) => ({
+			...prevState,
+			total_company_account: totalCompanyTransport,
+			net_profit: netProfit,
+		}));
+	};
+	
+
 		
 
 		useEffect(() => {
@@ -134,6 +179,8 @@ const handleChange = (field, value) => {
 		useEffect(() => {
 			calculateNightsCount();
 			calculateTotalTransport();
+			calculateCompanyNights();
+		  calculateTotalCompanyTransport();
 
 		}, [
 			formData.aging_date,
@@ -145,6 +192,9 @@ const handleChange = (field, value) => {
 			formData.transport_fee,
 			formData.expenses,
 			formData.total_received_cash,
+			formData.company_night_value,
+			formData.company_naulon,
+			formData.company_toll_fee,
 		]);
 	
 
@@ -180,7 +230,7 @@ const handleChange = (field, value) => {
 				let value = updatedData[key];
 	
 				if (value === "" || value === null || value === undefined) {
-					updatedData[key] = ["nights_count", "night_value", "nights_max", "total_nights_value", "transport_fee", "expenses", "total_transport", "total_received_cash"].includes(key) ? 0 : "";
+					updatedData[key] = ["nights_count", "night_value", "nights_max", "total_nights_value", "transport_fee", "expenses", "total_transport", "total_received_cash", "company_night_value", "company_naulon", "company_toll_fee", "total_company_account","total_company_nights_value","net_profit"].includes(key) ? 0 : "";
 				} else if (!isNaN(value) && typeof value !== "boolean") {
 					updatedData[key] = parseFloat(value);
 				} else {

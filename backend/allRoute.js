@@ -21,9 +21,6 @@ router.route('/dashboard')
   .delete(dashboard);
 
 
-router.get('/dashboard/:id', getDriverTrips);
-
-
 	router.post('/logout', logout); 
 
 // Error handling middleware

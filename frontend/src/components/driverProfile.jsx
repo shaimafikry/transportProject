@@ -9,17 +9,16 @@ import {
   FaIdCard,
   FaBriefcase,
   FaFileAlt,
+	FaTruck,
 } from "react-icons/fa";
-import { fetchData, putData, postData } from "../api";
-import { useParams } from "react-router-dom";
+import { fetchData, putData, postData, deleteData } from "../api";
 
-const DriverProfile = () => {
-  const { id } = useParams();
+const DriverProfile = ({id, onBack}) => {
   const [driver, setDriver] = useState({});
   const [trips, setTrips] = useState([]);
   const [expandedTrip, setExpandedTrip] = useState(null);
   const [newNote, setNewNote] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
 
@@ -29,10 +28,26 @@ const DriverProfile = () => {
 const fetchDriver = async () => {
   try {
     // Fetch driver details and trips with notes in one request
-    const { driver, trips } = await fetchData(`dashboard/${id}`);
+    const { driver, trips } = await fetchData(`dashboard?action=driverNotes&id=${id}`);
     
     if (!driver) {
       throw new Error("السائق غير موجود");
+    }
+		if (trips) {
+      trips.forEach(trip => {
+        if (trip.trip_notes) {
+          trip.trip_notes = trip.trip_notes.map(note => ({
+            ...note,
+            timestamp: new Date(note.createdAt).toLocaleString('ar-EG', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          }));
+        }
+      });
     }
 
     console.log("🔹 Driver Data:", driver);
@@ -114,11 +129,17 @@ const fetchDriver = async () => {
 
   return (
     <div className="container py-4">
-      <div className="d-flex align-items-center mb-4">
-      <Button variant="light" className="me-2" onClick={() => navigate("/dashboard")}>
-        <FaArrowLeft /> العودة
-      </Button>
-        <h1 className="h3 mb-0">سجلات رحلات السائق</h1>
+      <div className="d-flex align-items-center mb-4 justify-content-between">
+        {/* Header on the left */}
+        <h1 className="h4 mb-0 text-white">سجل رحلات السائق</h1>
+        {/* Button on the right */}
+        <Button
+          variant="light"
+          className="me-2"
+          onClick={() => onBack(null)}
+        >
+          <FaArrowLeft /> العودة
+        </Button>
       </div>
       
       <Card className="mb-4">
@@ -181,11 +202,20 @@ const fetchDriver = async () => {
                 </div>
               </div>
             </div>
+						<div className="col-md-4 col-lg-4">
+              <div className="d-flex align-items-center">
+                <FaTruck className="text-muted me-2" />
+                <div>
+                  <p className="text-muted small mb-0">عدد الرحلات</p>
+                  <p className="fw-medium">{driver.trip_num}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </Card.Body>
       </Card>
       
-      <h2 className="h4 mb-3">الرحلات الأخيرة</h2>
+      <h2 className="h4 mb-3 text-white">الرحلات الأخيرة</h2>
       
       <div className="mb-4">
         {trips.map(trip => (
@@ -246,9 +276,17 @@ const fetchDriver = async () => {
                         <p className="text-muted small mb-0">تاريخ التعتيق</p>
                         <p className="fw-medium">{trip.aging_date}</p>
                       </div>
+											<div className="col-md-4">
+                        <p className="text-muted small mb-0">حالة الرحلة</p>
+                        <p className="fw-medium">{trip.status}</p>
+                      </div>
                       <div className="col-md-4">
-                        <p className="text-muted small mb-0">بواسطة</p>
+                        <p className="text-muted small mb-0">اضافة بواسطة</p>
                         <p className="fw-medium">{trip.added_by}</p>
+                      </div>
+											<div className="col-md-4">
+                        <p className="text-muted small mb-0">اخر تعديل بواسطة</p>
+                        <p className="fw-medium">{trip.edited_by}</p>
                       </div>
                     </div>
                   </Tab.Pane>
@@ -274,7 +312,11 @@ const fetchDriver = async () => {
                     <div className="row g-3 mt-2">
                       <div className="col-md-4">
                         <p className="text-muted small mb-0">عدد البياتات</p>
-                        <p className="fw-medium">{trip.nights_count} / {trip.nights_max}</p>
+                        <p className="fw-medium">{trip.nights_count}</p>
+                      </div>
+											<div className="col-md-4">
+                        <p className="text-muted small mb-0">أقصى عدد بياتات</p>
+                        <p className="fw-medium">{trip.nights_max}</p>
                       </div>
                       <div className="col-md-4">
                         <p className="text-muted small mb-0">قيمة البياتة</p>
@@ -309,14 +351,14 @@ const fetchDriver = async () => {
                 </Tab.Content>
               </Tab.Container>
               
-              {trip.trip_notes && trip.trip_notes.length > 0 && (
+              {/* {trip.trip_notes && trip.trip_notes.length > 0 && (
                   <div className="mt-3 p-3 bg-light rounded">
                     <p className="small fw-medium mb-1">ملاحظات:</p>
                     {trip.trip_notes.map((note, index) => (
                       <p key={index} className="small">{note.note}</p>
                     ))}
                   </div>
-                )}
+                )} */}
             </Card.Body>
             
             <Card.Footer className="bg-white">
@@ -326,34 +368,42 @@ const fetchDriver = async () => {
                     {expandedTrip === trip.id ? "إخفاء الملاحظات" : `عرض الملاحظات (${trip.trip_notes.length})`}
                   </Accordion.Header>
                   <Accordion.Body>
-                    {trip.trip_notes.length > 0 ? (
-                      <div className="mb-3">
-                        {trip.trip_notes.map(note => (
-                          <div key={note.id} className="p-3 bg-light rounded mb-2">
-                            <p className="small mb-1">{note.content}</p>
-                            <p className="small text-muted">{note.timestamp}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="small text-muted mb-3">لا توجد ملاحظات لهذه الرحلة حتى الآن.</p>
-                    )}
-                    
-                    <div className="d-flex gap-2">
-                      <Form.Control
-                        as="textarea"
-                        placeholder="أضف ملاحظة حول هذه الرحلة..."
-                        className="small"
-                        value={newNote}
-                        onChange={(e) => setNewNote(e.target.value)}
-                        style={{ height: '80px' }}
-                      />
-                      <Button onClick={() => addNote(trip.id)} className="align-self-start">
-                        <FaPlus className="me-1" size={12} />
-                        إضافة
-                      </Button>
-                    </div>
-                  </Accordion.Body>
+										{trip.trip_notes.length > 0 ? (
+											<div className="mb-3">
+												{trip.trip_notes.map(note => (
+													<div key={note.id} className="p-3 bg-light rounded mb-2 d-flex justify-content-between align-items-center">
+														{/* Note Content */}
+														<div>
+															<p className="small mb-1">{note.note}</p>
+															<div className="d-flex justify-content-start gap-3 text-muted small">
+																<span>🕒 {note.timestamp}</span>
+																<span>🖊️ بواسطة {note.added_by || "غير معروف"}</span>
+															</div>
+														</div>
+														
+														{/* Delete Button (Aligned Right) */}
+														<Button onClick={() => deleteNote(note.id, trip.id)} variant="danger" size="sm">حذف</Button>
+													</div>
+												))}
+											</div>
+										) : (
+											<p className="small text-muted mb-3">لا توجد ملاحظات لهذه الرحلة حتى الآن.</p>
+										)}
+
+										{/* Add New Note Section */}
+										<div className="d-flex gap-2">
+											<Form.Control
+												as="textarea"
+												placeholder="أضف ملاحظة حول هذه الرحلة خاصة بالسائق..."
+												className="small"
+												value={newNote}
+												onChange={(e) => setNewNote(e.target.value)}
+												style={{ height: '80px' }}
+											/>
+											<Button onClick={() => addNote(trip.id)} className="align-self-start">إضافة</Button>
+										</div>
+									</Accordion.Body>
+
                 </Accordion.Item>
               </Accordion>
             </Card.Footer>
