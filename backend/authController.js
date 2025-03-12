@@ -1,5 +1,5 @@
 require('dotenv').config({path: '../.env'});
-const { Users, Drivers, Attendance, TransportTrips, ConstructTrips, Agents } = require('./config');
+const { Users, Drivers, Attendance, TransportTrips, ConstructTrips, Agents, DriversNotes } = require('./config');
 const jwt = require('jsonwebtoken');
 const secret_key = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
@@ -579,4 +579,119 @@ const logout = async(req, res) => {
 
   
 
-module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip };
+
+//MARK: getDriverTrips
+const getDriverTrips = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const driver = await Drivers.findOne({ where: { id } });
+
+    if (!driver) {
+      return res.status(404).json({ error: "السائق غير موجود" });
+    }
+
+    const trips = await TransportTrips.findAll({ where: { national_id: driver.national_id } });
+
+    res.json({ driver, trips });
+  } catch (error) {
+    console.error("Error fetching driver trips:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء جلب بيانات السائق والرحلات" });
+  }
+};
+
+
+
+
+//MARK: getDriverNotes
+const getDriverNotes = async (req, res) => {
+  try {
+    const { trip_id } = req.query; // Use query param
+
+    if (!trip_id) {
+      return res.status(400).json({ error: "يجب إدخال معرف الرحلة" });
+    }
+
+    const notes = await DriversNotes.findAll({ where: { trip_id } });
+
+    res.json(notes);
+  } catch (error) {
+    console.error("Error fetching driver notes:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء جلب الملاحظات" });
+  }
+};
+
+
+//MARK: addDriverNote
+const addDriverNote = async (req, res) => {
+  try {
+    const { driver_id, trip_id, note } = req.body;
+
+    if (!driver_id || !trip_id || !note) {
+      return res.status(400).json({ error: "يجب إدخال معرف السائق، الرحلة والملاحظة" });
+    }
+
+    const added_by = req.user.name;
+    const newNote = await DriversNotes.create({ driver_id, trip_id, note, added_by });
+
+    res.json({ message: "تمت إضافة الملاحظة بنجاح", newNote });
+  } catch (error) {
+    console.error("Error adding note:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء إضافة الملاحظة" });
+  }
+};
+
+
+//MARK: editDriverNote
+const editDriverNote = async (req, res) => {
+  try {
+    const { note_id, note } = req.body;
+
+    if (!note_id || !note) {
+      return res.status(400).json({ error: "يجب إدخال معرف الملاحظة والمحتوى الجديد" });
+    }
+
+    const existingNote = await DriversNotes.findOne({ where: { id: note_id } });
+
+    if (!existingNote) {
+      return res.status(404).json({ error: "الملاحظة غير موجودة" });
+    }
+
+    const edited_by = req.user.name;
+
+    await existingNote.update({ note, edited_by });
+
+    res.json({ message: "تم تحديث الملاحظة بنجاح", updatedNote: existingNote });
+  } catch (error) {
+    console.error("Error updating note:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء تحديث الملاحظة" });
+  }
+};
+
+
+//MARK: deleteDriverNote
+const deleteDriverNote = async (req, res) => {
+  try {
+    const { note_id } = req.body;
+
+    if (!note_id) {
+      return res.status(400).json({ error: "يجب إدخال معرف الملاحظة للحذف" });
+    }
+
+    const existingNote = await DriversNotes.findOne({ where: { id: note_id } });
+
+    if (!existingNote) {
+      return res.status(404).json({ error: "الملاحظة غير موجودة" });
+    }
+
+    await existingNote.destroy();
+
+    res.json({ message: "تم حذف الملاحظة بنجاح" });
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    res.status(500).json({ error: "حدث خطأ أثناء حذف الملاحظة" });
+  }
+};
+
+
+module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip, getDriverNotes, getDriverTrips, editDriverNote, addDriverNote, deleteDriverNote };

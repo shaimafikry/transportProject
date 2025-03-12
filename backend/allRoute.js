@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { signIn, forgetPassword, logout, forgetPasswordCheck } = require('./authController');
+const { signIn, forgetPassword, logout, forgetPasswordCheck, getDriverTrips } = require('./authController');
 const { dashboard } = require('./controllers');
 const authToken = require('./authToken');
 
@@ -19,6 +19,10 @@ router.route('/dashboard')
   .post(dashboard) 
   .put(dashboard) 
   .delete(dashboard);
+
+
+
+router.get('/dashboard/:id', getDriverTrips);
 
 	router.post('/logout', logout); 
 

@@ -160,21 +160,14 @@ const DriversNotes = sequelize.define("DriversNotes", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   driver_id: { 
     type: DataTypes.INTEGER, 
-    allowNull: false, 
-    references: { 
-      model: 'Drivers', // يفترض وجود جدول للسائقين
-      key: 'id'
-    }
   },
   trip_id: { 
     type: DataTypes.INTEGER, 
-    allowNull: false, 
-    references: { 
-      model: 'TransportTrips', 
-      key: 'id'
-    }
+    allowNull: false,
   },
-  note: { type: DataTypes.TEXT, allowNull: false }
+  note: { type: DataTypes.TEXT, allowNull: false },
+  added_by: { type: DataTypes.STRING, allowNull: false },
+  edited_by: { type: DataTypes.STRING, allowNull: true },
 });
 
 const ConstructTripsNotes = sequelize.define("ConstructTripsNotes", {
@@ -182,18 +175,10 @@ const ConstructTripsNotes = sequelize.define("ConstructTripsNotes", {
   driver_id: { 
     type: DataTypes.INTEGER, 
     allowNull: false, 
-    references: { 
-      model: 'Drivers', // يفترض وجود جدول للسائقين
-      key: 'id'
-    }
   },
   trip_id: { 
     type: DataTypes.INTEGER, 
     allowNull: false, 
-    references: { 
-      model: 'ConstructTrips', 
-      key: 'id'
-    }
   },
   note: { type: DataTypes.TEXT, allowNull: false }
 });
