@@ -26,35 +26,26 @@ const DriverProfile = () => {
 
 
   //MARK: GET NOTES
-  const fetchDriver = async () => {
-    try {
-      const { driver, trips } = await fetchData(`dashboard/${id}`);
-      if (!driver) {
-        throw new Error("السائق غير موجود");
-      }
-      console.log(driver, trips);
-  
-      // Fetch notes for all trips of this driver
-      const tripNotes = await Promise.all(
-        trips.map(async (trip) => {
-          const notes = await fetchData(`dashboard?action=driverNotes&driver_id=${id}&trip_id=${trip.id}`);
-          return { trip_id: trip.id, notes };
-        })
-      );
-  
-      // Attach notes to corresponding trips
-      const tripsWithNotes = trips.map((trip) => ({
-        ...trip,
-        trip_notes: tripNotes.find((tn) => tn.trip_id === trip.id)?.notes || [],
-      }));
-  
-      setDriver(driver || {});
-      setTrips(tripsWithNotes || []);
-    } catch (error) {
-      console.error("Error fetching driver data", error);
-      setErrMessage(error.message);
+const fetchDriver = async () => {
+  try {
+    // Fetch driver details and trips with notes in one request
+    const { driver, trips } = await fetchData(`dashboard/${id}`);
+    
+    if (!driver) {
+      throw new Error("السائق غير موجود");
     }
-  };
+
+    console.log("🔹 Driver Data:", driver);
+    console.log("🔹 Trips with Notes:", trips);
+
+    setDriver(driver || {});
+    setTrips(trips || []);
+  } catch (error) {
+    console.error("❌ Error fetching driver data", error);
+    setErrMessage(error.message);
+  }
+};
+
   
 
   useEffect(() => {
@@ -73,9 +64,8 @@ const DriverProfile = () => {
       const data = await postData(`dashboard?action=driverNotes-add`, {
         trip_id: tripId,
         driver_id: id,
-        note: "راجل جدع",
+        note: newNote,
       });
-      console.log(data);
       setTrips(trips.map((trip) => trip.id === tripId ? { ...trip, trip_notes: [...trip.trip_notes, data.newNote] } : trip));
       setNewNote("");
     } catch (error) {
@@ -319,12 +309,14 @@ const DriverProfile = () => {
                 </Tab.Content>
               </Tab.Container>
               
-              {trip.notes && (
-                <div className="mt-3 p-3 bg-light rounded">
-                  <p className="small fw-medium mb-1">ملاحظات:</p>
-                  <p className="small">{trip.notes}</p>
-                </div>
-              )}
+              {trip.trip_notes && trip.trip_notes.length > 0 && (
+                  <div className="mt-3 p-3 bg-light rounded">
+                    <p className="small fw-medium mb-1">ملاحظات:</p>
+                    {trip.trip_notes.map((note, index) => (
+                      <p key={index} className="small">{note.note}</p>
+                    ))}
+                  </div>
+                )}
             </Card.Body>
             
             <Card.Footer className="bg-white">
