@@ -1,5 +1,5 @@
 const { sequelize, Drivers, Agents, TransportTrips, ConstructTrips, Users, DriversNotes } = require('./config');
-const { addUser, editUser,allUsers,editDriver,addDriver,comp2DelTrip, comp2EditTrip, addTripAndDriver,editComp1, updatePassword, getDriverNotes, getDriverTrips, editDriverNote, deleteDriverNote, addDriverNote } = require('./authController');
+const { addUser, editUser,allUsers,editDriver,addDriver,comp2DelTrip, comp2EditTrip, addTripAndDriver,editComp1, updatePassword, editDriverNote, deleteDriverNote, addDriverNote } = require('./authController');
 const {attendanceLog} = require('./attendanceCont');
 
 const models = {
@@ -62,7 +62,7 @@ const dashboard = async (req, res) => {
 if (action === "driverNotes-add") return addDriverNote(req, res);
 if (action === "driverNotes-edit") return editDriverNote(req, res);
 if (action === "driverNotes-del") return deleteDriverNote(req, res);
-if (action === "driverNotes") return getDriverNotes(req, res);
+// if (action === "driverNotes") return getDriverNotes(req, res);
 
 
 

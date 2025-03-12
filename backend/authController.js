@@ -591,11 +591,20 @@ const getDriverTrips = async (req, res) => {
       return res.status(404).json({ error: "السائق غير موجود" });
     }
 
+    // Fetch all trips related to this driver
     const trips = await TransportTrips.findAll({ where: { national_id: driver.national_id } });
 
-    res.json({ driver, trips });
+    // Fetch notes for each trip and attach them
+    const tripsWithNotes = await Promise.all(
+      trips.map(async (trip) => {
+        const notes = await DriversNotes.findAll({ where: { trip_id: trip.id } });
+        return { ...trip.get({ plain: true }), trip_notes: notes };
+      })
+    );
+
+    res.json({ driver, trips: tripsWithNotes });
   } catch (error) {
-    console.error("Error fetching driver trips:", error);
+    console.error("Error fetching driver trips and notes:", error);
     res.status(500).json({ error: "حدث خطأ أثناء جلب بيانات السائق والرحلات" });
   }
 };
@@ -604,22 +613,22 @@ const getDriverTrips = async (req, res) => {
 
 
 //MARK: getDriverNotes
-const getDriverNotes = async (req, res) => {
-  try {
-    const { trip_id } = req.query; // Use query param
+// const getDriverNotes = async (req, res) => {
+//   try {
+//     const { trip_id } = req.query; // Use query param
 
-    if (!trip_id) {
-      return res.status(400).json({ error: "يجب إدخال معرف الرحلة" });
-    }
+//     if (!trip_id) {
+//       return res.status(400).json({ error: "يجب إدخال معرف الرحلة" });
+//     }
 
-    const notes = await DriversNotes.findAll({ where: { trip_id } });
+//     const notes = await DriversNotes.findAll({ where: { trip_id } });
 
-    res.json(notes);
-  } catch (error) {
-    console.error("Error fetching driver notes:", error);
-    res.status(500).json({ error: "حدث خطأ أثناء جلب الملاحظات" });
-  }
-};
+//     res.json(notes);
+//   } catch (error) {
+//     console.error("Error fetching driver notes:", error);
+//     res.status(500).json({ error: "حدث خطأ أثناء جلب الملاحظات" });
+//   }
+// };
 
 
 //MARK: addDriverNote
@@ -631,8 +640,7 @@ const addDriverNote = async (req, res) => {
       return res.status(400).json({ error: "يجب إدخال معرف السائق، الرحلة والملاحظة" });
     }
 
-    const added_by = req.user.name;
-    const newNote = await DriversNotes.create({ driver_id, trip_id, note, added_by });
+    const newNote = await DriversNotes.create({ driver_id, trip_id, note });
 
     res.json({ message: "تمت إضافة الملاحظة بنجاح", newNote });
   } catch (error) {
@@ -694,4 +702,4 @@ const deleteDriverNote = async (req, res) => {
 };
 
 
-module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip, getDriverNotes, getDriverTrips, editDriverNote, addDriverNote, deleteDriverNote };
+module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip, getDriverTrips, editDriverNote, addDriverNote, deleteDriverNote };

@@ -14,8 +14,6 @@ router.put('/forget-password', forgetPassword);
 // Apply authToken middleware to all routes below
 router.use(authToken); 
 
-router.get('/dashboard/:id', getDriverTrips);
-
 router.route('/dashboard')
   .get(dashboard) 
   .post(dashboard) 
@@ -23,6 +21,7 @@ router.route('/dashboard')
   .delete(dashboard);
 
 
+router.get('/dashboard/:id', getDriverTrips);
 
 
 	router.post('/logout', logout); 
