@@ -10,7 +10,7 @@ import {
   FaBriefcase,
   FaFileAlt,
 } from "react-icons/fa";
-import { fetchData, putData } from "../api";
+import { fetchData, putData, postData } from "../api";
 import { useParams } from "react-router-dom";
 
 const DriverProfile = () => {
@@ -23,24 +23,39 @@ const DriverProfile = () => {
   const [message, setMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
 
+
+
+  //MARK: GET NOTES
   const fetchDriver = async () => {
     try {
       const { driver, trips } = await fetchData(`dashboard/${id}`);
       if (!driver) {
-        setMessage("لا يوجد بيانات لهذا السائق");
-        return;
+        throw new Error("السائق غير موجود");
       }
-      if (!trips) {
-        setMessage("لا يوجد رحلات لهذا السائق");
-        return;
-      }
-      setDriver(driver);
-      setTrips(trips);
+      console.log(driver, trips);
+  
+      // Fetch notes for all trips of this driver
+      const tripNotes = await Promise.all(
+        trips.map(async (trip) => {
+          const notes = await fetchData(`dashboard?action=driverNotes&driver_id=${id}&trip_id=${trip.id}`);
+          return { trip_id: trip.id, notes };
+        })
+      );
+  
+      // Attach notes to corresponding trips
+      const tripsWithNotes = trips.map((trip) => ({
+        ...trip,
+        trip_notes: tripNotes.find((tn) => tn.trip_id === trip.id)?.notes || [],
+      }));
+  
+      setDriver(driver || {});
+      setTrips(tripsWithNotes || []);
     } catch (error) {
       console.error("Error fetching driver data", error);
       setErrMessage(error.message);
     }
   };
+  
 
   useEffect(() => {
     fetchDriver();
@@ -50,47 +65,69 @@ const DriverProfile = () => {
     setExpandedTrip(expandedTrip === tripId ? null : tripId);
   };
 
+  //MARK: ADD NOTE
+  
   const addNote = async (tripId) => {
-    if (newNote.trim() === "") return;
+    if (!newNote.trim()) return;
     try {
-      const data = await putData(`dashboard/${tripId}`, {
-        note: newNote,
-        timestamp: new Date().toLocaleString("ar-EG", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+      const data = await postData(`dashboard?action=driverNotes-add`, {
+        trip_id: tripId,
+        driver_id: id,
+        note: "راجل جدع",
       });
-      const updatedTrips = trips.map((trip) =>
-        trip.id === tripId
-          ? {
-              ...trip,
-              trip_notes: [
-                ...trip.trip_notes,
-                {
-                  id: `n${Date.now()}`,
-                  content: newNote,
-                  timestamp: data.timestamp || new Date().toLocaleString("ar-EG"),
-                },
-              ],
-            }
-          : trip
-      );
-      setTrips(updatedTrips);
+      console.log(data);
+      setTrips(trips.map((trip) => trip.id === tripId ? { ...trip, trip_notes: [...trip.trip_notes, data.newNote] } : trip));
       setNewNote("");
     } catch (error) {
       console.error("Error adding note", error);
       setErrMessage(error.message);
     }
   };
+
+  //MARK: UPDATE NOTE
+  const updateNote = async (noteId, tripId) => {
+    if (!editNote.trim()) return;
+    try {
+      await putData(`dashboard?action=driverNotes-edit`, {
+        note_id: noteId,
+        note: editNote,
+      });
+      setTrips(trips.map((trip) =>
+        trip.id === tripId
+          ? {
+              ...trip,
+              trip_notes: trip.trip_notes.map((note) =>
+                note.id === noteId ? { ...note, content: editNote } : note
+              ),
+            }
+          : trip
+      ));
+      setEditNote("");
+      setEditingNoteId(null);
+    } catch (error) {
+      console.error("Error updating note", error);
+      setErrMessage(error.message);
+    }
+  };
+
+    //MARK: DELETE NOTE
+  const deleteNote = async (noteId, tripId) => {
+    try {
+      await deleteData(`dashboard?action=driverNotes-del`, { note_id: noteId });
+      setTrips(trips.map((trip) => trip.id === tripId ? { ...trip, trip_notes: trip.trip_notes.filter((note) => note.id !== noteId) } : trip));
+    } catch (error) {
+      console.error("Error deleting note", error);
+      setErrMessage(error.message);
+    }
+  };
+
+
   return (
     <div className="container py-4">
       <div className="d-flex align-items-center mb-4">
-        <Button variant="light" className="me-2">
-          <FaArrowLeft />
-        </Button>
+      <Button variant="light" className="me-2" onClick={() => navigate("/dashboard")}>
+        <FaArrowLeft /> العودة
+      </Button>
         <h1 className="h3 mb-0">سجلات رحلات السائق</h1>
       </div>
       
