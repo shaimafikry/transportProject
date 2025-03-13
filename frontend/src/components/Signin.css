@@ -43,3 +43,9 @@
 
   transform: scale(1.05);
 }
+
+
+.del-button:hover {
+  background-color: #ea4d4d;
+  color: #fcfcfc;
+}

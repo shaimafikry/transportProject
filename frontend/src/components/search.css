@@ -104,3 +104,34 @@
   grid-template-columns: repeat(3, 1fr);
 
 }
+
+.del-button:hover {
+  background-color: #ea4d4d;
+  color: #fcfcfc;
+}
+
+
+
+@media (max-width: 1200px) {
+  .trans-search-container {
+    grid-template-columns: repeat(5, 1fr); /* Medium screens */
+  }
+}
+
+@media (max-width: 900px) {
+  .trans-search-container {
+    grid-template-columns: repeat(3, 1fr); /* Tablets */
+  }
+}
+
+@media (max-width: 600px) {
+  .trans-search-container {
+    grid-template-columns: repeat(2, 1fr); /* Small screens */
+  }
+}
+
+@media (max-width: 400px) {
+  .trans-search-container {
+    grid-template-columns: repeat(1, 1fr); /* Single column for mobile */
+  }
+}

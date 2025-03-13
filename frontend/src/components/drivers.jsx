@@ -34,7 +34,7 @@ const Drivers = () => {
 
   const editFields = [
     ...driverFields,
-    { name: "trip_num", type: "number", placeholder: "عدد الرحلات", disabled: true },
+    { name: "trip_counter", type: "number", placeholder: "عدد الرحلات", disabled: true },
   ];
 
   // Fetch drivers data from API
@@ -334,7 +334,7 @@ const Drivers = () => {
                         <td>
 												<div className="action-buttons">
                           <button onClick={() => handleSaveDriver(driver.id)}>حفظ</button>
-                          <button onClick={() => handleDeleteDriver(driver.id)}>حذف</button>
+                          <button onClick={() => handleDeleteDriver(driver.id) } className="del-button">حذف</button>
                           <button onClick={() => handleEditDriver(driver.id)}>إلغاء</button>
 													</div>
 													{message && (<p className="suc-message">{message}</p>)}

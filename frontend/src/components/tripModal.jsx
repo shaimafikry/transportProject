@@ -345,7 +345,7 @@ const handleChange = (field, value) => {
         ))}
       <div className="action-buttons">
         <button onClick={handleSave}>حفظ</button>
-				<button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
+				<button onClick={() => handleDeleteTrip(trip.id)} className="del-button">حذف</button>
         <button onClick={() => onSave(null)}>إلغاء</button>
       </div>
 			{message && (<p className="suc-message">{message}</p>)}

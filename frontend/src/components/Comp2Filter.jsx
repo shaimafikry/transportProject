@@ -240,7 +240,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     value={filters.client_name}
     onChange={(e) => setFilters({ ...filters, client_name: e.target.value })}
   >
-    <option value="">تصنيف حسب العميل</option>
+    <option value="">  العميل</option>
     {uniqueClients.map((client) => (
       <option key={client} value={client}>
         {client}
@@ -253,7 +253,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     value={filters.destination}
     onChange={(e) => setFilters({ ...filters, destination: e.target.value })}
   >
-    <option value="">تصنيف حسب الواجهة</option>
+    <option value="">  الواجهة</option>
     {uniqueDestinations.map((destination) => (
       <option key={destination} value={destination}>
         {destination}
@@ -266,7 +266,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     value={filters.leader_name}
     onChange={(e) => setFilters({ ...filters, leader_name: e.target.value })}
   >
-    <option value="">تصنيف حسب المندوب</option>
+    <option value="">  المندوب</option>
     {uniqueLeaders.map((leader) => (
       <option key={leader} value={leader}>
         {leader}
@@ -279,7 +279,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     value={filters.status}
     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
   >
-    <option value="">تصنيف حسب الحالة</option>
+    <option value="">  الحالة</option>
     <option value="غير مطالبة">غير مطالبة</option>
     <option value="مطالبة">مطالبة</option>
   </select>

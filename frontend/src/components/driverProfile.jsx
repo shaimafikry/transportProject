@@ -207,7 +207,7 @@ const fetchDriver = async () => {
                 <FaTruck className="text-muted me-2" />
                 <div>
                   <p className="text-muted small mb-0">عدد الرحلات</p>
-                  <p className="fw-medium">{driver.trip_num}</p>
+                  <p className="fw-medium">{driver.trip_counter}</p>
                 </div>
               </div>
             </div>
@@ -382,7 +382,7 @@ const fetchDriver = async () => {
 														</div>
 														
 														{/* Delete Button (Aligned Right) */}
-														<Button onClick={() => deleteNote(note.id, trip.id)} variant="danger" size="sm">حذف</Button>
+														<Button onClick={() => deleteNote(note.id, trip.id)} className="del-button" variant="danger" size="sm">حذف</Button>
 													</div>
 												))}
 											</div>

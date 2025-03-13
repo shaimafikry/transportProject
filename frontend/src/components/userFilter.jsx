@@ -111,7 +111,7 @@ const UserFilter = ({ users, onSearch }) => {
           value={filters.role}
           onChange={(e) => setFilters({ ...filters, role: e.target.value })}
         >
-          <option value="">تصنيف حسب الوظيفة</option>
+          <option value="">  الوظيفة</option>
           <option value="data entry">Data Entry</option>
           <option value="manager">Manager</option>
         </select>

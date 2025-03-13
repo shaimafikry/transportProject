@@ -235,11 +235,11 @@ const Agent = () => {
                           <option value="منظمة">منظمة</option>
                         </select>
                       </td>
-											<td>{agent.trip_num}</td> 
+											<td>{agent.trip_counter}</td> 
 
                       <td>
                         <button onClick={() => handleSaveAgent(agent.id)}>حفظ</button>
-                        <button onClick={() => handleDeleteAgent(agent.id)}>حذف</button>
+                        <button onClick={() => handleDeleteAgent(agent.id) } className="del-button">حذف</button>
                         <button onClick={() => handleEditAgent(agent.id)}>إلغاء</button>
 												{message && <p className="suc-message">{message}</p>}
 												{errMessage && <p className="err-message">{errMessage}</p>}
@@ -249,7 +249,7 @@ const Agent = () => {
                     <>
                       <td>{agent.agent_name}</td>
                       <td>{agent.agent_type}</td>
-                      <td>{agent.trip_num}</td>
+                      <td>{agent.trip_counter}</td>
 
                       <td>
                         <button onClick={() => handleEditAgent(agent.id)}>تعديل</button>

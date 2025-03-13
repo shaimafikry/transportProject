@@ -94,7 +94,7 @@ const AgentFilter = ({ agents, onSearch }) => {
 					value={filters.agent_type}
 					onChange={(e) => setFilters({ ...filters, agent_type: e.target.value })}
 				>
-					<option value="">تصنيف حسب نوع العميل</option>
+					<option value="">  نوع العميل</option>
 					<option value="تجاري">تجاري</option>
 					<option value="منظمة">منظمة</option>
 				</select>

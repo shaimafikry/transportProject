@@ -499,3 +499,7 @@ error-message {
 		text-align: center;
 		border-radius: 5px;
 }
+.del-button:hover {
+  background-color: #ec0b0b;
+  color: #fcfcfc;
+}

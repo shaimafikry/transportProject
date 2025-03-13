@@ -320,7 +320,7 @@ const Comp1 = () => {
                       <td>
 											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
-                        <button onClick={() => handleDeleteTrip(trip.id)}>حذف</button>
+                        <button onClick={() => handleDeleteTrip(trip.id)} className="del-button" >حذف</button>
                         <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
 											</div>
 											{message && (<p className="suc-message">{message}</p>)}

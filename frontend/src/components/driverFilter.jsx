@@ -8,7 +8,7 @@ const initialDriverState = {
   national_id: "الرقم القومي",
   passport_number: "رقم الجواز",
   company: "الشركة",
-  trip_num: "عدد الرحلات",
+  trip_counter: "عدد الرحلات",
   price: "الحساب الكلي",
   remaining_money_fees: "الحساب المتبقي",
 };
@@ -132,7 +132,7 @@ const DriverFilter = ({ drivers, onSearch }) => {
           value={filters.company}
           onChange={(e) => setFilters({ ...filters, company: e.target.value })}
         >
-          <option value="">تصنيف حسب الشركة</option>
+          <option value="">  الشركة</option>
           <option value="النقل">النقل</option>
           <option value="المحاجر">المحاجر</option>
         </select>

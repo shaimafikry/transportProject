@@ -352,9 +352,7 @@ const Users = () => {
                           <button onClick={() => handleSaveUser(user.id)}>
                             حفظ
                           </button>
-                          <button onClick={() => handleDeleteUser(user.id)}>
-                            حذف
-                          </button>
+                          <button onClick={() => handleDeleteUser(user.id)} className="del-button">                            حذف                  </button>
                           <button onClick={() => handleEditUser(user.id)}>
                             إلغاء
                           </button>
