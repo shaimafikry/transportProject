@@ -1,8 +1,9 @@
 import {putData, deleteData } from "../api";
 import React, { useState, useEffect } from "react";
 
-const TripEditModal = ({ trip, onSave, initialTripState, carTypes, agents }) => {
+const TripEditModal = ({ trip, onSave, initialTripState, carTypes, agents, role }) => {
   // const [formData, setFormData] = useState({ ...trip });
+	const [userRole, setUserRole] = useState(role); 
 	const [formData, setFormData] = useState(() => {
     let sanitizedTrip = { ...trip };
     Object.keys(sanitizedTrip).forEach((key) => {
@@ -296,8 +297,18 @@ const handleChange = (field, value) => {
     <div className="tripModal-dashboard-form-group">
       {/* Ensure initialTripState is defined */}
       {Object.entries(initialTripState)
-        .filter(([key]) => !["added_by", "edited_by"].includes(key))
-        .map(([key, label]) => (
+        .filter(([key]) => 
+					!["added_by", "edited_by"].includes(key) && 
+					(userRole === "manager" || ![
+						"company_naulon",
+						"company_night_value",
+						"company_toll_fee",
+						"total_company_account",
+						"net_profit",
+						"total_company_nights_value"
+					].includes(key))
+				)
+				.map(([key, label]) => (
           <div key={key} className="comp2-form-field">
             <label htmlFor={key}>{label}</label>
             {key === "car_type" ? (

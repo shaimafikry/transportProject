@@ -14,7 +14,7 @@ const Comp2 = ({role}) => {
 	const [message, setMessage]= useState("");
 	const [errMessage, setErrMessage] = useState("");
 	const [tripsCount, setTripsCount] = useState(0); // New state for count
-	const [userRole, setUserRole] = useState(role); // or "employee" or whatever roles you have
+	const [userRole, setUserRole] = useState(role); 
 
 	
   const initialTripState = {
@@ -442,88 +442,56 @@ return (
 		{viewComp2 === "add" && (
 			<>
 				<div className="comp2-dashboard-form-group">
-					{Object.entries(initialTripState)
-						.filter(([key]) => !["added_by", "edited_by"].includes(key))
-						.map(([key, label]) => (
-							<div key={key} className="comp2-form-field">
-								<label htmlFor={key}>{label}</label>
-								{key === "car_type" ? (
-									<select
-										id={key}
-										value={newTripComp2[key]}
-										onChange={(e) => handleTripChange(key, e.target.value)}
-									>
-										<option value="" disabled>
-											اختر نوع السيارة
-										</option>
-										{carTypes.map((type, index) => (
-											<option key={index} value={type}>{type}</option>
-										))}
-									</select>
-								) : key === "client_name" ? (
-									<select
-										id={key}
-										value={newTripComp2[key]}
-										onChange={(e) => handleTripChange(key, e.target.value)}
-									>
-										<option value="" disabled>
-											اختر اسم العميل
-										</option>
-										{agents.map((agent, index) => (
-											<option key={index} value={agent.agent_name}>{agent.agent_name}</option>
-										))}
-									</select>
-								) : key === "status" ? (
-									<select
-										id={key}
-										value={newTripComp2[key]}
-										onChange={(e) => handleTripChange(key, e.target.value)}
-									>
-										<option value="" disabled>
-											اختر الحالة
-										</option>
-										<option value="مطالبة">مطالبة</option>
-										<option value="غير مطالبة">غير مطالبة</option>
-									</select>
-								) : key === "notes" ? (
-									<textarea
-										id={key}
-										value={newTripComp2[key]}
-										onChange={(e) => handleTripChange(key, e.target.value)}
-									/>
-								) : (
-									// Only show these fields if userRole is "manager"
-									![
-										"company_naulon",
-										"company_night_value",
-										"company_toll_fee",
-										"total_company_account",
-										"net_profit",
-										"total_company_nights_value"
-									].includes(key) || userRole === "manager" ? (
-										<input
-											id={key}
-											type={
-												key.includes("date") ? "date" :
-												[
-													"nights_count",
-													"nights_max",
-													"night_value",
-													"total_nights_value",
-													"transport_fee",
-													"expenses",
-													"total_transport",
-													"total_received_cash",
-													"remain_cash"
-												].includes(key) ? "number" : "text"
-											}
-											value={newTripComp2[key]}
-											onChange={(e) => handleTripChange(key, e.target.value)}
-										/>
-									) : null
-								)}
-							</div>
-						))}
+				{Object.entries(initialTripState)
+  .filter(([key]) => 
+    !["added_by", "edited_by"].includes(key) && 
+    (userRole === "manager" || ![
+      "company_naulon",
+      "company_night_value",
+      "company_toll_fee",
+      "total_company_account",
+      "net_profit",
+      "total_company_nights_value"
+    ].includes(key))
+  )
+  .map(([key, label]) => (
+    <div key={key} className="comp2-form-field">
+      <label htmlFor={key}>{label}</label>
+      {key === "car_type" ? (
+        <select id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)}>
+          <option value="" disabled>اختر نوع السيارة</option>
+          {carTypes.map((type, index) => (
+            <option key={index} value={type}>{type}</option>
+          ))}
+        </select>
+      ) : key === "client_name" ? (
+        <select id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)}>
+          <option value="" disabled>اختر اسم العميل</option>
+          {agents.map((agent, index) => (
+            <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
+          ))}
+        </select>
+      ) : key === "status" ? (
+        <select id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)}>
+          <option value="" disabled>اختر الحالة</option>
+          <option value="مطالبة">مطالبة</option>
+          <option value="غير مطالبة">غير مطالبة</option>
+        </select>
+      ) : key === "notes" ? (
+        <textarea id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)} />
+      ) : (
+        <input
+          id={key}
+          type={key.includes("date") ? "date" :
+                ["nights_count", "nights_max", "night_value", "total_nights_value", 
+                 "transport_fee", "expenses", "total_transport", "total_received_cash", "remain_cash"]
+                .includes(key) ? "number" : "text"}
+          value={newTripComp2[key]}
+          onChange={(e) => handleTripChange(key, e.target.value)}
+        />
+      )}
+    </div>
+  ))}
 				</div>
 				{message && (<p className="suc-message">{message}</p>)}
 				{errMessage && (<p className="err-message">{errMessage}</p>)}
@@ -610,6 +578,7 @@ return (
 						initialTripState={initialTripState}
 						carTypes={carTypes}
 						agents={agents}
+						role={role}
 						onSave={() => {
 							setSelectedTrip(null);
 							fetchTrips();
