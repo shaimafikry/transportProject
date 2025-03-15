@@ -165,8 +165,8 @@ const Users = () => {
           return ;
 			}
 
-			if (!fieldsToUpdate.username) {
-				setErrMessage("اسم المستخدم لا يمكن ان يكون فارغا");
+			if (fieldsToUpdate.username === "" || fieldsToUpdate.username.length < 4) {
+				setErrMessage("اسم المستخدم لا يمكن ان يكون فارغا او اقل من 4 حروف");
           setTimeout(() => {
             setErrMessage("");
           }, 5000);
