@@ -211,7 +211,7 @@ const Comp2 = ({role}) => {
 		
 		const totalTransport = parseFloat(updatedTrip.total_transport) || 0;
 
-		const netProfit = totalTransport - totalCompanyTransport;
+		const netProfit = totalCompanyTransport - totalTransport;
 	
 		setNewTripComp2((prevState) => ({
 			...prevState,

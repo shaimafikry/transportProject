@@ -155,7 +155,7 @@ const handleChange = (field, value) => {
 		
 		const totalTransport = parseFloat(updatedTrip.total_transport) || 0;
 
-		const netProfit = totalTransport - totalCompanyTransport;
+		const netProfit = totalCompanyTransport - totalTransport;
 	
 		setFormData((prevState) => ({
 			...prevState,
