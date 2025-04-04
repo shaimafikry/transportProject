@@ -28,7 +28,7 @@ const Attendance = () => {
   const fetchDayLog = async () => {
     try {
       const date = format(today, "yyyy-MM-dd");
-      const response = await fetchData(`dashboard?action=attendance&date=${date}`);
+      const response = await fetchData(`dashboard/attendance?date=${date}`);
       setDayLog(response);
       setMessage(response.length === 0 ? "لا يوجد سجل لهذا اليوم" : "");
     } catch (error) {
@@ -40,7 +40,7 @@ const Attendance = () => {
   // ✅ Fetch monthly log
   const fetchMonthLog = async () => {
     try {
-      const response = await fetchData(`dashboard?action=attendance&month=${monthYear.month}&year=${monthYear.year}`);
+      const response = await fetchData(`dashboard/attendance?month=${monthYear.month}&year=${monthYear.year}`);
       setMonthLog(response);
       setMessage(response.length === 0 ? "لا يوجد سجل لهذا الشهر" : "");
     } catch (error) {

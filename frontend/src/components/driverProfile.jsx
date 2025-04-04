@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom"; 
+
 import { Modal, Button, Card, Form, Nav, Tab, Badge, Accordion } from "react-bootstrap";
 import {
   FaArrowLeft,
@@ -9,15 +11,24 @@ import {
   FaIdCard,
   FaBriefcase,
   FaFileAlt,
-	FaTruck,
+  FaTruck,
+  FaMoneyBillWave,
+  FaCheck,
+  FaTimes
 } from "react-icons/fa";
 import { fetchData, putData, postData, deleteData } from "../api";
+import './driverProfile.css';
 
-const DriverProfile = ({id, onBack}) => {
+
+const DriverProfile = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [driver, setDriver] = useState({});
   const [trips, setTrips] = useState([]);
   const [expandedTrip, setExpandedTrip] = useState(null);
   const [newNote, setNewNote] = useState("");
+  const [editingPaymentId, setEditingPaymentId] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
   // const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
@@ -28,7 +39,7 @@ const DriverProfile = ({id, onBack}) => {
 const fetchDriver = async () => {
   try {
     // Fetch driver details and trips with notes in one request
-    const { driver, trips } = await fetchData(`dashboard?action=driverNotes&id=${id}`);
+    const { driver, trips } = await fetchData(`dashboard/drivers/${id}`);
     
     if (!driver) {
       throw new Error("السائق غير موجود");
@@ -76,12 +87,23 @@ const fetchDriver = async () => {
   const addNote = async (tripId) => {
     if (!newNote.trim()) return;
     try {
-      const data = await postData(`dashboard?action=driverNotes-add`, {
+      const data = await postData(`dashboard/drivers/${id}?action=add`, {
         trip_id: tripId,
         driver_id: id,
         note: newNote,
       });
-      setTrips(trips.map((trip) => trip.id === tripId ? { ...trip, trip_notes: [...trip.trip_notes, data.newNote] } : trip));
+
+      const formattedNote = {
+        ...data.newNote,
+        timestamp: new Date(data.newNote.createdAt).toLocaleString("ar-EG", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }
+      setTrips(trips.map((trip) => trip.id === tripId ? { ...trip, trip_notes: [...trip.trip_notes, formattedNote] } : trip));
       setNewNote("");
     } catch (error) {
       console.error("Error adding note", error);
@@ -93,7 +115,7 @@ const fetchDriver = async () => {
   const updateNote = async (noteId, tripId) => {
     if (!editNote.trim()) return;
     try {
-      await putData(`dashboard?action=driverNotes-edit`, {
+      await putData(`dashboard/drivers/${id}?action=edit`, {
         note_id: noteId,
         note: editNote,
       });
@@ -118,7 +140,7 @@ const fetchDriver = async () => {
     //MARK: DELETE NOTE
   const deleteNote = async (noteId, tripId) => {
     try {
-      await deleteData(`dashboard?action=driverNotes-del`, { note_id: noteId });
+      await deleteData(`dashboard/drivers/${id}?action=del`, { note_id: noteId });
       setTrips(trips.map((trip) => trip.id === tripId ? { ...trip, trip_notes: trip.trip_notes.filter((note) => note.id !== noteId) } : trip));
     } catch (error) {
       console.error("Error deleting note", error);
@@ -126,6 +148,103 @@ const fetchDriver = async () => {
     }
   };
 
+
+
+  // MARK: ADD PAYMENT
+  const startEditingPayment = (tripId) => {
+    setEditingPaymentId(tripId);
+    setPaymentAmount("");
+  };
+
+  const cancelEditingPayment = () => {
+    setEditingPaymentId(null);
+    setPaymentAmount("");
+  };
+
+  const submitPayment = async (tripId) => {
+    if (!paymentAmount || isNaN(parseFloat(paymentAmount)) || parseFloat(paymentAmount) <= 0) {
+      setErrMessage("الرجاء إدخال مبلغ صحيح");
+      return;
+    }
+
+    try {
+      const amount = parseFloat(paymentAmount);
+      const trip = trips.find(t => t.id === tripId);
+      
+      if (!trip) {
+        throw new Error("الرحلة غير موجودة");
+      }
+
+      const currentReceived = parseFloat(trip.total_received_cash) || 0;
+      const currentRemain = parseFloat(trip.remain_cash) || 0;
+      
+      // Calculate new values
+      const newReceived = currentReceived + amount;
+      const newRemain = Math.max(0, currentRemain - amount); // Ensure remain doesn't go below 0
+      
+      // Send update to backend
+      const updatedTrip = await putData("dashboard/transport?action=edit", {
+        id: tripId,
+        total_received_cash: newReceived,
+        remain_cash: newRemain,
+        // payment_amount: amount
+      });
+      
+      
+      // Add a note about the payment
+
+      const newNote = {
+        trip_id: tripId,
+        driver_id: id,
+        note: `تم استلام دفعة بقيمة ${amount} جنيه`,
+      };
+      
+
+      // Add a note about the payment - get the full response from server
+      const noteResponse = await postData(`dashboard/drivers/${id}?action=add`, newNote)
+
+      // Format the timestamp for the new note
+      const formattedNote = {
+        ...noteResponse.newNote,
+        timestamp: new Date(noteResponse.newNote.createdAt).toLocaleString("ar-EG", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }
+
+      // Update the notes in the trip
+      setTrips(
+        trips.map((t) =>
+          t.id === tripId
+            ? {
+                ...t,
+                total_received_cash: newReceived, 
+              remain_cash: newRemain,
+                trip_notes: [...t.trip_notes, formattedNote],
+              }
+            : t,
+        ),
+      )
+
+      
+
+      setMessage(`تم تسجيل الدفعة بنجاح`);
+      setTimeout(() => setMessage(""), 3000);
+      
+      // Reset the editing state
+      setEditingPaymentId(null);
+      setPaymentAmount("");
+      
+      
+    } catch (error) {
+      console.error("Error updating payment", error);
+      setErrMessage(error.message || "حدث خطأ أثناء تحديث الدفعة");
+      setTimeout(() => setErrMessage(""), 3000);
+    }
+  };
 
   return (
     <div className="container py-4">
@@ -136,14 +255,14 @@ const fetchDriver = async () => {
         <Button
           variant="light"
           className="me-2"
-          onClick={() => onBack(null)}
+          onClick={() => navigate(-1)}
         >
           <FaArrowLeft /> العودة
         </Button>
       </div>
       
       <Card className="mb-4">
-        <Card.Header>
+        <Card.Header style={{ backgroundColor: "#71483c", color: "white" }}>
           <Card.Title>بيانات السائق</Card.Title>
         </Card.Header>
         <Card.Body>
@@ -153,7 +272,7 @@ const fetchDriver = async () => {
                 <FaUser className="text-muted me-2" />
                 <div>
                   <p className="text-muted small mb-0">اسم المندوب</p>
-                  <p className="fw-medium">{driver.leader_name}</p>
+                  <p className="fw-medium"> {driver.leader_name} </p>
                 </div>
               </div>
             </div>
@@ -220,23 +339,23 @@ const fetchDriver = async () => {
       <div className="mb-4">
         {trips.map(trip => (
           <Card key={trip.id} className="mb-3">
-            <Card.Header className="d-flex justify-content-between align-items-start">
+            <Card.Header className="d-flex justify-content-between align-items-start" style={{ backgroundColor: "#71483c", color: "white" }}>
               <div>
                 <Card.Title className="h5 mb-1">
                   {trip.loading_place} إلى {trip.destination}
                 </Card.Title>
                 <div className="d-flex gap-2 text-muted small">
-                  <span className="d-inline-flex align-items-center">
-                    <FaCalendarAlt className="me-1" size={12} />
-                    تاريخ التحميل: {trip.driver_loading_date}
+                  <span className="d-inline-flex align-items-center" style={{ color: "white" }} >
+                    <FaCalendarAlt className="me-1" size={12} /> 
+                    تاريخ التحميل للشركة: {trip.company_loading_date}
                   </span>
-                  <span className="d-inline-flex align-items-center">
-                    <FaCalendarAlt className="me-1" size={12} />
-                    تاريخ الوصول: {trip.arrival_date}
+                  <span className="d-inline-flex align-items-center" style={{ color: "white" }} >
+                    <FaCalendarAlt className="me-1" size={12} /> 
+                    تاريخ التعتيق: {trip.aging_date}
                   </span>
                 </div>
               </div>
-              <Badge bg="primary">{trip.fo_number}</Badge>
+              <Badge bg="secondary">{trip.fo_number}</Badge>
             </Card.Header>
             
             <Card.Body>
@@ -269,12 +388,12 @@ const fetchDriver = async () => {
                         <p className="fw-medium">{trip.client_name}</p>
                       </div>
                       <div className="col-md-4">
-                        <p className="text-muted small mb-0">تاريخ التحميل للشركة</p>
-                        <p className="fw-medium">{trip.company_loading_date}</p>
+                        <p className="text-muted small mb-0">تاريخ التحميل للسائق</p>
+                        <p className="fw-medium">{trip.driver_loading_date}</p>
                       </div>
                       <div className="col-md-4">
-                        <p className="text-muted small mb-0">تاريخ التعتيق</p>
-                        <p className="fw-medium">{trip.aging_date}</p>
+                        <p className="text-muted small mb-0">تاريخ الوصول</p>
+                        <p className="fw-medium">{trip.arrival_date}</p>
                       </div>
 											<div className="col-md-4">
                         <p className="text-muted small mb-0">حالة الرحلة</p>
@@ -346,19 +465,49 @@ const fetchDriver = async () => {
                         <p className="text-muted small mb-0">المتبقى</p>
                         <p className="fw-medium">{trip.remain_cash} جنيه</p>
                       </div>
+                    {/* Payment Button/Input Field */}
+                    <div className="col-12 mt-3">
+                        {editingPaymentId === trip.id ? (
+                          <div className="d-flex align-items-center gap-2">
+                            <Form.Control
+                              type="number"
+                              placeholder="أدخل المبلغ"
+                              value={paymentAmount}
+                              onChange={(e) => setPaymentAmount(e.target.value)}
+                              min="1"
+                              step="0.01"
+                              className="w-auto"
+                            />
+                            <Button 
+                              variant="success" 
+                              size="sm"
+                              onClick={() => submitPayment(trip.id)}
+                            >
+                              <FaCheck /> تأكيد
+                            </Button>
+                            <Button 
+                              variant="secondary" 
+                              size="sm"
+                              onClick={cancelEditingPayment}
+                            >
+                              <FaTimes /> إلغاء
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button 
+                            variant="primary" 
+                            size="sm"
+                            onClick={() => startEditingPayment(trip.id)}
+                            disabled={parseFloat(trip.remain_cash) <= 0}
+                          >
+                            <FaMoneyBillWave className="me-1" /> تسجيل دفعة جديدة
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </Tab.Pane>
                 </Tab.Content>
               </Tab.Container>
-              
-              {/* {trip.trip_notes && trip.trip_notes.length > 0 && (
-                  <div className="mt-3 p-3 bg-light rounded">
-                    <p className="small fw-medium mb-1">ملاحظات:</p>
-                    {trip.trip_notes.map((note, index) => (
-                      <p key={index} className="small">{note.note}</p>
-                    ))}
-                  </div>
-                )} */}
             </Card.Body>
             
             <Card.Footer className="bg-white">

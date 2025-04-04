@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchData, postData, putData, deleteData } from "../api";
+import { fetchData, postData, putData, deleteData} from "../api";
 import UserFilter from "./userFilter";
 
 const Users = () => {
@@ -30,7 +30,7 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const data = await fetchData("dashboard?action=users");
+      const data = await fetchData("dashboard/users");
 
       setUsers(
         Array.isArray(data.users)
@@ -102,7 +102,7 @@ const Users = () => {
 			if (newUser.password.length < 6) {
 				throw new Error("يجب أن تكون كلمة المرور أكثر من 5 أحرف أو أرقام");
 			}
-      const data = await postData("dashboard?action=users-add", newUser);
+      const data = await postData("dashboard/users?action=add", newUser);
       setUsers([...users, { ...data, isEditing: false }]);
       setNewUser(
         Object.fromEntries(Object.keys(initialUserState).map((key) => [key, ""]))
@@ -121,6 +121,26 @@ const Users = () => {
       }, 5000);
 
     }
+  };
+
+  
+  const handleCancelEdit = (id) => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.id === id
+          ? { ...user.originalData, isEditing: false }
+          : user
+      )
+    );
+
+    // Update originalUsers
+    setOriginalUsers((prevOriginalUsers) =>
+      prevOriginalUsers.map((user) =>
+        user.id === id
+          ? { ...user.originalData, isEditing: false }
+          : user
+      )
+    );
   };
 
   const handleEditUser = (id) => {
@@ -165,7 +185,7 @@ const Users = () => {
           return ;
 			}
 
-			if (fieldsToUpdate.username === "" || fieldsToUpdate.username.length < 4) {
+			if (fieldsToUpdate.username === "" || (fieldsToUpdate.username && fieldsToUpdate.username.length < 4)) {
 				setErrMessage("اسم المستخدم لا يمكن ان يكون فارغا او اقل من 4 حروف");
           setTimeout(() => {
             setErrMessage("");
@@ -175,7 +195,7 @@ const Users = () => {
 
       // Send only the edited fields and the user ID to the backend
       const dataToUpdate = { id, ...fieldsToUpdate };
-      const updatedUser = await putData("dashboard?action=users-edit", dataToUpdate);
+      const updatedUser = await putData("dashboard/users?action=edit", dataToUpdate);
 
       // Update the user in the state
       setUsers((prevUsers) =>
@@ -216,7 +236,7 @@ const Users = () => {
 		const confirmDelete = window.confirm("هل أنت متأكد أنك تريد حذف هذا المستخدم");
     if (!confirmDelete) return;
     try {
-      await deleteData("dashboard?action=users-del", { id });
+      await deleteData("dashboard/users?action=del", { id });
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
 
       // Update originalUsers
@@ -353,7 +373,7 @@ const Users = () => {
                             حفظ
                           </button>
                           <button onClick={() => handleDeleteUser(user.id)} className="del-button">                            حذف                  </button>
-                          <button onClick={() => handleEditUser(user.id)}>
+                          <button onClick={() => handleCancelEdit(user.id)}>
                             إلغاء
                           </button>
 													</div>

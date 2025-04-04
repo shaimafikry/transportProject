@@ -63,7 +63,7 @@ const ImportTripsFile = () => {
   const handleSave = async () => {
     try {
       for (const trip of importedData) {
-        await postData("dashboard?action=comp1Trips-add", trip);
+        await postData("dashboard/construct?action=add", trip);
       }
       alert("تم حفظ البيانات");
       setShowModal(false);

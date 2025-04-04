@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
 import TripFilterSortComp1 from "./Comp1Filter";
 import ImportTripsFile from "./import_stones";
+import { FaFileImport } from "react-icons/fa";
 
 const Comp1 = () => {
   const [viewComp1, setViewComp1] = useState("");
@@ -36,8 +37,8 @@ const Comp1 = () => {
   // Fetch trips data from API
   const fetchTrips = async () => {
     try {
-      const data = await fetchData("dashboard?action=comp1Trips");
-      const formattedTrips = data.comp1Trips.map((trip) => ({
+      const data = await fetchData("dashboard/construct");
+      const formattedTrips = data.construct.map((trip) => ({
         ...trip,
         trip_date: trip.trip_date.split("T")[0], // Extract only the date part
 				isEditing: false, // Initialize isEditing for all trips
@@ -109,6 +110,26 @@ const Comp1 = () => {
   };
 
 
+  const handleCancelEdit = (id) => {
+    setTripsComp1((prevTrips) =>
+      prevTrips.map((trip) =>
+        trip.id === id
+          ? { ...trip.originalData, isEditing: false }
+          : trip
+      )
+    );
+
+    // Update originalTrips
+    setOriginalTrips((prevOriginalTrips) =>
+      prevOriginalTrips.map((trip) =>
+        trip.id === id
+          ? { ...trip.originalData, isEditing: false }
+          : trip
+      )
+    );
+  };
+
+
 	const handleEditTrip = (id) => {
 	
 		// Update tripsComp1
@@ -137,11 +158,13 @@ const Comp1 = () => {
 			if (Object.values(newTripComp1).every(value => value.trim() === "")) {
 				throw new Error("لا يمكن حفظ الرحلة بدون بيانات");
 			}
+
+      if (newTripComp1.bon_number === "" || (newTripComp1.bon_number && newTripComp1.bon_number.length < 1)) {
+				throw new Error("رقم البون لا يمكن ان يكون فارغا");
+			}
 			
 			const tripToSend = {
-				...newTripComp1,
-				added_by: sessionStorage.getItem("username"),
-			};
+				...newTripComp1	};
 
 			Object.keys(tripToSend).forEach((key) => {
 				let value = tripToSend[key];
@@ -156,7 +179,7 @@ const Comp1 = () => {
 				}
 		});
 
-      const data = await postData("dashboard?action=comp1Trips-add", tripToSend);
+      const data = await postData("dashboard/construct?action=add", tripToSend);
       setTripsComp1([...tripsComp1, data]);
       setNewTripComp1({
         bon_number: "",
@@ -166,7 +189,7 @@ const Comp1 = () => {
         trip_date: "",
         price: "",
       }); // Reset fields
-			setMessage(data.message);
+			setMessage('تم اضافة الرحلة بنجاح');
 			setTimeout(() => {
 				setMessage("");
 			}, 3000);
@@ -189,13 +212,13 @@ const Comp1 = () => {
         console.log("No changes to save");
         return;
       }
-			if (!fieldsToUpdate.bon_number ) {
+      if (fieldsToUpdate.bon_number === "" || (fieldsToUpdate.bon_number && fieldsToUpdate.bon_number.length < 1)) {
 				throw new Error("رقم البون لا يمكن ان يكون فارغا");
 			}
 
 			const dataToUpdate = { id, ...fieldsToUpdate };
 
-      const updatedTrip = await putData("dashboard?action=comp1Trips-edit", dataToUpdate);
+      const updatedTrip = await putData("dashboard/construct?action=edit", dataToUpdate);
 
       setTripsComp1((prevTrips) =>
         prevTrips.map((trip) =>
@@ -234,7 +257,7 @@ const Comp1 = () => {
       if (!confirmDelete) return;
     try {
       const tripToDel = tripsComp1.find((trip) => trip.id === id);
-      await deleteData("dashboard?action=comp1Trips-del", tripToDel);
+      await deleteData("dashboard/construct?action=del", tripToDel);
       setTripsComp1((prevTrips) => prevTrips.filter((trip) => trip.id !== id));
 			
     // Update originalTrips
@@ -259,8 +282,8 @@ const Comp1 = () => {
     <>
 		  <h2>رحلات شركة المحاجر</h2>
         <div className="trip-options">
+        <button title="اضافة من ملف اكسيل" onClick={() => {setViewComp1("import"); setMessage(""); setErrMessage("");}}><FaFileImport /></button>
           <button onClick={() => {setViewComp1("add"); setMessage(""); setErrMessage("");}}>إضافة رحلة</button>
-          <button onClick={() => {setViewComp1("import"); setMessage(""); setErrMessage("");}}>اضافة من ملف اكسيل</button>
           <button onClick={() => { setMessage(""); fetchTrips(); setViewComp1("edit"); setErrMessage("");}}>تعديل رحلة</button>
         </div>
 
@@ -321,7 +344,7 @@ const Comp1 = () => {
 											<div className="action-buttons">
                         <button onClick={() => handleSaveTrip(trip.id)}>حفظ</button>
                         <button onClick={() => handleDeleteTrip(trip.id)} className="del-button" >حذف</button>
-                        <button onClick={() => handleEditTrip(trip.id)}>إلغاء</button>
+                        <button onClick={() => handleCancelEdit(trip.id)}>إلغاء</button>
 											</div>
 											{message && (<p className="suc-message">{message}</p>)}
 				            	{errMessage && (<p className="err-message">{errMessage}</p>)}

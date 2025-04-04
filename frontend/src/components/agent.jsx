@@ -13,6 +13,27 @@ const Agent = () => {
   });
   const [originalAgents, setOriginalAgents] = useState([]);
 
+
+
+  const handleCancelEdit = (id) => {
+    setAgents((prevAgents) =>
+      prevAgents.map((agent) =>
+        agent.id === id
+          ? { ...agent.originalData, isEditing: false }
+          : agent
+      )
+    );
+
+    // Update originalAgents
+    setOriginalAgents((prevOriginalAgents) =>
+      prevOriginalAgents.map((agent) =>
+        agent.id === id
+          ? { ...agent.originalData, isEditing: false }
+          : agent
+      )
+    );
+  };
+
   // Edit agent
   const handleEditAgent = (id) => {
     setAgents((prevAgents) =>
@@ -58,7 +79,7 @@ const Agent = () => {
         console.log("No changes to save");
         return;
       }
-      const updatedAgent = await putData("dashboard?action=agents-edit", agentToUpdate);
+      const updatedAgent = await putData("dashboard/orgs?action=edit", agentToUpdate);
 
       setAgents((prevAgents) =>
         prevAgents.map((agent) =>
@@ -90,7 +111,7 @@ const Agent = () => {
     try {
 			const agentToDel = agents.find((agent) => agent.id === id);
 
-      await deleteData("dashboard?action=agents-del", agentToDel);
+      await deleteData("dashboard/orgs?action=del", agentToDel);
 
 			setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== id));
 
@@ -118,29 +139,32 @@ const Agent = () => {
   const addAgent = async () => {
     if (!newAgent.agent_name || !newAgent.agent_type) {
       setErrMessage("جميع الحقول مطلوبة، لا يمكن إضافة بيانات فارغة");
+      setTimeout(() => {
+        setErrMessage("");
+      }, 3000);
       return;
     }
     try {
-      await postData("dashboard?action=agents-add", newAgent);
+      await postData("dashboard/orgs?action=add", newAgent);
       setNewAgent({ agent_name: "", agent_type: "" });
       fetchAgents();
       setMessage("تم اضافة العميل بنجاح");
       setTimeout(() => {
         setMessage("");
-      }, 5000);
+      }, 3000);
     } catch (error) {
       console.error("Error adding agent:", error);
       setErrMessage("المنظمة موجودة مسبقا");
       setTimeout(() => {
         setErrMessage("");
-      }, 5000);
+      }, 3000);
     }
   };
 
   // Fetch agents data from API
   const fetchAgents = async () => {
     try {
-      const data = await fetchData("dashboard?action=agents");
+      const data = await fetchData("dashboard/orgs");
       setAgents(Array.isArray(data.agents) ? data.agents : []);
       setOriginalAgents(data.agents);
     } catch (error) {
@@ -240,7 +264,7 @@ const Agent = () => {
                       <td>
                         <button onClick={() => handleSaveAgent(agent.id)}>حفظ</button>
                         <button onClick={() => handleDeleteAgent(agent.id) } className="del-button">حذف</button>
-                        <button onClick={() => handleEditAgent(agent.id)}>إلغاء</button>
+                        <button onClick={() => handleCancelEdit(agent.id)}>إلغاء</button>
 												{message && <p className="suc-message">{message}</p>}
 												{errMessage && <p className="err-message">{errMessage}</p>}
                       </td>

@@ -6,7 +6,7 @@ const ForgetPass = () => {
   const [phone, setPhone] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [id, setUserId] = useState("");
-
+  const [success, setSuccess] = useState(false);
   const [checked, setChecked] = useState(false);
 const [message, setMessage] = useState("");
 const [errMessage, setErrMessage] = useState("");
@@ -44,6 +44,7 @@ const [errMessage, setErrMessage] = useState("");
       const formData = { id, newPassword };
       const response = await putData("forget-password", formData);
       setMessage(response);	
+      setSuccess(true);
 			setTimeout(() => {
         setMessage("");
       }, 3000);
@@ -78,6 +79,17 @@ const [errMessage, setErrMessage] = useState("");
           textAlign: "right", // Align text to the right
         }}
       >
+      {success ? (
+        <div>
+          <p style={{ color: "white", marginBottom: "20px" }}>{message}</p>
+          <p className="mt-3" style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    color: "white",
+                  }}>العودة الي صفحة تسجيل الدخول <Link to="/">اضغط هنا</Link></p>
+        </div>
+      ) :(
+        <>
         {!checked ? (
           <div>
             <h2 style={{ marginBottom: "20px" }}>يرجى إدخال رقم الموبايل</h2>
@@ -118,6 +130,7 @@ const [errMessage, setErrMessage] = useState("");
                 تحقق من رقم الموبايل
               </button>
             </div>
+            
             {message && <p className="suc-message">{message}</p>}
             {errMessage && <p className="err-message">{errMessage}</p>}
           </div>
@@ -171,6 +184,8 @@ const [errMessage, setErrMessage] = useState("");
                     fontSize: "16px",
                     color: "white",
                   }}>العودة الي صفحة تسجيل الدخول <Link to="/">اضغط هنا</Link></p>
+        </>
+        )}
       </div>
     </div>
   );

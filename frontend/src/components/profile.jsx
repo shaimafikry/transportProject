@@ -20,9 +20,12 @@ const Profile = () => {
       setLoading(true);
       const id = sessionStorage.getItem("userId");
       const formData = { id, oldPassword, newPassword };
-      await putData("dashboard?action=profile", formData);
+      await putData("dashboard/profile?action=edit", formData);
       
       setStatus("تم تغيير كلمة السر بنجاح");
+      setTimeout(() => {
+        setStatus("");
+      }, 3000);
       setOldPassword("");
       setNewPassword("");
     } catch (error) {
@@ -30,7 +33,7 @@ const Profile = () => {
 
 			setTimeout(() => {
         setStatus("");
-      }, 5000);
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -66,7 +69,7 @@ const Profile = () => {
         </div>
 
         {status && (
-          <span className={status.includes("تم") ? "text-green-600" : "text-red-600"}>
+          <span className={status.includes("تم") ? "suc-message" : "err-message"}>
             {status}
           </span>
         )}

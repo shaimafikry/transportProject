@@ -221,6 +221,7 @@ h2 {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  margin: 5px;
   /* transition: background-color 0.3s ease, transform 0.2s ease; */
   /* margin-top: 10px; */
 }
@@ -241,6 +242,7 @@ h2 {
 	background-color: transparent;
 	white-space: nowrap; /* Prevent wrapping of table content */
 	border-radius: 10px;
+  padding: inherit;
 
 
 
@@ -256,8 +258,7 @@ h2 {
 	white-space: nowrap; /* Prevent wrapping of table content */
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 	border-radius: 10px;
-
-
+  padding: inherit;
 
 }
 
@@ -265,7 +266,8 @@ table {
   width: 100%;
   min-width: 600px; 
   border-collapse: collapse;
-	overflow-x: hidden;
+	overflow-x: auto;
+	overflow-y: auto;
 
 
 
@@ -291,7 +293,7 @@ table {
 
 th,
 td {
-  border: 1px solid #ccc;
+  border: 1px solid #796d6d;
   padding: 10px;
   text-align: center;
 	white-space: nowrap; /* Prevent wrapping of table content */

@@ -20,7 +20,7 @@ const Drivers = sequelize.define("Drivers", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   leader_name: { type: DataTypes.STRING,  allowNull: true },
   driver_name: { type: DataTypes.STRING,  allowNull: true },
-  phone_number: { type: DataTypes.STRING},
+  phone_number: { type: DataTypes.STRING, unique: false }, 
   national_id: { type: DataTypes.STRING},
   passport_number: { type: DataTypes.STRING},
 	company: { type: DataTypes.STRING},
@@ -88,6 +88,7 @@ const Attendance = sequelize.define("Attendance", {
     type: DataTypes.DATE,
     allowNull: false,
   },
+  
   type: {
     type: DataTypes.ENUM("in", "out"), // "in" for check-in, "out" for check-out
     allowNull: false,
@@ -142,17 +143,17 @@ const TransportTrips = sequelize.define("TransportTrips", {
   total_company_nights_value: { 
     type: DataTypes.INTEGER, 
     defaultValue: 0, 
-    get() { 
-      return this.getDataValue('nights_count') * this.getDataValue('company_night_value');
-    }
+    // get() { 
+    //   return this.getDataValue('nights_count') * this.getDataValue('company_night_value');
+    // }
   },
   total_company_account: { type: DataTypes.INTEGER, defaultValue: 0 }, // الحساب الاجمالي للشركة
   net_profit: { 
     type: DataTypes.INTEGER, 
     defaultValue: 0, 
-    get() { 
-      return this.getDataValue('total_transport') - this.getDataValue('total_company_account');
-    }
+    // get() { 
+    //   return this.getDataValue('total_transport') - this.getDataValue('total_company_account');
+    // }
   }
 });
 

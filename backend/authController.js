@@ -35,7 +35,7 @@ const addUser = async (req, res) => {
 
 	}catch(error){
 		console.error('error in add user', error);
-		return res.status(400).json(`${error.message}`);
+		return res.status(400).json({message :`${error.message}`});
 
 
 	}
@@ -69,7 +69,7 @@ const addDriver = async (req, res) => {
 
 	}catch(error){
 		console.error('error in add driver', error);
-		return res.status(400).json(`${error.message}`);
+		return res.status(400).json({message :`${error.message}`});
 
 
 	}
@@ -86,6 +86,8 @@ const editDriver= async(req, res)=> {
 
 		if (updateData.national_id) {
 			const existingDriver = await Drivers.findOne({ where: { national_id: updateData.national_id } });
+      console.log("data",{...updateData}, existingDriver.get({ plain: true }))
+
 	
 			if (existingDriver && existingDriver.id !== id) {
 					throw new Error('الرقم القومي موجود مسبقا');
@@ -106,20 +108,20 @@ const editDriver= async(req, res)=> {
 	const updatedDriver = await Drivers.findOne({ where: { id } });
 	const driverData = updatedDriver.get({ plain: true });
 
-	console.log("data",{...driverData})
 
 
 	return res.status(200).json({...driverData});
 	
 }catch(error){
 	console.error('error in edit driver', error);
-	return res.status(400).json(`${error.message}`);
+	return res.status(400).json({message :`${error.message}`});
 
 }
 
 };
 
 
+//MARK: COMP1
 
 //MARK: EDIT comp1;
 const editComp1= async(req, res)=> {
@@ -134,7 +136,27 @@ const editComp1= async(req, res)=> {
 	
 }catch(error){
 	console.error('error in edit comp1', error);
-	return res.status(400).json(`${error.message}`);
+	return res.status(400).json({message :`${error.message}`});
+
+}
+
+};
+
+//MARK: EDIT comp1;
+const addComp1= async(req, res)=> {
+	const { id, ...updateData } = req.body;
+	try {
+		const comp1Data = {
+			...updateData,
+			added_by: req.user.name
+		};
+
+		const response = await ConstructTrips.create(comp1Data);
+		return res.status(200).json({ ...comp1Data, id: response.id });
+	
+}catch(error){
+	console.error('error in add comp1', error);
+	return res.status(400).json({message :`${error.message}`});
 
 }
 
@@ -183,7 +205,7 @@ const editUser= async(req, res)=> {
 		
 	}catch(error){
 		console.error('error in edit user', error);
-		return res.status(400).json(`${error.message}`);
+		return res.status(400).json({message :`${error.message}`});
 
 	}
 
@@ -214,6 +236,40 @@ const allUsers = async (req, res) => {
     return res.status(500).json(`${error.message}`);
   }
 };
+
+
+//MARK: COMP2
+
+const allComp2Trips = async (req, res) => {
+  try {
+
+    const trips = await TransportTrips.findAll({ raw: true }); // raw: true for plain JS objects
+
+    // Function to get agent type asynchronously
+    const getAgentType = async (client_name) => {
+      const agent = await Agents.findOne({ where: { agent_name: client_name }, raw: true });
+      return agent ? agent.agent_type : "منظمة"; // Fallback if agent is not found
+    };
+
+    const sanitizedComp2Trips = await Promise.all(
+      trips.map(async (trip) => {
+        const client_type = await getAgentType(trip.client_name); 
+        return {
+          ...trip,
+          client_type,
+        };
+      })
+    );
+
+    return res.status(200).json({ comp2Trips: sanitizedComp2Trips });
+
+  } catch (error) {
+    console.error("Error in fetching comp2Trips:", error);
+    return res.status(500).json(`${error.message}`);
+  }
+};
+
+
 
 //MARK: EDIT TRIP
 const comp2EditTrip = async (req, res) => {
@@ -288,7 +344,7 @@ const comp2EditTrip = async (req, res) => {
     return res.status(200).json({ ...sanitizedData });
   } catch (error) {
     console.error("Error updating trip:", error);
-    return res.status(400).json(`${error.message}`);
+    return res.status(400).json({message :`${error.message}`});
   }
 };
 
@@ -370,8 +426,8 @@ const addTripAndDriver = async (req, res) => {
     // Update or create the driver
     if (driver) {
       driver.trip_counter += 1;
-      driver.total_all_transport += sanitizedData.total_transport;
-      driver.remaining_money_fees += sanitizedData.total_transport - sanitizedData.total_received_cash;
+      driver.total_all_transport += sanitizedData.total_transport || 0;
+      driver.remaining_money_fees += (sanitizedData.total_transport || 0) - (sanitizedData.total_received_cash || 0);
       await driver.save();
     } else {
       driver = await Drivers.create({
@@ -381,8 +437,8 @@ const addTripAndDriver = async (req, res) => {
         national_id: sanitizedData.national_id,
         company: "النقل",
         trip_counter: 1,
-        total_all_transport: sanitizedData.total_transport,
-        remaining_money_fees: sanitizedData.total_transport - sanitizedData.total_received_cash,
+        total_all_transport: sanitizedData.total_transport || 0,
+        remaining_money_fees: (sanitizedData.total_transport || 0) - (sanitizedData.total_received_cash || 0),
       });
     }
 
@@ -393,7 +449,7 @@ const addTripAndDriver = async (req, res) => {
     } else if (sanitizedData.client_name) {
       await Agents.create({
         agent_name: sanitizedData.client_name,
-        agent_type: "منظمة",
+        agent_type: sanitizedData.client_type? sanitizedData.client_type : "منظمة",
         trip_counter: 1,
       });
     }
@@ -405,6 +461,70 @@ const addTripAndDriver = async (req, res) => {
   }
 };
 
+
+//MARK : IMPORT
+
+// MARK: ADD Trip
+const importTrip = async (req, res) => {
+  const errorList =[];
+  try {
+    const username = req.user.name;
+
+    for (const trip of req.body) {
+      try {
+      const sanitizedData = { ...trip, added_by: username };
+
+      // Check if the driver already exists
+      let driver = await Drivers.findOne({ where: { national_id: sanitizedData.national_id } });
+      let agent = await Agents.findOne({ where: { agent_name: sanitizedData.client_name || "" } });
+
+    // Create the trip
+    const respone = await TransportTrips.create(sanitizedData);
+    console.log("تمت إضافة بيانات الرحلة بنجاح");
+
+    // Update or create the driver
+    if (driver) {
+      driver.trip_counter += 1;
+      driver.total_all_transport += sanitizedData.total_transport || 0;
+      driver.remaining_money_fees += (sanitizedData.total_transport || 0) - (sanitizedData.total_received_cash || 0);
+      await driver.save();
+    } else {
+      driver = await Drivers.create({
+        leader_name: sanitizedData.leader_name,
+        driver_name: sanitizedData.driver_name,
+        phone_number: sanitizedData.phone_number,
+        national_id: sanitizedData.national_id,
+        company: "النقل",
+        trip_counter: 1,
+        total_all_transport: sanitizedData.total_transport || 0,
+        remaining_money_fees: (sanitizedData.total_transport || 0) - (sanitizedData.total_received_cash || 0),
+      });
+    }
+
+    // Update or create the agent
+    if (agent) {
+      agent.trip_counter += 1;
+      await agent.save();
+    } else if (sanitizedData.client_name) {
+      await Agents.create({
+        agent_name: sanitizedData.client_name,
+        agent_type: sanitizedData.client_type? sanitizedData.client_type : "منظمة",
+        trip_counter: 1,
+      });
+    }
+  }catch (error) {
+    console.error("Error importing trip :", error);
+    console.log(error.message);
+    errorList.push(error.message);
+  }
+
+  }
+    return res.status(201).json({message:"تمت اضافة الرحلات بنجاح", errorList});
+  } catch (error) {
+    console.error("Error adding trip and driver:", error);
+    return res.status(500).json(`${error.message}`);
+  }
+};
 
 
 //MARK: Sign in
@@ -456,7 +576,7 @@ const record = await Attendance.create(signInRecord);
   });
 }catch(error){
 	console.error('Error updating password:', error);
-	return res.status(402).json(`${error.message}`);
+	return res.status(402).json({message :`${error.message}`});
 }
 
 
@@ -481,7 +601,7 @@ const forgetPasswordCheck = async (req, res) => {
 
 }catch(error){
 	console.error('Error updating password:', error);
-	return res.status(402).json(`${error.message}`);
+	return res.status(402).json({message :`${error.message}`});
 }
 };
 
@@ -508,7 +628,7 @@ const forgetPassword = async (req, res) => {
   return res.status(200).json("تم تجديد كلمة السر بنجاح" );
 }catch(error) {
 	console.error('Error updating password:', error);
-	return res.status(402).json(`${error.message}`);
+	return res.status(402).json({message :`${error.message}`});
 
 }
 };
@@ -547,7 +667,7 @@ const updatePassword = async (req, res) => {
 
   } catch (error) {
     console.error('Error updating password:', error);
-    return res.status(402).json(`${error.message}`);
+    return res.status(402).json({message: `${error.message}`});
   }
 };
 
@@ -573,7 +693,7 @@ const logout = async(req, res) => {
     return res.status(200).json("تم تسجيل الخروج بنجاح" );
   } catch (error) {
     console.error("Error during logout:", error);
-		return res.status(400).json(`${error.message}`);
+		return res.status(400).json({message:`${error.message}`});
   }
 };
 
@@ -584,7 +704,7 @@ const logout = async(req, res) => {
 const getDriverTrips = async (req, res) => {
   try {
 		console.log(req.query)
-    const { id } = req.query;
+    const { id } = req.params;
 
     const driver = await Drivers.findOne({ where: { id } });
 
@@ -708,4 +828,4 @@ const deleteDriverNote = async (req, res) => {
 };
 
 
-module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip, getDriverTrips, editDriverNote, addDriverNote, deleteDriverNote };
+module.exports = { signIn, addUser,editUser,editDriver,addDriver,comp2DelTrip, allUsers, forgetPassword,forgetPasswordCheck, updatePassword, logout, addTripAndDriver, editComp1, comp2EditTrip, getDriverTrips, editDriverNote, addDriverNote, deleteDriverNote, allComp2Trips, addComp1, importTrip };

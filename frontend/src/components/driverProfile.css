@@ -1,0 +1,40 @@
+/* Add these styles to your CSS file */
+.payment-input-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  
+  .payment-input {
+    max-width: 150px;
+  }
+  
+  .payment-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .payment-button-icon {
+    margin-right: 5px;
+  }
+  
+  /* Highlight for payment fields */
+  .payment-highlight {
+    background-color: rgba(25, 135, 84, 0.1);
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 3px solid #198754;
+  }
+  
+  /* Animation for payment confirmation */
+  @keyframes highlight {
+    0% { background-color: rgba(25, 135, 84, 0.1); }
+    50% { background-color: rgba(25, 135, 84, 0.3); }
+    100% { background-color: rgba(25, 135, 84, 0.1); }
+  }
+  
+  .payment-confirmed {
+    animation: highlight 1s ease;
+  }

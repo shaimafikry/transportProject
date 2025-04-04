@@ -29,6 +29,8 @@ const initialTripState = {
   fo_number: "رقم FO",
   equipment: "المعدة",
   client_name: "اسم العميل",
+  client_type: "نوع العميل",
+
 
   nights_count: "عدد البياتات",
   nights_max: "اقصى عدد بياتات",
@@ -60,7 +62,7 @@ const initialTripState = {
 const TripFilterSortComp2 = ({ trips, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "", status: "", hasAgingDate: "", hasFoNumber:"" });
+  const [filters, setFilters] = useState({client_name: "", destination: "", leader_name: "", driver_name:"",startDate: "", endDate: "", status: "", hasAgingDate: "", hasFoNumber:"", client_type:"" });
 
   const [uniqueClients, setUniqueClients] = useState([]);
   const [uniqueDestinations, setUniqueDestinations] = useState([]);
@@ -82,6 +84,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
       startDate: "",
       endDate: "",
 			status: "",
+			client_type: "",
 			hasAgingDate: "",
 			hasFoNumber: ""
     }); // Reset filters
@@ -116,6 +119,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
 			(trip.leader_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.loading_place?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.status?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+			(trip.client_type?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.edited_by?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
 			(trip.added_by?.toLowerCase() || "").includes(searchQuery.toLowerCase())
 
@@ -136,6 +140,12 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
 				if (filters.status) {
 					result = result.filter((trip) => 
 						(trip.status?.toLowerCase() || "") === filters.status.toLowerCase()
+					);
+				}
+				// Add client_type filter check
+				if (filters.client_type) {
+					result = result.filter((trip) => 
+						(trip.client_type?.toLowerCase() || "") === filters.client_type.toLowerCase()
 					);
 				}
 
@@ -282,6 +292,16 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
     <option value="">  الحالة</option>
     <option value="غير مطالبة">غير مطالبة</option>
     <option value="مطالبة">مطالبة</option>
+  </select>
+
+	<select
+    name="client_type"
+    value={filters.client_type}
+    onChange={(e) => setFilters({ ...filters, client_type: e.target.value })}
+  >
+    <option value="">نوع العميل</option>
+    <option value="تجاري">تجاري</option>
+    <option value="منظمة">منظمة</option>
   </select>
 
 

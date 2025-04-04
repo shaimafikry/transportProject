@@ -6,6 +6,7 @@ import DriverProfile from "./driverProfile";
 
 
 const Drivers = () => {
+  const navigate = useNavigate();
   const [viewDrivers, setViewDrivers] = useState("");
 	const [selectedDriverId, setSelectedDriverId] = useState(null)
   const [drivers, setDrivers] = useState([]);
@@ -40,7 +41,7 @@ const Drivers = () => {
   // Fetch drivers data from API
   const fetchDrivers = async () => {
     try {
-      const data = await fetchData("dashboard?action=drivers");
+      const data = await fetchData("dashboard/drivers");
       setDrivers(Array.isArray(data.drivers) ? data.drivers.map((driver) => ({ ...driver, isEditing: false })) : []);
       setOriginalDrivers(data.drivers);
     } catch (error) {
@@ -97,6 +98,25 @@ const Drivers = () => {
     );
   };
 
+  const handleCancelEdit = (id) => {
+    setDrivers((prevDrivers) =>
+      prevDrivers.map((driver) =>
+        driver.id === id
+          ? { ...driver.originalData, isEditing: false }
+          : driver
+      )
+    );
+
+    // Update originalDrivers
+    setOriginalDrivers((prevOriginalDrivers) =>
+      prevOriginalDrivers.map((driver) =>
+        driver.id === id
+          ? { ...driver.originalData, isEditing: false }
+          : driver
+      )
+    );
+  };
+
   const handleEditDriver = (id) => {
     setDrivers((prevDrivers) =>
       prevDrivers.map((driver) =>
@@ -129,7 +149,7 @@ const Drivers = () => {
 				throw new Error("يجب ان يكون الرقم القومي 14 رقم");
 			}
 
-      const data = await postData("dashboard?action=drivers-add", newDriver);
+      const data = await postData("dashboard/drivers?action=add", newDriver);
       setDrivers([...drivers, { ...data, isEditing: false }]);
       setNewDriver({
         leader_name: "",
@@ -169,7 +189,7 @@ const Drivers = () => {
 
 			const dataToUpdate = { id, ...fieldsToUpdate };
 
-      const updatedDriver = await putData("dashboard?action=drivers-edit", dataToUpdate);
+      const updatedDriver = await putData("dashboard/drivers?action=edit", dataToUpdate);
 
   
       // ✅ Update state with `updatedDriver`
@@ -216,7 +236,7 @@ const Drivers = () => {
     if (!confirmDelete) return;
     try {
       const driverToDel = drivers.find((driver) => driver.id === id);
-      await deleteData("dashboard?action=drivers-del", driverToDel);
+      await deleteData("dashboard/drivers?action=del", driverToDel);
       setDrivers((prevDrivers) => prevDrivers.filter((driver) => driver.id !== id));
 
       // Update originalDrivers
@@ -240,12 +260,6 @@ const Drivers = () => {
 
 
   return (
-		<>
-				{selectedDriverId ? (
-						<div className="driver-profile-container">
-								<DriverProfile id={selectedDriverId} onBack={() => { setSelectedDriverId(null); setViewDrivers("edit"); }} />
-						</div>
-				) : (
     <>
 		 <h2>سجل السائقين</h2>
       <div className="driver-options">
@@ -335,7 +349,7 @@ const Drivers = () => {
 												<div className="action-buttons">
                           <button onClick={() => handleSaveDriver(driver.id)}>حفظ</button>
                           <button onClick={() => handleDeleteDriver(driver.id) } className="del-button">حذف</button>
-                          <button onClick={() => handleEditDriver(driver.id)}>إلغاء</button>
+                          <button onClick={() => handleCancelEdit(driver.id)}>إلغاء</button>
 													</div>
 													{message && (<p className="suc-message">{message}</p>)}
 													{errMessage && (<p className="err-message">{errMessage}</p>)}
@@ -349,7 +363,8 @@ const Drivers = () => {
                         <td>
 												<div className="action-buttons">
                           <button onClick={() => handleEditDriver(driver.id)}>تعديل</button>
-                          <button onClick={() => setSelectedDriverId(driver.id)}>زيارة</button>
+                          {/* <button onClick={() => setSelectedDriverId(driver.id)}>زيارة</button> */}
+                          <button onClick={() => navigate(`/dashboard/drivers/${driver.id}`)}>زيارة</button>
 													</div>
                         </td>
                       </>
@@ -361,9 +376,7 @@ const Drivers = () => {
           </div>
         </>
       )}
-    </>
-		)}
-		</>				
+    </>		
   );
 };
 

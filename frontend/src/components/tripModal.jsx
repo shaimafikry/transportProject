@@ -15,8 +15,7 @@ const TripEditModal = ({ trip, onSave, initialTripState, carTypes, agents, role 
 });
 		const [message, setMessage]= useState("");
 		const [errMessage, setErrMessage] = useState("");
-			const [editedFields, setEditedFields] = useState({});
-		
+		const [editedFields, setEditedFields] = useState({});
 		const [selectedAgentType, setSelectedAgentType] = useState("");
 
 
@@ -46,6 +45,7 @@ const handleChange = (field, value) => {
 		if (field === "client_name") {
 			const selectedAgent = agents.find((agent) => agent.agent_name === value);
 			setSelectedAgentType(selectedAgent ? selectedAgent.agent_type : "");
+			updatedState.client_type = selectedAgent ? selectedAgent.agent_type : "";
 		}
 
 		return updatedState;
@@ -204,7 +204,7 @@ const handleChange = (field, value) => {
 		if (!validateDates()) return;
 	
 		try {
-			let updatedData = { id: formData.id }; // Always include the ID
+			let updatedData = { id: formData.id, ...formData }; // Always include the ID
 	
 			const requiredFields = ["driver_name", "leader_name", "client_name", "fo_number", "national_id"];
 	
@@ -246,7 +246,7 @@ const handleChange = (field, value) => {
 				return;
 			}
 	
-			const updatedTrip = await putData("dashboard?action=comp2Trips-edit", updatedData);
+			const updatedTrip = await putData("dashboard/transport?action=edit", updatedData);
 			onSave(updatedTrip); // Notify parent about update
 			window.alert("تم حفظ الرحلة بنجاح");
 			setEditedFields({}); // Reset after saving
@@ -277,7 +277,7 @@ const handleChange = (field, value) => {
     if (!confirmDelete) return;
     
     try {
-      await deleteData("dashboard?action=comp2Trips-del", { id: trip.id });
+      await deleteData("dashboard/transport?action=del", { id: trip.id });
       window.alert("تم حذف الرحلة بنجاح");
       onSave(null); // Close modal and refresh trips
 			setTimeout(() => {
@@ -325,7 +325,15 @@ const handleChange = (field, value) => {
                   <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
                 ))}
               </select>
-            ) : key === "status" ? (
+            ) : key === "client_type" ? (
+							<input
+									id={key}
+									type="text"
+									value={formData[key]}
+									readOnly
+									style={{ backgroundColor: "#f0f0f0", cursor: "not-allowed" }}
+							/>
+					): key === "status" ? (
 							<select
 								id={key}
 								value={formData[key]}
@@ -339,17 +347,27 @@ const handleChange = (field, value) => {
 							</select>
 						): key === "notes" ? (
               <textarea id={key} name={key} value={formData[key]}  onChange={(e) => handleChange(key, e.target.value)} />
+            ) : ["net_profit", "remain_cash", "total_company_account", "total_company_nights_value", "nights_count", "total_transport", "total_nights_value"].includes(key) ? (
+              <input
+                id={key}
+                name={key}
+                type="text"
+                value={formData[key]}
+                onChange={(e) => handleChange(key, e.target.value)}
+                readOnly
+                style={{ backgroundColor: "#f0f0f0", cursor: "not-allowed" }}
+              />
             ) : (
               <input
                 id={key}
                 name={key}
                 type={
                   key.includes("date") ? "date" :
-                  ["nights_count", "total_transport", "total_received_cash", "remain_cash"].includes(key) ? "number" :
+                  ["total_received_cash", "total_company_nights_value", "company_night_value", "company_naulon", "company_toll_fee"].includes(key) ? "number" :
                   "text"
                 }
                 value={formData[key] || ""}
-								onChange={(e) => handleChange(key, e.target.value)}
+				onChange={(e) => handleChange(key, e.target.value)}
               />
             )}
           </div>

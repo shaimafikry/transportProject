@@ -1,27 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { fetchData, postData } from "../api";
 import TripFilterSortComp2 from "./Comp2Filter";
 import ImportTrips from "./import"
 import TripEditModal from "./tripModal"
+import './comp2.css'
+import { FaFileImport } from "react-icons/fa";
 
-const Comp2 = ({role}) => {
+
+const Comp2 = () => {
 	const [selectedTrip, setSelectedTrip] = useState(null);
   const [viewComp2, setViewComp2] = useState("");
   const [tripsComp2, setTripsComp2] = useState([]);
   const [agents, setAgents] = useState([]);
   const [selectedAgentType, setSelectedAgentType] = useState("");
+  const [drivers, setDrivers] = useState([]);
 	const [originalTrips, setOriginalTrips] = useState([]); 
 	const [message, setMessage]= useState("");
 	const [errMessage, setErrMessage] = useState("");
 	const [tripsCount, setTripsCount] = useState(0); // New state for count
-	const [userRole, setUserRole] = useState(role); 
+	const [userRole, setUserRole] = useState( sessionStorage.getItem("role")); 
+  const [nationalIdPredictions, setNationalIdPredictions] = useState([])
+  const [showPredictions, setShowPredictions] = useState(false)
+  const [fieldsEditable, setFieldsEditable] = useState(true)
+  const predictionsRef = useRef(null);
+  // Agent prediction states
+  const [agentSearchTerm, setAgentSearchTerm] = useState("")
+  const [agentPredictions, setAgentPredictions] = useState([])
+  const [showAgentPredictions, setShowAgentPredictions] = useState(false)
+  const agentPredictionsRef = useRef(null)
 
 	
   const initialTripState = {
-    leader_name: "اسم المندوب",
-    driver_name: "اسم السائق",
-    phone_number: "رقم الموبايل",
     national_id: "الرقم القومي",
+    driver_name: "اسم السائق",
+    leader_name: "اسم المندوب",
+    phone_number: "رقم الموبايل",
     passport_number: "رقم الجواز",
 
     car_letters: "حروف السيارة",
@@ -42,29 +55,34 @@ const Comp2 = ({role}) => {
     fo_number: "رقم FO",
     equipment: "المعدة",
     client_name: "اسم العميل",
+    client_type: "نوع العميل",
+
+		
 
     nights_count: "عدد البياتات",
     nights_max: "اقصى عدد بياتات",
     night_value: "قيمة البياتة",
     total_nights_value: "إجمالي قيمة البياتات",
 
-    company_night_value: "قيمة البياتة للشركة",
-    total_company_nights_value: "إجمالي البياتات للشركة",
-
-
     transport_fee: "ناولون",
-    company_naulon: "ناولون الشركة",
 
     expenses: "مصاريف (كارتة + ميزان)",
     total_transport: "إجمالي النقلة",
     total_received_cash: "إجمالي النقدية المستلمة",
     remain_cash: "المتبقى",
 
+
+		status: "حالة الرحلة",
+
+    company_night_value: "قيمة البياتة للشركة",
+    total_company_nights_value: "إجمالي البياتات للشركة",
+		company_naulon: "ناولون الشركة",
+
+
     company_toll_fee: "حساب الكارتة للشركة",
     total_company_account: "الحساب الاجمالي للشركة",
     net_profit: "صافي الربح",
 
-		status: "حالة الرحلة",
 
     notes: "ملاحظات",
     added_by: "اضافة بواسطة",
@@ -100,7 +118,7 @@ const Comp2 = ({role}) => {
   // Fetch trips
   const fetchTrips = async () => {
     try {
-      const data = await fetchData("dashboard?action=comp2Trips");
+      const data = await fetchData("dashboard/transport");
       const formattedTrips = data.comp2Trips.map((trip) => ({
         ...trip, }));
       setTripsComp2(Array.isArray(formattedTrips) ? formattedTrips : []);
@@ -117,16 +135,26 @@ const Comp2 = ({role}) => {
   // Fetch agents
   const fetchAgents = async () => {
     try {
-      const data = await fetchData("dashboard?action=agents");
+      const data = await fetchData("dashboard/orgs");
       setAgents(Array.isArray(data.agents) ? data.agents : []);
     } catch (error) {
       console.error("Error fetching agents:", error);
+    }
+  };
+  // Fetch agents
+  const fetchDrivers = async () => {
+    try {
+      const data = await fetchData("dashboard/drivers");
+      setDrivers(Array.isArray(data.drivers) ? data.drivers : []);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
     }
   };
 
   useEffect(() => {
     setViewComp2("");
     fetchAgents();
+    fetchDrivers();
   }, []);
 
 
@@ -188,7 +216,7 @@ const Comp2 = ({role}) => {
 
 	
 		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
-			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
+			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24)) || 0;
 			const nightValue = parseFloat(updatedTrip.company_night_value) || 0;
 			let totalCompanyNightsValue = maxNights > 0 && diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
 	
@@ -240,10 +268,6 @@ const Comp2 = ({role}) => {
 		newTripComp2.company_toll_fee,
   ]);
 
-	// Handle search results from TripFilterSortComp2Comp1
-  // const handleSearch = (searchResults) => {
-  //   setTripsComp2(searchResults); // Update the table with filtered data
-  // };
 
 	const handleSearch = (searchResults) => {
 		setTripsComp2(searchResults.trips || []);
@@ -265,16 +289,129 @@ const Comp2 = ({role}) => {
 				calculateCompanyNights(updatedState);
 		    calculateTotalCompanyTransport(updatedState);
 			}
+
+       // If the national_id field is being changed, check for predictions
+    if (field === "national_id" && value.length > 0) {
+      const predictions = drivers
+        .filter((driver) => driver.national_id && driver.national_id.startsWith(value))
+        .map((driver) => driver.national_id)
+
+      // Remove duplicates
+      const uniquePredictions = [...new Set(predictions)]
+      setNationalIdPredictions(uniquePredictions)
+      setShowPredictions(uniquePredictions.length > 0)
+
+      // If the national ID is complete (typically 14 digits in Egypt), check if it exists
+      if (value.length >= 10) {
+        checkNationalId(value)
+      }
+    } else if (field === "national_id" && value.length === 0) {
+      setShowPredictions(false)
+      setFieldsEditable(true)
+      updatedState.driver_name = ""
+      updatedState.phone_number = ""
+      updatedState.passport_number = ""
+      updatedState.leader_name = ""
+      
+
+    }
 	
-			if (field === "client_name") {
-				const selectedAgent = agents.find((agent) => agent.agent_name === value);
-				setSelectedAgentType(selectedAgent ? selectedAgent.agent_type : "");
-			}
+    if (field === "client_name") {
+      const selectedAgent = agents.find((agent) => agent.agent_name === value)
+      setSelectedAgentType(selectedAgent ? selectedAgent.agent_type : "")
+      updatedState.client_type = selectedAgent ? selectedAgent.agent_type : ""
+    }
 	
 			return updatedState;
 		});
 	};
 	
+    // Check if national ID exists and populate form
+    const checkNationalId = (nationalId) => {
+      const existingDriver = drivers.find((driver) => driver.national_id === nationalId)
+  
+      if (existingDriver) {
+        // Preserve existing form data while updating only driver fields
+        setNewTripComp2((prevState) => ({
+          ...prevState, // Keep all existing form values
+          national_id: existingDriver.national_id,
+          leader_name: existingDriver.leader_name,
+          driver_name: existingDriver.driver_name,
+          phone_number: existingDriver.phone_number,
+          passport_number: existingDriver.passport_number,
+        }))
+        
+        setFieldsEditable(false)
+      } else {
+        setFieldsEditable(true)
+        setErrMessage("")
+      }
+    }
+  
+    // // Reset form to initial state
+    // const resetForm = () => {
+    //   setNewTripComp2(Object.fromEntries(Object.keys(initialTripState).map((key) => [key, ""])))
+    // }
+  
+    // Select a prediction
+    const selectPrediction = (prediction) => {
+      setNewTripComp2((prev) => ({ ...prev, national_id: prediction }))
+      setShowPredictions(false)
+      checkNationalId(prediction)
+    }
+  
+    // Close predictions when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (predictionsRef.current && !predictionsRef.current.contains(event.target)) {
+          setShowPredictions(false)
+        }
+        if (agentPredictionsRef.current && !agentPredictionsRef.current.contains(event.target)) {
+          setShowAgentPredictions(false)
+        }
+      }
+  
+  
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside)
+      }
+    }, [])
+
+    // Handle agent search
+  const handleAgentSearch = (value) => {
+    setAgentSearchTerm(value)
+
+    if (value.length > 0) {
+      const predictions = agents
+        .filter((agent) => agent.agent_name && agent.agent_name.toLowerCase().includes(value.toLowerCase()))
+        .map((agent) => agent.agent_name)
+
+      setAgentPredictions(predictions)
+      setShowAgentPredictions(predictions.length > 0)
+    } else {
+      setShowAgentPredictions(false)
+    }
+  }
+
+  // Select an agent from predictions
+  const selectAgent = (agentName) => {
+    setAgentSearchTerm(agentName)
+    setShowAgentPredictions(false)
+
+    // Find the selected agent
+    const selectedAgent = agents.find((agent) => agent.agent_name === agentName)
+
+    if (selectedAgent) {
+      // Update client_name and client_type fields
+      setNewTripComp2((prev) => ({
+        ...prev,
+        client_name: selectedAgent.agent_name,
+        client_type: selectedAgent.agent_type || "",
+      }))
+      setSelectedAgentType(selectedAgent.agent_type || "")
+    }
+  }
 
 
   // MARK:Add a new trip
@@ -282,6 +419,7 @@ const Comp2 = ({role}) => {
 		if (!validateDates()) return;
     try {
         const tripData = { ...newTripComp2 };
+        console.log("Submitting trip data before:", newTripComp2)
 
         // Sanitize input
         Object.keys(tripData).forEach((key) => {
@@ -303,7 +441,8 @@ const Comp2 = ({role}) => {
                     "company_naulon", 
                     "total_company_nights_value",
                     "total_company_account",
-                    "net_profit"
+                    "net_profit",
+                    "remain_cash"
                   ].includes(key)) {
                     tripData[key] = 0;
                 } else {
@@ -353,13 +492,7 @@ const Comp2 = ({role}) => {
           }, 5000);
           return ;
         }
-				// if (!tripData.client_name) {
-        //   setErrMessage("يجب اداخال اسم العميل");
-        //   setTimeout(() => {
-        //     setErrMessage("");
-        //   }, 5000);
-        //   return ;
-        // }
+
         if (tripData.arrival_date && tripData.driver_loading_date && tripData.arrival_date < tripData.driver_loading_date) {
           setErrMessage("تاريخ الوصول لا يمكن أن يكون قبل تاريخ التحميل");
           setTimeout(() => {
@@ -374,7 +507,7 @@ const Comp2 = ({role}) => {
           }, 5000);
           return ;
         }
-        if (tripData.car_letters && !/^\p{Script=Arabic}+\s\p{Script=Arabic}+$/u.test(tripData.car_letters)) {
+        if (tripData.car_letters && !/^\p{Script=Arabic}(\s\p{Script=Arabic}){0,4}$/u.test(tripData.car_letters)) {
           setErrMessage("يجب أن تحتوي حروف السيارة على مسافة بين الحروف");
           setTimeout(() => {
             setErrMessage("");
@@ -382,7 +515,7 @@ const Comp2 = ({role}) => {
           return;
         }
         
-        if (tripData.trailer_letters && !/^\p{Script=Arabic}+\s\p{Script=Arabic}+$/u.test(tripData.trailer_letters)) {
+        if (tripData.trailer_letters && !/^\p{Script=Arabic}(\s\p{Script=Arabic}){0,4}$/u.test(tripData.trailer_letters)) {
           setErrMessage("يجب أن تحتوي حروف المقطورة على مسافة بين الحروف");
           setTimeout(() => {
             setErrMessage("");
@@ -398,8 +531,9 @@ const Comp2 = ({role}) => {
           return;
         }
 
+        console.log("Submitting trip data after:", tripData)
        
-        const data = await postData("dashboard?action=comp2Trips-add", tripData);
+        const data = await postData("dashboard/transport?action=add", tripData);
         setTripsComp2([...tripsComp2, data]);
 
         // Reset form fields
@@ -427,8 +561,8 @@ return (
 	<>
 		<h2>رحلات شركة النقل</h2>
 		<div className="trip-options">
+      <button  title="اضافة من ملف اكسيل" onClick={() =>{ setViewComp2("import"); setMessage(""); setErrMessage("");}}><FaFileImport /></button>
 			<button onClick={() => { setMessage(""); fetchAgents(); setViewComp2("add"); setErrMessage("");}}>إضافة رحلة</button>
-			<button onClick={() =>{ setViewComp2("import"); setMessage(""); setErrMessage("");}}>اضافة من ملف اكسيل</button>
 			<button onClick={() => { setMessage(""); fetchTrips(); setViewComp2("edit"); setErrMessage("");}}>تعديل رحلة</button>
 			<button onClick={() => {setMessage(""); fetchTrips(); setViewComp2("all"); setErrMessage("");}}>الرحلات</button>
 		</div>
@@ -465,13 +599,74 @@ return (
           ))}
         </select>
       ) : key === "client_name" ? (
-        <select id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)}>
-          <option value="" disabled>اختر اسم العميل</option>
-          {agents.map((agent, index) => (
-            <option key={index} value={agent.agent_name}>{agent.agent_name}</option>
-          ))}
-        </select>
-      ) : key === "status" ? (
+        <div className="relative">
+          <input
+            id={key}
+            type="text"
+            value={agentSearchTerm}
+            onChange={(e) => handleAgentSearch(e.target.value)}
+            placeholder="اسم العميل"
+            className="w-full"
+            onClick={() => {
+              // Show all agents when clicking on empty field
+              if (!agentSearchTerm) {
+                setAgentPredictions(agents.map((agent) => agent.agent_name))
+                setShowAgentPredictions(true)
+              }
+            }}
+          />
+          {showAgentPredictions && (
+            <div
+              ref={agentPredictionsRef}
+              className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto"
+            >
+              {agentPredictions.map((prediction, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => selectAgent(prediction)}
+                >
+                  {prediction}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : key === "client_type" ? (
+				<input
+						id={key}
+						type="text"
+						value={newTripComp2[key]}
+						readOnly
+						style={{ backgroundColor: "#f0f0f0", cursor: "not-allowed" }}
+				/>
+		): key === "national_id" ? (
+      <div className="relative">
+        <input
+          id={key}
+          type="text"
+          value={newTripComp2[key]}
+          onChange={(e) => handleTripChange(key, e.target.value)}
+          className="w-full"
+        />
+        {showPredictions && (
+          <div
+            ref={predictionsRef}
+            className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto"
+          >
+            {nationalIdPredictions.map((prediction, index) => (
+              <div
+                key={index}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => selectPrediction(prediction)}
+              >
+                {prediction}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ) : key === "status" ? (
         <select id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)}>
           <option value="" disabled>اختر الحالة</option>
           <option value="مطالبة">مطالبة</option>
@@ -479,12 +674,22 @@ return (
         </select>
       ) : key === "notes" ? (
         <textarea id={key} value={newTripComp2[key]} onChange={(e) => handleTripChange(key, e.target.value)} />
-      ) : (
+      ) : ["net_profit", "remain_cash", "total_company_account", "total_company_nights_value", "nights_count", "total_transport", "total_nights_value"].includes(key) ? (
+        <input
+          id={key}
+          name={key}
+          type="text"
+          value={newTripComp2[key]}
+          onChange={(e) => handleTripChange(key, e.target.value)}
+          readOnly
+          style={{ backgroundColor: "#f0f0f0", cursor: "not-allowed" }}
+        />
+      ): (
         <input
           id={key}
           type={key.includes("date") ? "date" :
-                ["nights_count", "nights_max", "night_value", "total_nights_value", 
-                 "transport_fee", "expenses", "total_transport", "total_received_cash", "remain_cash"]
+                [ "nights_max", "night_value",
+                 "transport_fee", "expenses", "total_received_cash"]
                 .includes(key) ? "number" : "text"}
           value={newTripComp2[key]}
           onChange={(e) => handleTripChange(key, e.target.value)}
@@ -508,7 +713,6 @@ return (
 					<thead>
 						<tr>
 							<th>اسم السائق</th>
-							<th>تاريخ الوصول</th>
 							<th>رقم FO</th>
 							<th>تاريخ التحميل للشركة</th>
 							<th>تاريخ التعتيق</th>
@@ -523,7 +727,6 @@ return (
 						{tripsComp2.map((trip) => (
 							<tr key={trip.id}>
 										<td>{trip.driver_name}</td>
-										<td>{trip.arrival_date}</td>
 										<td>{trip.fo_number}</td>
 										<td>{trip.company_loading_date}</td>
 										<td>{trip.aging_date}</td>
@@ -578,7 +781,7 @@ return (
 						initialTripState={initialTripState}
 						carTypes={carTypes}
 						agents={agents}
-						role={role}
+						role={userRole}
 						onSave={() => {
 							setSelectedTrip(null);
 							fetchTrips();
