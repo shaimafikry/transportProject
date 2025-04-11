@@ -14,6 +14,7 @@ app.use(express.json());
 
 // ✅ Correct CORS Configuration
 const allowedOrigins = [
+  "https://transportproject-frontend.vercel.app", // Your frontend on Vercel
   "https://transport-project-eta.vercel.app",
   "http://localhost:3000" // Local development
 ];
