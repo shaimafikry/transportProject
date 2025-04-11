@@ -1,11 +1,12 @@
 // const API_URL = 'http://localhost:5000';
-const API_URL = 'https://transportprojectbackend-production.up.railway.app';
+// const API_URL = 'https://transportprojectbackend-production.up.railway.app';
+const API_URL = 'adequate-jaquenette-shaima-b2cbba98.koyeb.app';
 
 // Function to get the token
 const getToken = () => sessionStorage.getItem('token');
 
 // Reusable fetch function
-const apiRequest = async (endpoint, method = 'GET', data = null) => {
+const apiRequest = async (endpoint, method = 'GET', data = null, signal = null) => {
   const token = getToken(); // Get token dynamically
   const options = {
     method,
@@ -14,27 +15,30 @@ const apiRequest = async (endpoint, method = 'GET', data = null) => {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }) // Add Authorization only if token exists
     },
-    ...(data && { body: JSON.stringify(data) }) // Add body only if there's data
+    ...(data && { body: JSON.stringify(data) }), // Add body only if there's data
+    ...(signal && { signal }) // Add abort signal if provided
   };
 
   try {
     const response = await fetch(`${API_URL}/${endpoint}`, options);
     if (!response.ok) {
       const errorData = await response.json();
-			console.log(errorData);
-			console.log(errorData.message);
-			throw new Error(errorData.error || errorData.message || "حدث خطأ أثناء معالجة الطلب");
-
+      console.log(errorData);
+      console.log(errorData.message);
+      throw new Error(errorData.error || errorData.message || "حدث خطأ أثناء معالجة الطلب");
     }
     return await response.json();
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error; // Re-throw abort errors
+    }
     console.error(`Error in ${method} request:`, error);
-    throw new Error(error.message || "حدث خطأ أثناء معالجة الطلب");
+    throw error;
   }
 };
 
 // API methods
-export const fetchData = (endpoint) => apiRequest(endpoint);
-export const postData = (endpoint, data) => apiRequest(endpoint, 'POST', data);
-export const putData = (endpoint, data) => apiRequest(endpoint, 'PUT', data);
-export const deleteData = (endpoint, data) => apiRequest(endpoint, 'DELETE', data);
+export const fetchData = (endpoint, signal) => apiRequest(endpoint, 'GET', null, signal);
+export const postData = (endpoint, data, signal) => apiRequest(endpoint, 'POST', data, signal);
+export const putData = (endpoint, data, signal) => apiRequest(endpoint, 'PUT', data, signal);
+export const deleteData = (endpoint, data, signal) => apiRequest(endpoint, 'DELETE', data, signal);
