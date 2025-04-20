@@ -77,8 +77,9 @@ const handleChange = (field, value) => {
 	
 		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
 			const diffTime = Math.abs(arrivalDate - loadingDate);
-			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 			const nightValue = parseFloat(formData.night_value) || 0;
+			diffDays = diffDays + 1;
 			let totalNightsValue = 0;
 			if (maxNights > 0) {
 				totalNightsValue = diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
@@ -132,8 +133,9 @@ const handleChange = (field, value) => {
 
 	
 		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
-			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
+			let diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
 			const nightValue = parseFloat(updatedTrip.company_night_value) || 0;
+			diffDays = diffDays + 1;
 			let totalCompanyNightsValue = maxNights > 0 && diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
 	
 			setFormData((prevState) => ({

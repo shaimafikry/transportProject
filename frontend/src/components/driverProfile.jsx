@@ -32,6 +32,8 @@ const DriverProfile = () => {
   // const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
+  const [userRole, setUserRole] = useState( sessionStorage.getItem("role")); 
+  
 
 
 
@@ -370,6 +372,11 @@ const fetchDriver = async () => {
                   <Nav.Item>
                     <Nav.Link eventKey="financial-details">البيانات المالية</Nav.Link>
                   </Nav.Item>
+                  {userRole === "manager" && (
+                    <Nav.Item>
+                      <Nav.Link eventKey="company-details">بيانات الشركة المالية</Nav.Link>
+                    </Nav.Item>
+                  )}
                 </Nav>
                 
                 <Tab.Content>
@@ -506,6 +513,38 @@ const fetchDriver = async () => {
                       </div>
                     </div>
                   </Tab.Pane>
+                  {userRole === "manager" && (
+                    <>
+                    <Tab.Pane eventKey="company-details">
+                      <div className="row g-3 mt-2">
+                      <div className="col-md-4">
+                        <p className="text-muted small mb-0">قيمة البياتة للشركة</p>
+                        <p className="fw-medium">{trip.company_night_value} جنيه</p>
+                      </div>
+                      <div className="col-md-4">
+                        <p className="text-muted small mb-0">إجمالي البياتات للشركة</p>
+                        <p className="fw-medium">{trip.total_company_nights_value} جنيه</p>
+                      </div>
+                      <div className="col-md-4">
+                        <p className="text-muted small mb-0">ناولون الشركة</p>
+                        <p className="fw-medium">{trip.company_naulon} جنيه</p>
+                      </div>
+                      <div className="col-md-4">
+                        <p className="text-muted small mb-0">حساب الكارتة للشركة</p>
+                        <p className="fw-medium">{trip.company_toll_fee} جنيه</p>
+                      </div>
+                      <div className="col-md-4">
+                        <p className="text-muted small mb-0">الحساب الاجمالي للشركة</p>
+                        <p className="fw-medium">{trip.total_company_account} جنيه</p>
+                      </div>
+                      <div className="col-md-4">
+                        <p className="text-muted small mb-0">صافي الربح</p>
+                        <p className="fw-medium">{trip.net_profit} جنيه</p>
+                      </div>
+                    </div>
+                 </Tab.Pane>
+                  </>
+                    )}
                 </Tab.Content>
               </Tab.Container>
             </Card.Body>

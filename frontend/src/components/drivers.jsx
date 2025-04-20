@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { fetchData, postData, putData, deleteData } from "../api";
 import { useNavigate } from 'react-router-dom';
 import DriverFilter from "./driverFilter";
-import DriverProfile from "./driverProfile";
 
 
 const Drivers = () => {
   const navigate = useNavigate();
   const [viewDrivers, setViewDrivers] = useState("");
-	const [selectedDriverId, setSelectedDriverId] = useState(null)
   const [drivers, setDrivers] = useState([]);
 	const [editedFields, setEditedFields] = useState({});
 	const [message, setMessage]= useState("");
@@ -363,7 +361,6 @@ const Drivers = () => {
                         <td>
 												<div className="action-buttons">
                           <button onClick={() => handleEditDriver(driver.id)}>تعديل</button>
-                          {/* <button onClick={() => setSelectedDriverId(driver.id)}>زيارة</button> */}
                           <button onClick={() => navigate(`/dashboard/drivers/${driver.id}`)}>زيارة</button>
 													</div>
                         </td>

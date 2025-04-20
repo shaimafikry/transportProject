@@ -181,8 +181,9 @@ const Comp2 = () => {
 		const maxNights = parseFloat(updatedTrip.nights_max) || 0;
 	
 		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
-			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
+			let diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24));
 			const nightValue = parseFloat(updatedTrip.night_value) || 0;
+      diffDays = diffDays + 1;
 			let totalNightsValue = maxNights > 0 && diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
 	
 			setNewTripComp2((prevState) => ({
@@ -216,8 +217,10 @@ const Comp2 = () => {
 
 	
 		if (!isNaN(arrivalDate.getTime()) && !isNaN(loadingDate.getTime())) {
-			const diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24)) || 0;
+			let diffDays = Math.ceil((arrivalDate - loadingDate) / (1000 * 60 * 60 * 24)) || 0;
 			const nightValue = parseFloat(updatedTrip.company_night_value) || 0;
+      diffDays = diffDays + 1;
+
 			let totalCompanyNightsValue = maxNights > 0 && diffDays > maxNights ? (diffDays - maxNights) * nightValue : 0;
 	
 			setNewTripComp2((prevState) => ({
