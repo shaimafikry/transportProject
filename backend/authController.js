@@ -478,6 +478,14 @@ const importTrip = async (req, res) => {
       let driver = await Drivers.findOne({ where: { national_id: sanitizedData.national_id } });
       let agent = await Agents.findOne({ where: { agent_name: sanitizedData.client_name || "" } });
 
+      // codition to prevent dpulicated entries
+      const existingTrip = await TransportTrips.findOne({ where: { national_id: sanitizedData.national_id, arrival_date: sanitizedData.arrival_date } });
+
+      if (existingTrip) {
+        continue;
+      }
+
+      
     // Create the trip
     const respone = await TransportTrips.create(sanitizedData);
     console.log("تمت إضافة بيانات الرحلة بنجاح");

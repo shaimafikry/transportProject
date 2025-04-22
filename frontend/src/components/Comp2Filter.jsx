@@ -175,7 +175,7 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
 		//filter acordong to cmpny loading date
     if (filters.startDate && filters.endDate) {
       result = result.filter((trip) => {
-        const tripDate = new Date(trip.company_loading_date);
+        const tripDate = new Date(trip.createdAt);
         return tripDate >= new Date(filters.startDate) && tripDate <= new Date(filters.endDate);
       });
     }
@@ -183,8 +183,8 @@ const TripFilterSortComp2 = ({ trips, onSearch }) => {
    
         // Apply sorting
 				result.sort((a, b) => {
-					const dateA = new Date(a.company_loading_date); // Use the correct field for sorting
-					const dateB = new Date(b.company_loading_date);
+					const dateA = new Date(a.createdAt); // Use the correct field for sorting
+					const dateB = new Date(b.createdAt);
 		
 					if (sortOrder === "asc") {
 						return dateA - dateB; // Ascending order
